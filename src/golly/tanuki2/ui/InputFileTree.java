@@ -22,7 +22,11 @@ public class InputFileTree {
 	private static final Pattern pathSeperatorPattern= Pattern.compile("[\\/\\\\]"); //$NON-NLS-1$
 
 	public InputFileTree(Composite parent) {
-		tree= new Tree(parent, SWT.BORDER | SWT.CHECK);
+		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
+	}
+
+	public Tree getWidget() {
+		return tree;
 	}
 
 	@SuppressWarnings("unchecked")
