@@ -20,10 +20,6 @@ public class FileData {
 		this.dirData= dirData;
 	}
 	
-	public String getAlbum() {
-		return albumData == null ? null : albumData.getAlbum();
-	}
-
 	public AlbumData getAlbumData() {
 		return albumData;
 	}
@@ -46,10 +42,6 @@ public class FileData {
 
 	public String getTrack() {
 		return track;
-	}
-
-	public Integer getYear() {
-		return albumData == null ? null : albumData.getYear();
 	}
 
 	public boolean isAudio() {
