@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -37,6 +39,18 @@ public class InputTree implements IFileView {
 		tree.setHeaderVisible(true);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
+
+		tree.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.stateMask == SWT.CTRL)
+					if (e.character == '+' || e.character == '-') {
+						tree.setRedraw(false);
+						setExpandedAll(e.character == '+');
+						tree.setRedraw(true);
+						e.doit= false;
+					}
+			}
+		});
 	}
 
 	// =============================================================================================== //
@@ -169,5 +183,17 @@ public class InputTree implements IFileView {
 			break;
 		}
 		}
+	}
+
+	private void setExpanded(TreeItem ti, boolean expanded) {
+		ti.setExpanded(expanded);
+		for (TreeItem i : ti.getItems())
+			setExpanded(i, expanded);
+	}
+
+	private void setExpandedAll(boolean expanded) {
+		for (TreeItem i : tree.getItems())
+			setExpanded(i, expanded);
+		tree.showSelection();
 	}
 }
