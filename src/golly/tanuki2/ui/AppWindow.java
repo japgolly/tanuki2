@@ -1,8 +1,14 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.core.Engine;
+import golly.tanuki2.data.AlbumData;
+import golly.tanuki2.data.DirData;
+import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
@@ -28,6 +34,7 @@ public class AppWindow {
 	private final static int SPACING= 4;
 
 	private final Display display;
+	private final SharedUIResources sharedUIResources;
 	private final Shell shell;
 	private final Engine engine;
 	private final TabFolder tabFolder;
@@ -37,6 +44,7 @@ public class AppWindow {
 	public AppWindow(Display display_, Engine engine_) {
 		display= display_;
 		engine= engine_;
+		sharedUIResources= new SharedUIResources(display);
 
 		// Create shell
 		shell= new Shell();
@@ -55,15 +63,14 @@ public class AppWindow {
 		tabFolder= new TabFolder(shell, SWT.NONE);
 		// Create tab: input tree
 		TabItem ti= new TabItem(tabFolder, SWT.NONE);
-		inputTree= new InputTree(tabFolder);
+		inputTree= new InputTree(tabFolder, sharedUIResources);
 		ti.setControl(inputTree.getWidget());
 		ti.setText(I18n.l("main_tab_inputTree")); //$NON-NLS-1$
 		// Create tab: flat list
 		ti= new TabItem(tabFolder, SWT.NONE);
-		flatList= new FlatList(tabFolder);
+		flatList= new FlatList(tabFolder, sharedUIResources);
 		ti.setControl(flatList.getWidget());
 		ti.setText(I18n.l("main_tab_flatList")); //$NON-NLS-1$
-		tabFolder.setSelection(1);
 
 		// Create expandBar
 		expandBar= new ExpandBar(shell, SWT.NONE);
@@ -109,8 +116,31 @@ public class AppWindow {
 		engine.addFolder("X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]");
 		engine.addFolder("X:\\music\\4. Done\\Unexpect");
 		engine.addFolder("C:\\2\\Nevermore\\2004 Enemies of Reality");
+		AlbumData ad= new AlbumData();
+		ad.setArtist("Unexpect");
+		ad.setYear(2003);
+		ad.setAlbum("We, Invaders");
+		Pattern p= Pattern.compile("^(\\d{2}) - (.+)\\.mp3$");
+		DirData dd= engine.dirs.get("X:\\music\\4. Done\\Unexpect\\2003 - We, Invaders");
+		for (String f: dd.files.keySet()) {
+			FileData fd= dd.files.get(f);
+			fd.setAlbumData(ad);
+			Matcher m= p.matcher(f);
+			if (m.matches()) {
+				fd.setTn(Integer.parseInt(m.group(1)));
+				fd.setTrack(m.group(2));
+			}
+		}
+		ad= new AlbumData();
+		ad.setArtist("Unexpect");
+		dd= engine.dirs.get("X:\\music\\4. Done\\Unexpect\\2006 - In a Flesh Aquarium");
+		for (String f: dd.files.keySet()) {
+			FileData fd= dd.files.get(f);
+			fd.setAlbumData(ad);
+		}
 		inputTree.refreshFiles(engine.dirs);
 		flatList.refreshFiles(engine.dirs);
+		tabFolder.setSelection(0);
 	}
 
 	public void show() {

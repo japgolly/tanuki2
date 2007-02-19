@@ -4,7 +4,7 @@ package golly.tanuki2.data;
  * @author Golly
  * @since 19/02/2007
  */
-public class AlbumData {
+public class AlbumData extends AbstractDataObject {
 	private String album= null;
 	private String artist= null;
 	private Integer year= null;
@@ -29,13 +29,16 @@ public class AlbumData {
 
 	public void setAlbum(String album) {
 		this.album= album;
+		dataUpdated();
 	}
 
 	public void setArtist(String artist) {
 		this.artist= artist;
+		dataUpdated();
 	}
 
 	public void setYear(Integer year) {
 		this.year= year;
+		dataUpdated();
 	}
 }

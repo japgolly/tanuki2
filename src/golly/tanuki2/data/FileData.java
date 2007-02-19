@@ -8,7 +8,7 @@ import org.eclipse.swt.graphics.Image;
  * @author Golly
  * @since 16/02/2007
  */
-public class FileData {
+public class FileData extends AbstractDataObject {
 	private AlbumData albumData= null;
 	private final DirData dirData;
 	private boolean isAudio= false;
@@ -19,7 +19,7 @@ public class FileData {
 	public FileData(final DirData dirData) {
 		this.dirData= dirData;
 	}
-	
+
 	public AlbumData getAlbumData() {
 		return albumData;
 	}
@@ -56,21 +56,26 @@ public class FileData {
 
 	public void setAlbumData(AlbumData albumData) {
 		this.albumData= albumData;
+		dataUpdated();
 	}
 
 	public void setAudio(boolean isAudio) {
 		this.isAudio= isAudio;
+		dataUpdated();
 	}
-	
+
 	public void setMimeImage(TanukiImage mimeImage) {
 		this.mimeImage= mimeImage;
+		dataUpdated();
 	}
 
 	public void setTn(Integer tn) {
 		this.tn= tn;
+		dataUpdated();
 	}
 
 	public void setTrack(String track) {
 		this.track= track;
+		dataUpdated();
 	}
 }

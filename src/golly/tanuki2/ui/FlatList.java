@@ -37,16 +37,14 @@ import org.eclipse.swt.widgets.TableItem;
  */
 public class FlatList implements IFileView {
 	private static final String EOL= "\r\n"; //$NON-NLS-1$ // TODO win32
+
+	private final SharedUIResources sharedUIResources;
 	private final Table table;
 	private final int INDEX_FILENAME, INDEX_ARTIST, INDEX_YEAR, INDEX_ALBUM, INDEX_TN, INDEX_TRACK;
-	private final Color nonAudioBkgColor;
 	private final MenuItem[] singleSelectionMenuItems;
-	private final Clipboard clipboard;
 
-	public FlatList(Composite parent) {
-		// Create resources
-		nonAudioBkgColor= UIResourceManager.getColorGrey("flatlist_nonAudio_bkg", 230); //$NON-NLS-1$
-		clipboard= new Clipboard(Display.getCurrent());
+	public FlatList(Composite parent, SharedUIResources sharedUIResources) {
+		this.sharedUIResources= sharedUIResources;
 
 		// Create table
 		table= new Table(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
@@ -124,25 +122,27 @@ public class FlatList implements IFileView {
 				final FileData fd= files.get(file);
 				final TableItem ti= new TableItem(table, SWT.NONE);
 				ti.setData(fd);
-				
-				ti.setText(INDEX_FILENAME, dir2 + file);
-				if (fd.getTn() != null)
-					ti.setText(INDEX_TN, fd.getTn().toString());
-				if (fd.getTrack() != null)
-					ti.setText(INDEX_TRACK, fd.getTrack());
-				final AlbumData ad= fd.getAlbumData();
-				if (ad != null) {
-					if (ad.getAlbum() != null)
-						ti.setText(INDEX_ALBUM, ad.getAlbum());
-					if (ad.getArtist() != null)
-						ti.setText(INDEX_ARTIST, ad.getArtist());
-					if (ad.getYear() != null)
-						ti.setText(INDEX_YEAR, ad.getYear().toString());
-				}
-				
 				ti.setImage(fd.getImage());
 				if (!fd.isAudio())
-					ti.setBackground(nonAudioBkgColor);
+					ti.setBackground(sharedUIResources.nonAudioBkgColor);
+				else {
+					ti.setText(INDEX_FILENAME, dir2 + file);
+					if (fd.getTn() != null)
+						ti.setText(INDEX_TN, fd.getTn().toString());
+					if (fd.getTrack() != null)
+						ti.setText(INDEX_TRACK, fd.getTrack());
+					final AlbumData ad= fd.getAlbumData();
+					if (ad != null) {
+						if (ad.getAlbum() != null)
+							ti.setText(INDEX_ALBUM, ad.getAlbum());
+						if (ad.getArtist() != null)
+							ti.setText(INDEX_ARTIST, ad.getArtist());
+						if (ad.getYear() != null)
+							ti.setText(INDEX_YEAR, ad.getYear().toString());
+					}
+					if (!fd.isComplete())
+						ti.setBackground(sharedUIResources.incompleteBkgColor);
+				}
 			}
 		}
 		for (TableColumn tc : table.getColumns())
@@ -161,7 +161,7 @@ public class FlatList implements IFileView {
 			sb.append(ti.getText());
 			sb.append(EOL);
 		}
-		clipboard.setContents(new Object[] {sb.toString()}, new Transfer[] {TextTransfer.getInstance()});
+		sharedUIResources.clipboard.setContents(new Object[] {sb.toString()}, new Transfer[] {TextTransfer.getInstance()});
 	}
 
 	protected void onOpenFolder() {
