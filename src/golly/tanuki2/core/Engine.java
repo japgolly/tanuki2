@@ -28,7 +28,7 @@ public class Engine {
 		final String sourceFolderName= sourceFolder.getAbsolutePath();
 		DirData dd= dirs.get(sourceFolderName);
 		if (dd == null)
-			dirs.put(sourceFolderName, dd= new DirData());
+			dirs.put(sourceFolderName, dd= new DirData(sourceFolderName));
 
 		for (File f : sourceFolder.listFiles())
 			if (f.isDirectory())
@@ -41,7 +41,7 @@ public class Engine {
 		final String fullFilename= f.getAbsolutePath();
 		FileData fd= files.get(fullFilename);
 		if (fd == null)
-			files.put(fullFilename, fd= new FileData());
+			files.put(fullFilename, fd= new FileData(dd));
 		dd.files.put(f.getName(), fd);
 
 		fd.setAudio(false);

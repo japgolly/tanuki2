@@ -7,5 +7,11 @@ import java.util.HashMap;
  * @since 16/02/2007
  */
 public class DirData {
-	public final HashMap<String, FileData> files= new HashMap<String, FileData>();
+	public final String dir;
+	public final HashMap<String, FileData> files;
+
+	public DirData(final String dir) {
+		this.dir= dir;
+		this.files= new HashMap<String, FileData>();
+	}
 }

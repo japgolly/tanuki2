@@ -10,17 +10,26 @@ import org.eclipse.swt.graphics.Image;
  */
 public class FileData {
 	private AlbumData albumData= null;
+	private final DirData dirData;
 	private boolean isAudio= false;
 	private TanukiImage mimeImage= null;
 	private Integer tn= null;
 	private String track= null;
 
+	public FileData(final DirData dirData) {
+		this.dirData= dirData;
+	}
+	
 	public String getAlbum() {
 		return albumData == null ? null : albumData.getAlbum();
 	}
 
 	public AlbumData getAlbumData() {
 		return albumData;
+	}
+
+	public DirData getDirData() {
+		return dirData;
 	}
 
 	public Image getImage() {
