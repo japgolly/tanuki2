@@ -2,6 +2,7 @@ package golly.tanuki2.ui;
 
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
+import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 
 import java.util.HashMap;
@@ -16,12 +17,12 @@ import org.eclipse.swt.widgets.TreeItem;
  * @author Golly
  * @since 17/02/2007
  */
-public class InputFileTree {
-	private HashMap<String, DirData> dirs= null;
-	private final Tree tree;
+public class InputTree implements IFileView {
 	private static final Pattern pathSeperatorPattern= Pattern.compile("[\\/\\\\]"); //$NON-NLS-1$
+	private final Tree tree;
+	private HashMap<String, DirData> dirs= null;
 
-	public InputFileTree(Composite parent) {
+	public InputTree(Composite parent) {
 		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
 	}
 
@@ -33,6 +34,7 @@ public class InputFileTree {
 	public void refreshFiles(HashMap<String, DirData> dirs) {
 		this.dirs= dirs;
 		tree.setRedraw(false);
+		tree.clearAll(true);
 
 		HashMap<String, HashMap> dirTree= new HashMap<String, HashMap>();
 		for (String dir : dirs.keySet()) {
@@ -51,6 +53,7 @@ public class InputFileTree {
 		for (String dir : Helpers.sort(dirTree.keySet())) {
 			TreeItem ti= new TreeItem(tree, SWT.NONE);
 			ti.setText(dir);
+			ti.setImage(TanukiImage.FOLDER.get());
 			addChildren(ti, dirTree.get(dir), dir);
 		}
 
@@ -64,14 +67,17 @@ public class InputFileTree {
 			for (String dir : Helpers.sort(children.keySet())) {
 				TreeItem ti= new TreeItem(parent, SWT.NONE);
 				ti.setText(dir);
+				ti.setImage(TanukiImage.FOLDER.get());
 				addChildren(ti, children.get(dir), Helpers.addPathElement(path, dir));
 			}
 		} else {
 			// Add files
 			final HashMap<String, FileData> files= dirs.get(path).files;
 			for (String f : Helpers.sort(files.keySet())) {
+				final FileData fd= files.get(f);
 				TreeItem ti= new TreeItem(parent, SWT.NONE);
 				ti.setText(f);
+				ti.setImage(fd.getImage());
 			}
 		}
 	}

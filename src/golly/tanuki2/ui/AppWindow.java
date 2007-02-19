@@ -16,19 +16,22 @@ import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
 /**
  * @author Golly
  * @since 16/02/2007
  */
 public class AppWindow {
-	private final static int MARGIN= 2;
+	private final static int MARGIN= 0;
 	private final static int SPACING= 4;
 
 	private final Display display;
 	private final Shell shell;
 	private final Engine engine;
-	private final InputFileTree inputTreeView;
+	private final TabFolder tabFolder;
+	private final IFileView inputTree, flatList;
 	private final ExpandBar expandBar;
 
 	public AppWindow(Display display_, Engine engine_) {
@@ -37,8 +40,9 @@ public class AppWindow {
 
 		// Create shell
 		shell= new Shell();
-		shell.setSize(600, 500);
+		shell.setSize(1600, 800);
 		shell.setText(I18n.l("general_app_title")); //$NON-NLS-1$
+		Display.setAppName(shell.getText());
 		shell.addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent e) {
 				shell.setRedraw(false);
@@ -47,8 +51,19 @@ public class AppWindow {
 			}
 		});
 
-		// Create InputFileTree
-		inputTreeView= new InputFileTree(shell);
+		// Create tab folder
+		tabFolder= new TabFolder(shell, SWT.NONE);
+		// Create tab: input tree
+		TabItem ti= new TabItem(tabFolder, SWT.NONE);
+		inputTree= new InputTree(tabFolder);
+		ti.setControl(inputTree.getWidget());
+		ti.setText(I18n.l("main_tab_inputTree")); //$NON-NLS-1$
+		// Create tab: flat list
+		ti= new TabItem(tabFolder, SWT.NONE);
+		flatList= new FlatList(tabFolder);
+		ti.setControl(flatList.getWidget());
+		ti.setText(I18n.l("main_tab_flatList")); //$NON-NLS-1$
+		tabFolder.setSelection(1);
 
 		// Create expandBar
 		expandBar= new ExpandBar(shell, SWT.NONE);
@@ -94,7 +109,8 @@ public class AppWindow {
 		engine.addFolder("X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]");
 		engine.addFolder("X:\\music\\4. Done\\Unexpect");
 		engine.addFolder("C:\\2\\Nevermore\\2004 Enemies of Reality");
-		inputTreeView.refreshFiles(engine.dirs);
+		inputTree.refreshFiles(engine.dirs);
+		flatList.refreshFiles(engine.dirs);
 	}
 
 	public void show() {
@@ -114,6 +130,6 @@ public class AppWindow {
 		final int expandBarSize= expandBar.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		expandBar.setBounds(ca.x, ca.y + ca.height - expandBarSize, ca.width, expandBarSize);
 		// Resize input view
-		inputTreeView.getWidget().setBounds(ca.x, ca.y, ca.width, ca.height - expandBarSize - SPACING);
+		tabFolder.setBounds(ca.x, ca.y, ca.width, ca.height - expandBarSize - SPACING);
 	}
 }

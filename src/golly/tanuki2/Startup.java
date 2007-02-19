@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import golly.tanuki2.core.Engine;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.UIResourceManager;
 import golly.tanuki2.ui.AppWindow;
 
 import org.eclipse.swt.widgets.Display;
@@ -28,6 +29,7 @@ public class Startup {
 			new AppWindow(display, engine).show();
 
 		} finally {
+			UIResourceManager.disposeAll();
 			if (display != null)
 				display.dispose();
 		}
