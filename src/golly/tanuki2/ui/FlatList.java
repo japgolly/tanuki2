@@ -1,5 +1,6 @@
 package golly.tanuki2.ui;
 
+import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.Helpers;
@@ -17,7 +18,6 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -45,7 +45,7 @@ public class FlatList implements IFileView {
 
 	public FlatList(Composite parent) {
 		// Create resources
-		nonAudioBkgColor= UIResourceManager.getColorGrey("flatlist_nonAudio_bkg", 242); //$NON-NLS-1$
+		nonAudioBkgColor= UIResourceManager.getColorGrey("flatlist_nonAudio_bkg", 230); //$NON-NLS-1$
 		clipboard= new Clipboard(Display.getCurrent());
 
 		// Create table
@@ -124,7 +124,22 @@ public class FlatList implements IFileView {
 				final FileData fd= files.get(file);
 				final TableItem ti= new TableItem(table, SWT.NONE);
 				ti.setData(fd);
+				
 				ti.setText(INDEX_FILENAME, dir2 + file);
+				if (fd.getTn() != null)
+					ti.setText(INDEX_TN, fd.getTn().toString());
+				if (fd.getTrack() != null)
+					ti.setText(INDEX_TRACK, fd.getTrack());
+				final AlbumData ad= fd.getAlbumData();
+				if (ad != null) {
+					if (ad.getAlbum() != null)
+						ti.setText(INDEX_ALBUM, ad.getAlbum());
+					if (ad.getArtist() != null)
+						ti.setText(INDEX_ARTIST, ad.getArtist());
+					if (ad.getYear() != null)
+						ti.setText(INDEX_YEAR, ad.getYear().toString());
+				}
+				
 				ti.setImage(fd.getImage());
 				if (!fd.isAudio())
 					ti.setBackground(nonAudioBkgColor);
