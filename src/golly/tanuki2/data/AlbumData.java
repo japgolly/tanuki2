@@ -6,10 +6,15 @@ package golly.tanuki2.data;
  */
 public class AlbumData {
 	private String album= null;
+	private String artist= null;
 	private Integer year= null;
 
 	public String getAlbum() {
 		return album;
+	}
+
+	public String getArtist() {
+		return artist;
 	}
 
 	public Integer getYear() {
@@ -24,6 +29,10 @@ public class AlbumData {
 
 	public void setAlbum(String album) {
 		this.album= album;
+	}
+
+	public void setArtist(String artist) {
+		this.artist= artist;
 	}
 
 	public void setYear(Integer year) {
