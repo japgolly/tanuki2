@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Control;
  * @author Golly
  * @since 19/02/2007
  */
-public interface IFileView {
+interface IFileView {
 
 	public abstract Control getWidget();
 
