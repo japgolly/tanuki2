@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -49,6 +51,11 @@ public class InputTree implements IFileView {
 						tree.setRedraw(true);
 						e.doit= false;
 					}
+			}
+		});
+		tree.addMouseListener(new MouseAdapter() {
+			public void mouseDoubleClick(MouseEvent e) {
+				onEdit();
 			}
 		});
 	}
@@ -92,6 +99,31 @@ public class InputTree implements IFileView {
 	}
 
 	// =============================================================================================== //
+	// = Events
+	// =============================================================================================== //
+
+	protected void onEdit() {
+		if (tree.getSelectionCount() != 1)
+			return;
+		final TreeItem ti= tree.getSelection()[0];
+		DirData dd= null;
+		// If selected item is a file
+		if (ti.getData() instanceof FileData && ((FileData) ti.getData()).isAudio())
+			dd= ((FileData) ti.getData()).getDirData();
+		else
+			// Or if directory, get the first audio child-item, and use its DirData
+			for (TreeItem i : ti.getItems())
+				if (i.getData() instanceof FileData && ((FileData) i.getData()).isAudio()) {
+					dd= ((FileData) i.getData()).getDirData();
+					break;
+				}
+
+		if (dd != null) {
+			new AlbumEditor(tree.getShell(), dd).show();
+		}
+	}
+
+	// =============================================================================================== //
 	// = Internal
 	// =============================================================================================== //
 
@@ -113,6 +145,7 @@ public class InputTree implements IFileView {
 			for (String f : Helpers.sort(files.keySet())) {
 				final FileData fd= files.get(f);
 				TreeItem ti= new TreeItem(parent, SWT.NONE);
+				ti.setData(fd);
 				ti.setImage(fd.getImage());
 				ti.setText(0, f);
 				if (fd.isAudio()) {

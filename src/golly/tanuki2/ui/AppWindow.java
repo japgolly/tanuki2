@@ -131,13 +131,14 @@ public class AppWindow {
 				fd.setTrack(m.group(2));
 			}
 		}
-		ad= new AlbumData();
-		ad.setArtist("Unexpect");
+		AlbumData ad2= new AlbumData();
+		ad2.setArtist("Unexpect");
 		dd= engine.dirs.get("X:\\music\\4. Done\\Unexpect\\2006 - In a Flesh Aquarium");
 		for (String f: dd.files.keySet()) {
 			FileData fd= dd.files.get(f);
-			fd.setAlbumData(ad);
+			fd.setAlbumData(ad2);
 		}
+		dd.files.values().iterator().next().setAlbumData(ad);
 		inputTree.refreshFiles(engine.dirs);
 		flatList.refreshFiles(engine.dirs);
 		tabFolder.setSelection(0);

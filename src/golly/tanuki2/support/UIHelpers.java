@@ -7,6 +7,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.MessageBox;
@@ -17,6 +18,13 @@ import org.eclipse.swt.widgets.Shell;
  * @since 17/02/2007
  */
 public class UIHelpers {
+	public static void addUnlessExists(Combo combo, String name) {
+		for (String s : combo.getItems())
+			if (name.equals(s))
+				return;
+		combo.add(name);
+	}
+	
 	public static Font createFont(Font baseFont, int style) {
 		FontData[] fds= baseFont.getFontData();
 		for (FontData fd : fds)
