@@ -31,7 +31,7 @@ public class DirData {
 	public String toString() {
 		if (toString == null)
 			try {
-				toString= Helpers.inspect(this, true, DirData.class.getDeclaredField("dir")); //$NON-NLS-1$
+				toString= Helpers.inspect(this, true, "dir"); //$NON-NLS-1$
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

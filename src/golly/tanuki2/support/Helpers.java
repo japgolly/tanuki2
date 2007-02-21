@@ -22,6 +22,19 @@ public final class Helpers {
 		return inspect(obj, includeObjectId, obj.getClass().getDeclaredFields());
 	}
 
+	public static String inspect(final Object obj, boolean includeObjectId, String... fieldNames) {
+		Class<?> cls= obj.getClass();
+		int i= fieldNames.length;
+		Field[] fields= new Field[i];
+		try {
+			while (i-- > 0)
+				fields[i]= cls.getDeclaredField(fieldNames[i]);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return inspect(obj, includeObjectId, fields);
+	}
+
 	@SuppressWarnings("nls")
 	public static String inspect(final Object obj, boolean includeObjectId, Field... fields) {
 		if (obj == null)
