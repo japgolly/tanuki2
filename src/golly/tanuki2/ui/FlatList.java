@@ -6,14 +6,12 @@ import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Tanuki2Exception;
-import golly.tanuki2.support.UIResourceManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
@@ -22,9 +20,7 @@ import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
@@ -123,10 +119,10 @@ public class FlatList implements IFileView {
 				final TableItem ti= new TableItem(table, SWT.NONE);
 				ti.setData(fd);
 				ti.setImage(fd.getImage());
+				ti.setText(INDEX_FILENAME, dir2 + file);
 				if (!fd.isAudio())
 					ti.setBackground(sharedUIResources.nonAudioBkgColor);
 				else {
-					ti.setText(INDEX_FILENAME, dir2 + file);
 					if (fd.getTn() != null)
 						ti.setText(INDEX_TN, fd.getTn().toString());
 					if (fd.getTrack() != null)
