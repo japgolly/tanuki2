@@ -20,30 +20,55 @@ public class Engine {
 	public final HashMap<String, DirData> dirs= new HashMap<String, DirData>();
 	public final HashMap<String, FileData> files= new HashMap<String, FileData>();
 
+	/**
+	 * Recursively adds the contents of a folder.
+	 */
 	public void addFolder(String sourceFolderName) {
 		addFolder(new File(sourceFolderName));
 	}
 
+	// =============================================================================================== //
+	// = Internal
+	// =============================================================================================== //
+
+	/**
+	 * Recursively adds the contents of a folder.
+	 */
 	private void addFolder(File sourceFolder) {
+		// Create or get DirData
 		final String sourceFolderName= sourceFolder.getAbsolutePath();
 		DirData dd= dirs.get(sourceFolderName);
 		if (dd == null)
 			dirs.put(sourceFolderName, dd= new DirData(sourceFolderName));
 
+		// Add dir contents
 		for (File f : sourceFolder.listFiles())
 			if (f.isDirectory())
 				addFolder(f);
 			else
 				addFile(dd, f);
+
+		// Set hasAudioContent
+		dd.setHasAudioContent(false);
+		for (FileData fd : dd.files.values())
+			if (fd.isAudio()) {
+				dd.setHasAudioContent(true);
+				break;
+			}
 	}
 
+	/**
+	 * Adds a file.
+	 */
 	private void addFile(DirData dd, File f) {
+		// Create or get FileData
 		final String fullFilename= f.getAbsolutePath();
 		FileData fd= files.get(fullFilename);
 		if (fd == null)
 			files.put(fullFilename, fd= new FileData(dd));
 		dd.files.put(f.getName(), fd);
 
+		// Check file extension
 		fd.setAudio(false);
 		if (patAudio.matcher(f.getName()).matches()) {
 			fd.setMimeImage(TanukiImage.MIME_AUDIO);

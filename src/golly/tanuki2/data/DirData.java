@@ -8,9 +8,10 @@ import java.util.HashMap;
  * @author Golly
  * @since 16/02/2007
  */
-public class DirData extends AbstractDataObject {
+public final class DirData extends AbstractDataObject {
 	public final String dir;
 	public final HashMap<String, FileData> files;
+	private boolean hasAudioContent= false;
 
 	public DirData(final String dir) {
 		this.dir= dir;
@@ -20,5 +21,14 @@ public class DirData extends AbstractDataObject {
 	@Override
 	protected String generateToString() {
 		return Helpers.inspectExcept(this, false, "files"); //$NON-NLS-1$
+	}
+
+	public boolean getHasAudioContent() {
+		return hasAudioContent;
+	}
+
+	public void setHasAudioContent(boolean hasAudioContent) {
+		dataUpdated();
+		this.hasAudioContent= hasAudioContent;
 	}
 }
