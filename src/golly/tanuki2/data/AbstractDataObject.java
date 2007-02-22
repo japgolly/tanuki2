@@ -32,9 +32,13 @@ abstract class AbstractDataObject {
 	@Override
 	public String toString() {
 		if (toStringCache == null) {
-			toStringCache= Helpers.inspect(this, false);
+			toStringCache= generateToString();
 			hashcode= toString().intern().hashCode();
 		}
 		return toStringCache;
+	}
+
+	protected String generateToString() {
+		return Helpers.inspect(this, false);
 	}
 }

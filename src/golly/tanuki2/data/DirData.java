@@ -8,11 +8,9 @@ import java.util.HashMap;
  * @author Golly
  * @since 16/02/2007
  */
-public class DirData {
+public class DirData extends AbstractDataObject {
 	public final String dir;
 	public final HashMap<String, FileData> files;
-
-	private String toString= null;
 
 	public DirData(final String dir) {
 		this.dir= dir;
@@ -20,21 +18,7 @@ public class DirData {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof DirData))
-			return false;
-		DirData dd2= (DirData) obj;
-		return dir.equals(dd2.dir);
-	}
-
-	@Override
-	public String toString() {
-		if (toString == null)
-			try {
-				toString= Helpers.inspect(this, true, "dir"); //$NON-NLS-1$
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		return toString;
+	protected String generateToString() {
+		return Helpers.inspectExcept(this, false, "files"); //$NON-NLS-1$
 	}
 }
