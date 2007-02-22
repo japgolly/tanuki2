@@ -23,7 +23,7 @@ public final class DirData extends AbstractDataObject {
 		return Helpers.inspectExcept(this, false, "files"); //$NON-NLS-1$
 	}
 
-	public boolean getHasAudioContent() {
+	public boolean hasAudioContent() {
 		return hasAudioContent;
 	}
 

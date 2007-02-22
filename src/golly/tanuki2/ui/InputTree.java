@@ -74,6 +74,7 @@ public class InputTree implements IFileView {
 		tree.setRedraw(false);
 		tree.clearAll(true);
 
+		// Create a virtual representation of the tree
 		HashMap<String, HashMap> dirTree= new HashMap<String, HashMap>();
 		for (String dir : dirs.keySet()) {
 			HashMap<String, HashMap> tree= dirTree;
@@ -85,9 +86,9 @@ public class InputTree implements IFileView {
 				tree= newtree;
 			}
 		}
+		dirTree= Helpers.optimiseDirTree(dirTree);
 
-		dirTree= removeEmptyNodes(dirTree);
-
+		// Populate the tree widget
 		for (String dir : Helpers.sort(dirTree.keySet())) {
 			TreeItem ti= new TreeItem(tree, SWT.NONE);
 			ti.setText(dir);
@@ -139,9 +140,9 @@ public class InputTree implements IFileView {
 			}
 		} else {
 			// Add files
-			final HashMap<String, FileData> files= dirs.get(path).files;
+			final DirData dd= dirs.get(path);
+			final HashMap<String, FileData> files= dd.files;
 			final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
-			boolean foundAudio= false;
 			for (String f : Helpers.sort(files.keySet())) {
 				final FileData fd= files.get(f);
 				TreeItem ti= new TreeItem(parent, SWT.NONE);
@@ -150,7 +151,6 @@ public class InputTree implements IFileView {
 				ti.setText(0, f);
 				if (fd.isAudio()) {
 					ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
-					foundAudio= true;
 					albumDataSet.add(fd.getAlbumData());
 					if (!fd.isComplete())
 						ti.setBackground(sharedUIResources.incompleteBkgColor);
@@ -158,7 +158,7 @@ public class InputTree implements IFileView {
 					ti.setBackground(sharedUIResources.nonAudioBkgColor);
 			}
 			// Update parent
-			if (foundAudio) {
+			if (dd.hasAudioContent()) {
 				boolean complete= false;
 				if (albumDataSet.size() > 1)
 					parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
@@ -175,6 +175,13 @@ public class InputTree implements IFileView {
 		}
 	}
 
+	/**
+	 * Creates a string that contains info about album or track data. The resulting string will appear beside the
+	 * file/dir in the tree.
+	 * 
+	 * @param fmt The i18n key of the format string.
+	 * @param args The info fields to use as args.
+	 */
 	private static String formatInfo(String fmt, Object... args) {
 		boolean foundNonNull= false;
 		int i= args.length;
@@ -184,38 +191,6 @@ public class InputTree implements IFileView {
 			else
 				foundNonNull= true;
 		return foundNonNull ? String.format(fmt, args) : ""; //$NON-NLS-1$
-	}
-
-	@SuppressWarnings("unchecked")
-	private HashMap<String, HashMap> removeEmptyNodes(HashMap<String, HashMap> tree) {
-		HashMap<String, HashMap> r= new HashMap<String, HashMap>();
-		removeEmptyNodes(tree, "", r); //$NON-NLS-1$
-		if (r.size() == 1 && r.keySet().iterator().next().length() == 0)
-			r= r.get(""); //$NON-NLS-1$
-		return r;
-	}
-
-	@SuppressWarnings("unchecked")
-	private void removeEmptyNodes(HashMap<String, HashMap> tree, String path, HashMap<String, HashMap> target) {
-		switch (tree.size()) {
-		case 0: {
-			target.put(path, null);
-			break;
-		}
-		case 1: {
-			final String name= tree.keySet().iterator().next();
-			removeEmptyNodes(tree.get(name), Helpers.addPathElement(path, name), target);
-			break;
-		}
-		default: {
-			HashMap<String, HashMap> subTarget= target.get(path);
-			if (subTarget == null)
-				target.put(path, subTarget= new HashMap<String, HashMap>());
-			for (String name : tree.keySet())
-				removeEmptyNodes(tree.get(name), name, subTarget);
-			break;
-		}
-		}
 	}
 
 	private void setExpanded(TreeItem ti, boolean expanded) {

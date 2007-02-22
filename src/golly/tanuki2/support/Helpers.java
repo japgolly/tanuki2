@@ -144,6 +144,74 @@ public final class Helpers {
 	}
 
 	/**
+	 * Takes a virtual directory tree in the following format:<br>
+	 * 
+	 * <pre>
+	 * {
+	 *   'c:' =&gt; {
+	 *     'music' =&gt; {
+	 *       'new stuff' =&gt; {
+	 *         'napster' =&gt; {}, 
+	 *         'winmx' =&gt; {},
+	 *       },
+	 *       'old stuff' =&gt; {
+	 *         '2006' =&gt; {
+	 *           'burnt' =&gt; {},
+	 *         },
+	 *       },
+	 *     },
+	 *   },
+	 * }
+	 * </pre>
+	 * 
+	 * and optimises it so that it becomes:<br>
+	 * 
+	 * <pre>
+	 * {
+	 *   'c:\music' =&gt; {
+	 *     'new stuff' =&gt; {
+	 *       'napster' =&gt; {}, 
+	 *       'winmx' =&gt; {},
+	 *     },
+	 *     'old stuff\2006\burnt' =&gt; {},
+	 *   },
+	 * }
+	 * </pre>
+	 */
+	@SuppressWarnings("unchecked")
+	public static HashMap<String, HashMap> optimiseDirTree(HashMap<String, HashMap> tree) {
+		// FIXME This reduces tree to c:/2/nevermore/xxxx but wot if there r mp3s in c:/2 ??
+		HashMap<String, HashMap> r= new HashMap<String, HashMap>();
+		optimiseDirTree(tree, "", r); //$NON-NLS-1$
+		if (r.size() == 1 && r.keySet().iterator().next().length() == 0)
+			r= r.get(""); //$NON-NLS-1$
+		return r;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void optimiseDirTree(HashMap<String, HashMap> tree, String path, HashMap<String, HashMap> target) {
+		switch (tree.size()) {
+		case 0: {
+			target.put(path, null);
+			break;
+		}
+		case 1: {
+			final String name= tree.keySet().iterator().next();
+			optimiseDirTree(tree.get(name), Helpers.addPathElement(path, name), target);
+			break;
+		}
+		default: {
+			HashMap<String, HashMap> subTarget= target.get(path);
+			if (subTarget == null)
+				target.put(path, subTarget= new HashMap<String, HashMap>());
+			for (String name : tree.keySet())
+				optimiseDirTree(tree.get(name), name, subTarget);
+			break;
+		}
+		}
+	}
+
+	/**
 	 * Takes a <code>Set</code>, and returns a sorted array.
 	 */
 	public static String[] sort(final Set<String> data) {
