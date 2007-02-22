@@ -77,27 +77,29 @@ public class InputTree implements IFileView {
 		tree.clearAll(true);
 
 		// Create a virtual representation of the tree
-		Map<String, OptimisibleDirTreeNode> dirTree= new HashMap<String, OptimisibleDirTreeNode>();
+		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree= new HashMap<String, OptimisibleDirTreeNode>();
 		for (String dir : dirs.keySet()) {
-			Map<String, OptimisibleDirTreeNode> tree= dirTree;
-			String[] a= pathSeperatorPattern.split(dir);
-			for (String e : a) {
-				OptimisibleDirTreeNode newTreeNode= tree.get(e);
-				if (newTreeNode == null) {
-					newTreeNode= new OptimisibleDirTreeNode();
-					tree.put(e, newTreeNode);
+			Map<String, OptimisibleDirTreeNode> t= unoptimisedDirTree;
+			OptimisibleDirTreeNode latestNode= null;
+			for (String dirElement : pathSeperatorPattern.split(dir)) {
+				latestNode= t.get(dirElement);
+				if (latestNode == null) {
+					latestNode= new OptimisibleDirTreeNode();
+					t.put(dirElement, latestNode);
 				}
-				tree= newTreeNode.children;
+				t= latestNode.children;
 			}
+			if (latestNode != null && !dirs.get(dir).files.isEmpty())
+				latestNode.hasFiles= true;
 		}
-		dirTree= Helpers.optimiseDirTree(dirTree);
+		final Map<String, Map> optimisedDirTree= Helpers.optimiseDirTree(unoptimisedDirTree);
 
 		// Populate the tree widget
-		for (String dir : Helpers.sort(dirTree.keySet())) {
+		for (String dir : Helpers.sort(optimisedDirTree.keySet())) {
 			TreeItem ti= new TreeItem(tree, SWT.NONE);
 			ti.setText(dir);
 			ti.setImage(TanukiImage.FOLDER.get());
-			addChildren(ti, dirTree.get(dir), dir);
+			addChildren(ti, optimisedDirTree.get(dir), dir);
 		}
 
 		tree.setRedraw(true);
@@ -133,49 +135,51 @@ public class InputTree implements IFileView {
 	// =============================================================================================== //
 
 	@SuppressWarnings("unchecked")
-	private void addChildren(TreeItem parent, OptimisibleDirTreeNode parentNode, String path) {
-		final Map<String, OptimisibleDirTreeNode> children= (parentNode == null) ? null : parentNode.children;
-		if (children != null) {
-			// Add directories
+	private void addChildren(TreeItem parent, Map<String, Map> children, String path) {
+		// Add directories
+		if (children != null)
 			for (String dir : Helpers.sort(children.keySet())) {
 				TreeItem ti= new TreeItem(parent, SWT.NONE);
 				ti.setImage(TanukiImage.FOLDER.get());
 				ti.setText(0, dir);
 				addChildren(ti, children.get(dir), Helpers.addPathElement(path, dir));
 			}
-		} else {
-			// Add files
-			final DirData dd= dirs.get(path);
+
+		// Add files
+		final DirData dd= dirs.get(path);
+		if (dd != null) {
 			final Map<String, FileData> files= dd.files;
-			final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
-			for (String f : Helpers.sort(files.keySet())) {
-				final FileData fd= files.get(f);
-				TreeItem ti= new TreeItem(parent, SWT.NONE);
-				ti.setData(fd);
-				ti.setImage(fd.getImage());
-				ti.setText(0, f);
-				if (fd.isAudio()) {
-					ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
-					albumDataSet.add(fd.getAlbumData());
-					if (!fd.isComplete())
-						ti.setBackground(sharedUIResources.incompleteBkgColor);
-				} else
-					ti.setBackground(sharedUIResources.nonAudioBkgColor);
-			}
-			// Update parent
-			if (dd.hasAudioContent()) {
-				boolean complete= false;
-				if (albumDataSet.size() > 1)
-					parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
-				else {
-					AlbumData ad= albumDataSet.iterator().next();
-					if (ad != null) {
-						parent.setText(1, formatInfo(albumInfoFmt, ad.getArtist(), ad.getYear(), ad.getAlbum()));
-						complete= ad.isComplete();
-					}
+			if (!files.isEmpty()) {
+				final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
+				for (String f : Helpers.sort(files.keySet())) {
+					final FileData fd= files.get(f);
+					TreeItem ti= new TreeItem(parent, SWT.NONE);
+					ti.setData(fd);
+					ti.setImage(fd.getImage());
+					ti.setText(0, f);
+					if (fd.isAudio()) {
+						ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
+						albumDataSet.add(fd.getAlbumData());
+						if (!fd.isComplete())
+							ti.setBackground(sharedUIResources.incompleteBkgColor);
+					} else
+						ti.setBackground(sharedUIResources.nonAudioBkgColor);
 				}
-				if (!complete)
-					parent.setBackground(sharedUIResources.incompleteBkgColor);
+				// Update parent
+				if (dd.hasAudioContent()) {
+					boolean complete= false;
+					if (albumDataSet.size() > 1)
+						parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
+					else {
+						AlbumData ad= albumDataSet.iterator().next();
+						if (ad != null) {
+							parent.setText(1, formatInfo(albumInfoFmt, ad.getArtist(), ad.getYear(), ad.getAlbum()));
+							complete= ad.isComplete();
+						}
+					}
+					if (!complete)
+						parent.setBackground(sharedUIResources.incompleteBkgColor);
+				}
 			}
 		}
 	}

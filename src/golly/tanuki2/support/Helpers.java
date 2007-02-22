@@ -184,38 +184,61 @@ public final class Helpers {
 	 * </pre>
 	 */
 	@SuppressWarnings("unchecked")
-	public static Map<String, OptimisibleDirTreeNode> optimiseDirTree(Map<String, OptimisibleDirTreeNode> tree) {
-		// FIXME This reduces tree to c:/2/nevermore/xxxx but wot if there r mp3s in c:/2 ??
-		Map<String, OptimisibleDirTreeNode> r= new HashMap<String, OptimisibleDirTreeNode>();
-		optimiseDirTree(tree, "", r); //$NON-NLS-1$
+	public static Map<String, Map> optimiseDirTree(final Map<String, OptimisibleDirTreeNode> tree) {
+		Map<String, Map> r= new HashMap<String, Map>();
+		optimiseDirTree("", r, tree); //$NON-NLS-1$
 		if (r.size() == 1 && r.keySet().iterator().next().length() == 0)
-			r= r.get("").children; //$NON-NLS-1$
+			r= r.get(""); //$NON-NLS-1$
 		return r;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void optimiseDirTree(Map<String, OptimisibleDirTreeNode> tree, String path, Map<String, OptimisibleDirTreeNode> target) {
-		switch (tree.size()) {
+	private static void optimiseDirTree(String path, Map<String, Map> target, Map<String, OptimisibleDirTreeNode> sourceNodes) {
+		switch (sourceNodes.size()) {
 		case 0: {
+			// Has no children
+			// Add to target with no child-node
 			target.put(path, null);
 			break;
 		}
 		case 1: {
-			final String name= tree.keySet().iterator().next();
-			optimiseDirTree(tree.get(name).children, Helpers.addPathElement(path, name), target);
+			// Has one child
+			// Don't add to target, extend path and optimise child
+			final String name= sourceNodes.keySet().iterator().next();
+			optimiseDirTree_add(Helpers.addPathElement(path, name), target, sourceNodes.get(name));
 			break;
 		}
 		default: {
-			OptimisibleDirTreeNode subTargetNode= target.get(path);
-			if (subTargetNode == null) {
-				subTargetNode= new OptimisibleDirTreeNode();
-				target.put(path, subTargetNode);
+			// Has more than one child
+			// Create node in target and add children to it
+			Map<String, Map> currentNode;
+			if (path.length() == 0)
+				currentNode= target;
+			else {
+				currentNode= target.get(path);
+				if (currentNode == null)
+					target.put(path, currentNode= new HashMap<String, Map>());
 			}
-			for (String name : tree.keySet())
-				optimiseDirTree(tree.get(name).children, name, subTargetNode.children);
+			for (String name : sourceNodes.keySet())
+				optimiseDirTree_add(name, currentNode, sourceNodes.get(name));
 			break;
 		}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void optimiseDirTree_add(String path, Map<String, Map> target, OptimisibleDirTreeNode node) {
+		if (node.hasFiles) {
+			if (node.children.size() == 0)
+				target.put(path, null);
+			else {
+				Map<String, Map> currentNode= target.get(path);
+				if (currentNode == null)
+					target.put(path, currentNode= new HashMap<String, Map>());
+				optimiseDirTree("", currentNode, node.children); //$NON-NLS-1$
+			}
+		} else
+			optimiseDirTree(path, target, node.children);
 	}
 
 	/**
