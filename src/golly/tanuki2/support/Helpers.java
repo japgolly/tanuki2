@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -13,6 +14,10 @@ import java.util.regex.Pattern;
  * @since 16/02/2007
  */
 public final class Helpers {
+	public static class OptimisibleDirTreeNode {
+		public Map<String, OptimisibleDirTreeNode> children= new HashMap<String, OptimisibleDirTreeNode>();
+		public boolean hasFiles= false;
+	}
 
 	public static String addPathElement(final String path, final String name) {
 		return path.length() == 0 ? name : path + File.separator + name;
@@ -179,17 +184,17 @@ public final class Helpers {
 	 * </pre>
 	 */
 	@SuppressWarnings("unchecked")
-	public static HashMap<String, HashMap> optimiseDirTree(HashMap<String, HashMap> tree) {
+	public static Map<String, OptimisibleDirTreeNode> optimiseDirTree(Map<String, OptimisibleDirTreeNode> tree) {
 		// FIXME This reduces tree to c:/2/nevermore/xxxx but wot if there r mp3s in c:/2 ??
-		HashMap<String, HashMap> r= new HashMap<String, HashMap>();
+		Map<String, OptimisibleDirTreeNode> r= new HashMap<String, OptimisibleDirTreeNode>();
 		optimiseDirTree(tree, "", r); //$NON-NLS-1$
 		if (r.size() == 1 && r.keySet().iterator().next().length() == 0)
-			r= r.get(""); //$NON-NLS-1$
+			r= r.get("").children; //$NON-NLS-1$
 		return r;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void optimiseDirTree(HashMap<String, HashMap> tree, String path, HashMap<String, HashMap> target) {
+	private static void optimiseDirTree(Map<String, OptimisibleDirTreeNode> tree, String path, Map<String, OptimisibleDirTreeNode> target) {
 		switch (tree.size()) {
 		case 0: {
 			target.put(path, null);
@@ -197,15 +202,17 @@ public final class Helpers {
 		}
 		case 1: {
 			final String name= tree.keySet().iterator().next();
-			optimiseDirTree(tree.get(name), Helpers.addPathElement(path, name), target);
+			optimiseDirTree(tree.get(name).children, Helpers.addPathElement(path, name), target);
 			break;
 		}
 		default: {
-			HashMap<String, HashMap> subTarget= target.get(path);
-			if (subTarget == null)
-				target.put(path, subTarget= new HashMap<String, HashMap>());
+			OptimisibleDirTreeNode subTargetNode= target.get(path);
+			if (subTargetNode == null) {
+				subTargetNode= new OptimisibleDirTreeNode();
+				target.put(path, subTargetNode);
+			}
 			for (String name : tree.keySet())
-				optimiseDirTree(tree.get(name), name, subTarget);
+				optimiseDirTree(tree.get(name).children, name, subTargetNode.children);
 			break;
 		}
 		}

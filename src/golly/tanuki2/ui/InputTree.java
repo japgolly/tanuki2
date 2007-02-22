@@ -6,9 +6,11 @@ import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -75,15 +77,17 @@ public class InputTree implements IFileView {
 		tree.clearAll(true);
 
 		// Create a virtual representation of the tree
-		HashMap<String, HashMap> dirTree= new HashMap<String, HashMap>();
+		Map<String, OptimisibleDirTreeNode> dirTree= new HashMap<String, OptimisibleDirTreeNode>();
 		for (String dir : dirs.keySet()) {
-			HashMap<String, HashMap> tree= dirTree;
+			Map<String, OptimisibleDirTreeNode> tree= dirTree;
 			String[] a= pathSeperatorPattern.split(dir);
 			for (String e : a) {
-				HashMap<String, HashMap> newtree= tree.get(e);
-				if (newtree == null)
-					tree.put(e, newtree= new HashMap<String, HashMap>());
-				tree= newtree;
+				OptimisibleDirTreeNode newTreeNode= tree.get(e);
+				if (newTreeNode == null) {
+					newTreeNode= new OptimisibleDirTreeNode();
+					tree.put(e, newTreeNode);
+				}
+				tree= newTreeNode.children;
 			}
 		}
 		dirTree= Helpers.optimiseDirTree(dirTree);
@@ -129,7 +133,8 @@ public class InputTree implements IFileView {
 	// =============================================================================================== //
 
 	@SuppressWarnings("unchecked")
-	private void addChildren(TreeItem parent, HashMap<String, HashMap> children, String path) {
+	private void addChildren(TreeItem parent, OptimisibleDirTreeNode parentNode, String path) {
+		final Map<String, OptimisibleDirTreeNode> children= (parentNode == null) ? null : parentNode.children;
 		if (children != null) {
 			// Add directories
 			for (String dir : Helpers.sort(children.keySet())) {
@@ -141,7 +146,7 @@ public class InputTree implements IFileView {
 		} else {
 			// Add files
 			final DirData dd= dirs.get(path);
-			final HashMap<String, FileData> files= dd.files;
+			final Map<String, FileData> files= dd.files;
 			final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
 			for (String f : Helpers.sort(files.keySet())) {
 				final FileData fd= files.get(f);
