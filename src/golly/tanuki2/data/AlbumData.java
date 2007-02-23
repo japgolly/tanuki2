@@ -37,6 +37,10 @@ public class AlbumData extends AbstractDataObject {
 		dataUpdated();
 	}
 
+	public void setYear(String year) {
+		setYear((Integer) (year == null ? null : Integer.parseInt(year)));
+	}
+
 	public void setYear(Integer year) {
 		this.year= year;
 		dataUpdated();

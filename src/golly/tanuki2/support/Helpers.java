@@ -149,6 +149,31 @@ public final class Helpers {
 	}
 
 	/**
+	 * Works like <code>Array.join()</code> in Ruby.
+	 */
+	public static String join(final String[] array, final String joinWith) {
+		StringBuilder sb= new StringBuilder();
+		for (String a : array) {
+			if (sb.length() != 0 && joinWith != null)
+				sb.append(joinWith);
+			sb.append(a);
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Works like <code>Array.map()</code> in Ruby although instead of using a closure, strings are simply added to
+	 * the beginning and end of array elements.
+	 */
+	public static String[] map(final String[] array, final String pre, final String post) {
+		int i= array.length;
+		String[] x= new String[i];
+		while (i-- > 0)
+			x[i]= pre + array[i] + post;
+		return x;
+	}
+
+	/**
 	 * Takes a virtual directory tree in the following format:<br>
 	 * 
 	 * <pre>
@@ -239,6 +264,15 @@ public final class Helpers {
 			}
 		} else
 			optimiseDirTree(path, target, node.children);
+	}
+
+	/**
+	 * Creates a regex string that is an OR combination of the arguents passed.<br>
+	 * eg. <code>regexOr("abc","def","asd")</code> returns <code>"(?:(?:abc)|(?:def)|(?:asd))"</code>.
+	 */
+	@SuppressWarnings("nls")
+	public static String regexOr(String... array) {
+		return "(?:" + join(map(array, "(?:", ")"), "|") + ")";
 	}
 
 	/**

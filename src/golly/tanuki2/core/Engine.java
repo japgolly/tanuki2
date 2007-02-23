@@ -1,11 +1,19 @@
 package golly.tanuki2.core;
 
+import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
+import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
+import golly.tanuki2.support.Helpers;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -19,6 +27,7 @@ public class Engine {
 
 	public final HashMap<String, DirData> dirs= new HashMap<String, DirData>();
 	public final HashMap<String, FileData> files= new HashMap<String, FileData>();
+	private final FilenameParser filenameParser= new FilenameParser();
 
 	/**
 	 * Recursively adds the contents of a folder.
@@ -55,6 +64,42 @@ public class Engine {
 				dd.setHasAudioContent(true);
 				break;
 			}
+
+		// Guess values
+		if (dd.hasAudioContent()) {
+			final Map<String, FileData> ddFiles= dd.files;
+			final Set<AlbumData> allAlbumProperties= new HashSet<AlbumData>();
+			
+			// Read values
+			final Map<String, List<TrackProperties>> trackPropertyMap= filenameParser.readMultipleTrackProperties(dd);
+			for (String filename : trackPropertyMap.keySet()) {
+				final List<TrackProperties> trackPropertyCollection= trackPropertyMap.get(filename);
+				final FileData fd= ddFiles.get(filename);
+				
+				// Set track filenames
+				if (!trackPropertyCollection.isEmpty()) {
+					// TODO temporarily just using allAlbumProperties.iterator().next()
+					TrackProperties tp= trackPropertyCollection.iterator().next();
+					fd.setTn(tp.get(TrackPropertyType.TN));
+					fd.setTrack(tp.get(TrackPropertyType.TRACK));
+				}
+				
+				// Save album values
+				for (TrackProperties tp : trackPropertyCollection)
+					allAlbumProperties.add(tp.toAlbumData());
+			}
+
+			// Create album data
+			// TODO temporarily just using allAlbumProperties.iterator().next()
+			AlbumData ad= null;
+			if (!allAlbumProperties.isEmpty())
+				ad= allAlbumProperties.iterator().next();
+			for (String s : Helpers.sort(ddFiles.keySet())) {
+				final FileData fd= ddFiles.get(s);
+				if (fd.isAudio())
+					fd.setAlbumData(ad);
+			}
+		}
 	}
 
 	/**

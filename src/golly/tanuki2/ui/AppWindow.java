@@ -116,29 +116,6 @@ public class AppWindow {
 		engine.addFolder("X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]");
 		engine.addFolder("X:\\music\\4. Done\\Unexpect");
 		engine.addFolder("C:\\2\\Nevermore\\2004 Enemies of Reality");
-		AlbumData ad= new AlbumData();
-		ad.setArtist("Unexpect");
-		ad.setYear(2003);
-		ad.setAlbum("We, Invaders");
-		Pattern p= Pattern.compile("^(\\d{2}) - (.+)\\.mp3$");
-		DirData dd= engine.dirs.get("X:\\music\\4. Done\\Unexpect\\2003 - We, Invaders");
-		for (String f: dd.files.keySet()) {
-			FileData fd= dd.files.get(f);
-			fd.setAlbumData(ad);
-			Matcher m= p.matcher(f);
-			if (m.matches()) {
-				fd.setTn(Integer.parseInt(m.group(1)));
-				fd.setTrack(m.group(2));
-			}
-		}
-		AlbumData ad2= new AlbumData();
-		ad2.setArtist("Unexpect");
-		dd= engine.dirs.get("X:\\music\\4. Done\\Unexpect\\2006 - In a Flesh Aquarium");
-		for (String f: dd.files.keySet()) {
-			FileData fd= dd.files.get(f);
-			fd.setAlbumData(ad2);
-		}
-		dd.files.values().iterator().next().setAlbumData(ad);
 		inputTree.refreshFiles(engine.dirs);
 		flatList.refreshFiles(engine.dirs);
 		tabFolder.setSelection(0);

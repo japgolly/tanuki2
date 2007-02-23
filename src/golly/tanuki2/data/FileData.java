@@ -73,6 +73,10 @@ public class FileData extends AbstractDataObject {
 		this.tn= tn;
 		dataUpdated();
 	}
+	
+	public void setTn(String tn) {
+		setTn(tn == null ? ((Integer)null) : Integer.parseInt(tn));
+	}
 
 	public void setTrack(String track) {
 		this.track= track;

@@ -35,10 +35,10 @@ public class DataTest extends Assert {
 		assertTrue(ad1.equals(ad2));
 		assertTrue(ad1.hashCode() == ad2.hashCode());
 
-		ad2.setYear(null);
+		ad2.setYear((Integer)null);
 		assertFalse(ad1.equals(ad2));
 		assertTrue(ad1.hashCode() != ad2.hashCode());
-		ad1.setYear(null);
+		ad1.setYear((Integer)null);
 		assertTrue(ad1.equals(ad2));
 		assertTrue(ad1.hashCode() == ad2.hashCode());
 
