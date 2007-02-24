@@ -1,12 +1,9 @@
 package golly.tanuki2.core;
 
-import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.data.RankedObject;
 import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.data.TrackProperties;
-import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 
@@ -117,16 +114,9 @@ public class Engine {
 	}
 
 	protected void readTrackProprties() {
+		// Read properties
 		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= new HashMap<DirData, Map<String, List<TrackProperties>>>();
-		final RankedObjectCollection<AlbumData> sharedAlbumData= new RankedObjectCollection<AlbumData>();
-		final Set<String> successfulFiles= new HashSet<String>();
-
-		// ====================================================================
-		// FIRST PASS
 		for (DirData dd : dirsNeedingTrackProprties) {
-			final Map<String, FileData> ddFiles= dd.files;
-
-			// Read values
 			final Map<String, List<TrackProperties>> trackPropertyMap= new HashMap<String, List<TrackProperties>>();
 			for (ITrackProprtyReader reader : trackProprtyReaders)
 				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
@@ -134,140 +124,17 @@ public class Engine {
 			// TODO: Merge TPs
 			// TODO: Remove duplicate TPs
 
-			// ATTEMPT: assign if only one result
-			for (String filename : trackPropertyMap.keySet()) {
-				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
-				if (resultArray.size() == 1) {
-					TrackProperties tp= resultArray.iterator().next();
-					assignTrackPropertiesToFile(ddFiles.get(filename), tp, sharedAlbumData);
-					successfulFiles.add(filename);
-				}
-			}
+			unassignedData.put(dd, trackPropertyMap);
+		}
 
-			// ATTEMPT: if more than one result, check AlbumData of others in this dir
-			for (String filename : trackPropertyMap.keySet()) {
-				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
-				if (resultArray.size() > 1)
-					second_pass: for (RankedObject<AlbumData> adr : sharedAlbumData)
-						for (TrackProperties tp : resultArray)
-							if (adr.data.equals(tp.toAlbumData())) {
-								assignTrackPropertiesToFile(ddFiles.get(filename), tp, sharedAlbumData);
-								successfulFiles.add(filename);
-								break second_pass;
-							}
-			}
-
-			// Save any still unassigned
-			removeSuccessfulTrackProperties(trackPropertyMap, successfulFiles);
-			if (!trackPropertyMap.isEmpty())
-				unassignedData.put(dd, trackPropertyMap);
-
-		} // end outer pass 1
-		removeEmptyValues(unassignedData);
-
-		// ====================================================================
-		// SECOND PASS
-		final RankedObjectCollection<String> rankedArtists= getRankedArtists(true);
-		for (DirData dd : unassignedData.keySet()) {
-			final Map<String, List<TrackProperties>> trackPropertyMap= unassignedData.get(dd);
-			final Map<String, FileData> ddFiles= dd.files;
-
-			// ATTEMPT: if there is one result whose artist has a higher rank than any other results, then just use it
-			for (String filename : trackPropertyMap.keySet()) {
-				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
-				if (resultArray.size() > 1) {
-					final RankedObjectCollection<TrackProperties> rankedTPs= new RankedObjectCollection<TrackProperties>();
-					for (TrackProperties tp : resultArray) {
-						double rank= 0;
-						String artist= tp.get(TrackPropertyType.ARTIST);
-						if (artist != null) {
-							artist= Helpers.normalizeText(artist);
-							if (rankedArtists.contains(artist))
-								rank= rankedArtists.getRank(artist);
-						}
-						rankedTPs.add(tp, rank);
-					}
-					if (rankedTPs.hasSingleWinner()) {
-						assignTrackPropertiesToFile(ddFiles.get(filename), rankedTPs.getWinner(), sharedAlbumData);
-						successfulFiles.add(filename);
-					}
-				}
-			}
-			removeSuccessfulTrackProperties(trackPropertyMap, successfulFiles);
-
-		} // end outer pass 2
-		removeEmptyValues(unassignedData);
-
-		// ====================================================================
-		// LAST PASS: guessing time
-		for (DirData dd : unassignedData.keySet()) {
-			final Map<String, List<TrackProperties>> trackPropertyMap= unassignedData.get(dd);
-			final Map<String, FileData> ddFiles= dd.files;
-
-			// ATTEMPT: rank each album property individually, then use that to rank each tp
-			// STEP 1: Create individual, ranked album properties
-			final Map<TrackPropertyType, RankedObjectCollection<String>> rankedIndividualAlbumProperties= new HashMap<TrackPropertyType, RankedObjectCollection<String>>();
-			for (TrackPropertyType propType : TrackPropertyType.albumTypes) {
-				final RankedObjectCollection<String> roc= new RankedObjectCollection<String>();
-				rankedIndividualAlbumProperties.put(propType, roc);
-				for (String filename : trackPropertyMap.keySet())
-					for (TrackProperties tp : trackPropertyMap.get(filename)) {
-						String x= tp.get(propType);
-						if (x != null) {
-							x= Helpers.normalizeText(x);
-							roc.increaseRank(x, 1);
-						}
-					}
-			}
-			// STEP 2: Rank each tp
-			for (String filename : trackPropertyMap.keySet()) {
-				final RankedObjectCollection<TrackProperties> rankedTPs= new RankedObjectCollection<TrackProperties>();
-				for (TrackProperties tp : trackPropertyMap.get(filename)) {
-					double rank= 0;
-					for (TrackPropertyType propType : TrackPropertyType.albumTypes) {
-						final RankedObjectCollection<String> roc= rankedIndividualAlbumProperties.get(propType);
-						String x= tp.get(propType);
-						if (x != null)
-							rank+= roc.getRank(Helpers.normalizeText(x));
-					}
-					rankedTPs.add(tp, rank);
-				}
-				// choose
-				if (rankedTPs.hasSingleWinner()) {
-					assignTrackPropertiesToFile(ddFiles.get(filename), rankedTPs.getWinner(), sharedAlbumData);
-					successfulFiles.add(filename);
-				}
-			}
-			removeSuccessfulTrackProperties(trackPropertyMap, successfulFiles);
-
-			//			// ATTEMPT: just use whatever
-			//			for (String filename : trackPropertyMap.keySet()) {
-			//				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
-			//				// TODO
-			//			}
-
-		} // end last pass
+		// Select and assign
+		TrackPropertySelectors.Runner trackPropertySelector= new TrackPropertySelectors.Runner(unassignedData);
+		trackPropertySelector.run(new TrackPropertySelectors.AssignSingleRows());
+		trackPropertySelector.run(new TrackPropertySelectors.CompareAlbumData());
+		trackPropertySelector.run(new TrackPropertySelectors.RankArtist(getRankedArtists(true)));
+		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults());
 
 		// Finished. Clean up.
 		dirsNeedingTrackProprties.clear();
-	}
-
-	private void assignTrackPropertiesToFile(final FileData fd, TrackProperties tp, final RankedObjectCollection<AlbumData> sharedAlbumData) {
-		fd.setTn(tp.get(TrackPropertyType.TN));
-		fd.setTrack(tp.get(TrackPropertyType.TRACK));
-		final AlbumData ad= sharedAlbumData.increaseRank(tp.toAlbumData(), 1).data;
-		fd.setAlbumData(ad);
-	}
-
-	private void removeEmptyValues(final Map<DirData, Map<String, List<TrackProperties>>> unassignedData) {
-		for (Map<String, List<TrackProperties>> tpm : unassignedData.values())
-			Helpers.removeEmptyCollections(tpm);
-		Helpers.removeEmptyMaps(unassignedData);
-	}
-
-	private void removeSuccessfulTrackProperties(final Map<String, List<TrackProperties>> trackPropertyMap, final Set<String> successfulFiles) {
-		for (String filename : successfulFiles)
-			trackPropertyMap.remove(filename);
-		successfulFiles.clear();
 	}
 }
