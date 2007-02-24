@@ -1,19 +1,23 @@
 package golly.tanuki2.core;
 
-import golly.tanuki2.data.AlbumData;
+import golly.tanuki2.data.AlbumDataAndRank;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
+import golly.tanuki2.data.RankedTrackPropertyCollection;
 import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -27,13 +31,38 @@ public class Engine {
 
 	public final HashMap<String, DirData> dirs= new HashMap<String, DirData>();
 	public final HashMap<String, FileData> files= new HashMap<String, FileData>();
-	private final FilenameParser filenameParser= new FilenameParser();
+
+	protected final List<ITrackProprtyReader> trackProprtyReaders= new ArrayList<ITrackProprtyReader>();
+	protected final Set<DirData> dirsNeedingTrackProprties= new HashSet<DirData>();
+
+	public Engine() {
+		trackProprtyReaders.add(new FilenameParser());
+	}
 
 	/**
 	 * Recursively adds the contents of a folder.
 	 */
 	public void addFolder(String sourceFolderName) {
 		addFolder(new File(sourceFolderName));
+		readTrackProprties();
+	}
+
+	/**
+	 * Returns a map of all artists, and thier rank (occurance count).
+	 */
+	public Map<String, Integer> getRankedArtists(boolean normalizeArtistNames) {
+		final Map<String, Integer> rankedArtists= new HashMap<String, Integer>();
+		for (FileData fd : this.files.values())
+			if (fd.getAlbumData() != null) {
+				String artist= fd.getAlbumData().getArtist();
+				if (artist != null) {
+					if (normalizeArtistNames)
+						artist= Helpers.normalizeText(artist);
+					Integer rank= rankedArtists.get(artist);
+					rankedArtists.put(artist, (rank == null) ? 1 : rank + 1);
+				}
+			}
+		return rankedArtists;
 	}
 
 	// =============================================================================================== //
@@ -62,44 +91,9 @@ public class Engine {
 		for (FileData fd : dd.files.values())
 			if (fd.isAudio()) {
 				dd.setHasAudioContent(true);
+				dirsNeedingTrackProprties.add(dd);
 				break;
 			}
-
-		// Guess values
-		if (dd.hasAudioContent()) {
-			final Map<String, FileData> ddFiles= dd.files;
-			final Set<AlbumData> allAlbumProperties= new HashSet<AlbumData>();
-			
-			// Read values
-			final Map<String, List<TrackProperties>> trackPropertyMap= filenameParser.readMultipleTrackProperties(dd);
-			for (String filename : trackPropertyMap.keySet()) {
-				final List<TrackProperties> trackPropertyCollection= trackPropertyMap.get(filename);
-				final FileData fd= ddFiles.get(filename);
-				
-				// Set track filenames
-				if (!trackPropertyCollection.isEmpty()) {
-					// TODO temporarily just using allAlbumProperties.iterator().next()
-					TrackProperties tp= trackPropertyCollection.iterator().next();
-					fd.setTn(tp.get(TrackPropertyType.TN));
-					fd.setTrack(tp.get(TrackPropertyType.TRACK));
-				}
-				
-				// Save album values
-				for (TrackProperties tp : trackPropertyCollection)
-					allAlbumProperties.add(tp.toAlbumData());
-			}
-
-			// Create album data
-			// TODO temporarily just using allAlbumProperties.iterator().next()
-			AlbumData ad= null;
-			if (!allAlbumProperties.isEmpty())
-				ad= allAlbumProperties.iterator().next();
-			for (String s : Helpers.sort(ddFiles.keySet())) {
-				final FileData fd= ddFiles.get(s);
-				if (fd.isAudio())
-					fd.setAlbumData(ad);
-			}
-		}
 	}
 
 	/**
@@ -122,5 +116,99 @@ public class Engine {
 			fd.setMimeImage(TanukiImage.MIME_IMAGE);
 		else if (patText.matcher(f.getName()).matches())
 			fd.setMimeImage(TanukiImage.MIME_TEXT);
+	}
+
+	protected void readTrackProprties() {
+		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= new HashMap<DirData, Map<String, List<TrackProperties>>>();
+		final SortedSet<AlbumDataAndRank> sharedAlbumData= new TreeSet<AlbumDataAndRank>();
+
+		// ====================================================================
+		// Outer pass 1
+		for (DirData dd : dirsNeedingTrackProprties) {
+			final Map<String, FileData> ddFiles= dd.files;
+			final Set<String> assignedOk= new HashSet<String>();
+
+			// Read values
+			final Map<String, List<TrackProperties>> trackPropertyMap= new HashMap<String, List<TrackProperties>>();
+			for (ITrackProprtyReader reader : trackProprtyReaders)
+				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
+
+			// TODO: Merge TPs
+			// TODO: Remove duplicate TPs
+
+			// Assign (first pass: assign if only one result)
+			for (String filename : trackPropertyMap.keySet()) {
+				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
+				if (resultArray.size() == 1) {
+					TrackProperties tp= resultArray.iterator().next();
+					assignTrackPropertiesToFile(ddFiles.get(filename), tp, sharedAlbumData);
+					assignedOk.add(filename);
+				}
+			}
+
+			// Assign (second pass: if more than one result, check AlbumData of others in this dir)
+			for (String filename : trackPropertyMap.keySet()) {
+				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
+				if (resultArray.size() > 1)
+					second_pass: for (AlbumDataAndRank adr : sharedAlbumData)
+						for (TrackProperties tp : resultArray)
+							if (adr.data.equals(tp.toAlbumData())) {
+								assignTrackPropertiesToFile(ddFiles.get(filename), tp, sharedAlbumData);
+								assignedOk.add(filename);
+								break second_pass;
+							}
+			}
+
+			// Save any still unassigned
+			for (String filename : assignedOk)
+				trackPropertyMap.remove(filename);
+			if (!trackPropertyMap.isEmpty())
+				unassignedData.put(dd, trackPropertyMap);
+		} // end outer pass 1
+
+		// ====================================================================
+		// Outer pass 2
+		final Map<String, Integer> rankedArtists= getRankedArtists(true);
+		for (DirData dd : unassignedData.keySet()) {
+			final Map<String, List<TrackProperties>> trackPropertyMap= unassignedData.get(dd);
+			final Map<String, FileData> ddFiles= dd.files;
+			final Set<String> assignedOk= new HashSet<String>();
+
+			// Assign: if there is one result whose artist has a higher rank than any other results, then just use it
+			for (String filename : trackPropertyMap.keySet()) {
+				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
+				if (resultArray.size() > 1) {
+					RankedTrackPropertyCollection rankedTPs= new RankedTrackPropertyCollection();
+					for (TrackProperties tp : resultArray) {
+						double rank= 0;
+						String artist= tp.get(TrackPropertyType.ARTIST);
+						if (artist != null) {
+							artist= Helpers.normalizeText(artist);
+							if (rankedArtists.containsKey(artist))
+								rank= rankedArtists.get(artist).doubleValue();
+						}
+						rankedTPs.add(tp, rank);
+					}
+					if (rankedTPs.hasSingleWinner()) {
+						assignTrackPropertiesToFile(ddFiles.get(filename), rankedTPs.getWinner(), sharedAlbumData);
+						assignedOk.add(filename);
+					}
+				}
+			}
+
+			// Remove successful
+			for (String filename : assignedOk)
+				trackPropertyMap.remove(filename);
+
+		} // end outer pass 2
+
+		dirsNeedingTrackProprties.clear();
+	}
+
+	private void assignTrackPropertiesToFile(final FileData fd, TrackProperties tp, final SortedSet<AlbumDataAndRank> sharedAlbumData) {
+		fd.setTn(tp.get(TrackPropertyType.TN));
+		fd.setTrack(tp.get(TrackPropertyType.TRACK));
+		AlbumDataAndRank adr= AlbumDataAndRank.addOneToSet(sharedAlbumData, tp.toAlbumData());
+		fd.setAlbumData(adr.data);
 	}
 }

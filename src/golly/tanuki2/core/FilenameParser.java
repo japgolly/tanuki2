@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * @author Golly
  * @since 23/02/2007
  */
-public class FilenameParser {
+public class FilenameParser implements ITrackProprtyReader {
 
 	// =============================================================================================== //
 	// = SmartPattern

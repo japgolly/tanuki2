@@ -3,15 +3,13 @@ package golly.tanuki2.qa;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 @SuppressWarnings( {"nls", "unchecked"})
-public class HelperTest extends Assert {
+public class HelperTest extends TestHelper {
 
 	@Test
 	public void testOptimiseDirTree1() {
@@ -104,14 +102,6 @@ public class HelperTest extends Assert {
 		assertEquals(keys.length, map.size());
 		for (String key : keys)
 			assertTrue(map.containsKey(osCompatFilename(key)));
-	}
-
-	private String osCompatFilename(String filename) {
-		if (File.separatorChar == '/')
-			return filename.replace('\\', '/');
-		else
-			return filename.replace('/', '\\');
-
 	}
 
 	private OptimisibleDirTreeNode addOptimisibleDirTreeNode(OptimisibleDirTreeNode parent, String name) {

@@ -6,9 +6,9 @@ import static golly.tanuki2.data.TrackPropertyType.TN;
 import static golly.tanuki2.data.TrackPropertyType.TRACK;
 import static golly.tanuki2.data.TrackPropertyType.YEAR;
 import golly.tanuki2.core.FilenameParser;
+import golly.tanuki2.core.ITrackProprtyReader;
 import golly.tanuki2.core.FilenameParser.SmartPattern;
 import golly.tanuki2.data.DirData;
-import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.TrackProperties;
 
 import java.io.File;
@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,8 +24,8 @@ import org.junit.Test;
  * @since 23/02/2007
  */
 @SuppressWarnings("nls")
-public class FilenameParserTest extends Assert {
-	private FilenameParser fp= null;
+public class FilenameParserTest extends TestHelper {
+	private ITrackProprtyReader fp= null;
 
 	@Before
 	public void setup() {
@@ -139,23 +138,7 @@ public class FilenameParserTest extends Assert {
 		}
 	}
 
-	private FileData makeFileData(DirData dd, boolean isAudio) {
-		FileData fd= new FileData(dd);
-		fd.setAudio(isAudio);
-		return fd;
-	}
-
-	private TrackProperties makeTrackProperties(String artist, Integer year, String album, String tn, String track) {
-		TrackProperties expected= new TrackProperties();
-		expected.put(ARTIST, artist);
-		expected.put(YEAR, year == null ? null : year.toString());
-		expected.put(ALBUM, album);
-		expected.put(TN, tn == null ? null : tn.toString());
-		expected.put(TRACK, track);
-		return expected;
-	}
-
-	private void subtestParse(FilenameParser fp, String filename, String artist, Integer year, String album, String tn, String track) {
+	private void subtestParse(ITrackProprtyReader fp, String filename, String artist, Integer year, String album, String tn, String track) {
 		final TrackProperties expected= makeTrackProperties(artist, year, album, tn, track);
 
 		final Collection<TrackProperties> r= fp.readTrackProperties(filename);

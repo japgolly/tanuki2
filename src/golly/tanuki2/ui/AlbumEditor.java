@@ -71,17 +71,7 @@ public class AlbumEditor {
 					c.setText(fd.getTrack());
 
 				// Record album data
-				final AlbumData ad= fd.getAlbumData();
-				if (ad != null) {
-					boolean adrFound= false;
-					for (AlbumDataAndRank i : allAlbumData)
-						if (i.ad.equals(ad)) {
-							i.rank+= 1;
-							adrFound= true;
-						}
-					if (!adrFound)
-						allAlbumData.add(new AlbumDataAndRank(ad, 1));
-				}
+				AlbumDataAndRank.addOneToSet(allAlbumData, fd.getAlbumData());
 			}
 		}
 
@@ -92,7 +82,7 @@ public class AlbumEditor {
 		// Populate
 		boolean select= true;
 		for (AlbumDataAndRank adr : allAlbumData) {
-			final AlbumData ad= adr.ad;
+			final AlbumData ad= adr.data;
 			addToCombo(iwArtist, ad.getArtist(), select);
 			addToCombo(iwYear, ad.getYear(), select);
 			addToCombo(iwAlbum, ad.getAlbum(), select);

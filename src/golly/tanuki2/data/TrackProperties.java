@@ -2,6 +2,8 @@ package golly.tanuki2.data;
 
 import static golly.tanuki2.data.TrackPropertyType.ALBUM;
 import static golly.tanuki2.data.TrackPropertyType.ARTIST;
+import static golly.tanuki2.data.TrackPropertyType.TN;
+import static golly.tanuki2.data.TrackPropertyType.TRACK;
 import static golly.tanuki2.data.TrackPropertyType.YEAR;
 
 import java.util.HashMap;
@@ -12,6 +14,21 @@ import java.util.HashMap;
  */
 public class TrackProperties extends HashMap<TrackPropertyType, String> {
 	private static final long serialVersionUID= -1436707286917587072L;
+
+	public static TrackProperties fromFileData(FileData fd) {
+		final TrackProperties tp= new TrackProperties();
+		AlbumData ad= fd.getAlbumData();
+		if (ad != null) {
+			tp.put(ARTIST, ad.getArtist());
+			tp.put(ALBUM, ad.getAlbum());
+			if (ad.getYear() != null)
+				tp.put(YEAR, ad.getYear().toString());
+		}
+		if (fd.getTn() != null)
+			tp.put(TN, fd.getTn().toString());
+		tp.put(TRACK, fd.getTrack());
+		return tp;
+	}
 
 	@Override
 	public String put(TrackPropertyType key, String value) {

@@ -3,8 +3,10 @@ package golly.tanuki2.support;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -50,7 +52,7 @@ public final class Helpers {
 		final Field[] fields= new Field[i];
 		try {
 			while (i-- > 0)
-				fields[i]= cls.getDeclaredField(fieldNames[i]);
+				fields[i]= cls.getField(fieldNames[i]);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -171,6 +173,124 @@ public final class Helpers {
 		while (i-- > 0)
 			x[i]= pre + array[i] + post;
 		return x;
+	}
+
+	public static <K, V> void mergeCollectionMap(Map<K, Collection<V>> main, Map<K, Collection<V>> newContent) {
+		if (newContent != null)
+			for (K k : newContent.keySet())
+				if (main.containsKey(k))
+					main.get(k).addAll(newContent.get(k));
+				else
+					main.put(k, newContent.get(k));
+	}
+
+	public static <K, V> void mergeListMap(Map<K, List<V>> main, Map<K, List<V>> newContent) {
+		if (newContent != null)
+			for (K k : newContent.keySet())
+				if (main.containsKey(k))
+					main.get(k).addAll(newContent.get(k));
+				else
+					main.put(k, newContent.get(k));
+	}
+
+	/**
+	 * @see #normalizeText(String, List)
+	 */
+	public static final String normalizeText(final String input) {
+		return normalizeText(input, null);
+	}
+
+	private static final String KATAKANA_HALF= "ｱｲｳｴｵｧｨｩｪｫｶｷｸｹｺｻｼｽｾｿﾀﾁﾂｯﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖｬｭｮﾗﾘﾙﾚﾛﾜｦﾝｰﾞﾟ"; //$NON-NLS-1$
+	private static final String KATAKANA_FULL= "アイウエオァィゥェォカキクケコサシスセソタチツッテトナニヌネノハヒフヘホマミムメモヤユヨャュョラリルレロワヲンー゛゜"; //$NON-NLS-1$
+	private static final String KATAKANA_TENTEN= "カキクケコサシスセソタチツテトハヒフヘホ"; //$NON-NLS-1$
+
+	/**
+	 * Performs the following conversions:
+	 * <ul>
+	 * <li>Converts all 全角英字/数字 to ASCII</li>
+	 * <li>Converts ひらがな and 半角カタカナ to 全角カタカナ</li>
+	 * <li>Converts to uppercase</li>
+	 * <li>Removes all whitespace</li>
+	 * <li>Converts all whitespace to ASCII spaces</li>
+	 * </ul>
+	 */
+	public static final String normalizeText(final String input, List<Integer> map) {
+		final StringBuilder sb= new StringBuilder();
+		final int inputLength= input.length() - 1;
+		boolean ignoreNextMapChar= false;
+		int lastNonWhitespacePos= 0;
+		char c;
+		for (int i= 0; i <= inputLength; i++) {
+			c= input.charAt(i);
+
+			if (!Character.isWhitespace(c)) {
+
+				if (c >= 'Ａ' && c <= 'Ｚ') // 全角大文字
+					c-= ('Ａ' - 'A');
+
+				else if (c >= 'ａ' && c <= 'ｚ') // 全角小文字
+					c-= ('ａ' - 'A');
+
+				else if (c >= '０' && c <= '９') // 全角数字
+					c-= ('０' - '0');
+
+				else if (c >= 0x3041 && c <= 0x3096) // ひらがな
+					c-= (0x3041 - 0x30A1);
+
+				else if (c > 0xFF60 && c < 0xFFA0) { // 半角ｶﾀｶﾅ
+					// 全角ｶﾀｶﾅに変換
+					int index= KATAKANA_HALF.indexOf(c);
+					if (index >= 0)
+						c= KATAKANA_FULL.charAt(index);
+					// ﾃﾝﾃﾝ
+					if (c == '゛') {
+						final int sblen= sb.length() - 1;
+						c= sb.charAt(sblen);
+						if (KATAKANA_TENTEN.indexOf(c) != -1)
+							c++;
+						else if (c == 'ウ')
+							c= 'ヴ';
+						else if (c == 'ワ')
+							c= 0x30f7;
+						else
+							continue;
+						sb.deleteCharAt(sblen);
+						if (map != null)
+							ignoreNextMapChar= true;
+					}
+					// ﾏﾙ
+					else if (c == '゜') {
+						final int sblen= sb.length() - 1;
+						c= sb.charAt(sblen);
+						if (c == 'ハ' || c == 'ヒ' || c == 'フ' || c == 'ヘ' || c == 'ホ') {
+							c++;
+							c++;
+							sb.deleteCharAt(sblen);
+							if (map != null)
+								ignoreNextMapChar= true;
+						} else
+							continue;
+					}
+
+				} else
+					c= Character.toUpperCase(c);
+
+				sb.append(c);
+				if (map != null) {
+					lastNonWhitespacePos= i;
+					if (ignoreNextMapChar)
+						ignoreNextMapChar= false;
+					else
+						map.add(i);
+				}
+			}
+		}
+
+		if (map != null)
+			map.add(lastNonWhitespacePos);
+
+		assert (map == null ? true : map.size() == sb.length() + 1);
+		return sb.toString();
 	}
 
 	/**

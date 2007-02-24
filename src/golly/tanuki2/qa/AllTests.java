@@ -12,7 +12,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * @since 23/02/2007
  */
 @RunWith(Suite.class)
-@SuiteClasses( {DataTest.class, FilenameParserTest.class, HelperTest.class})
+@SuiteClasses( {HelperTest.class, DataTest.class, FilenameParserTest.class, EngineTest.class})
 public class AllTests {
 	public static Test suite() {
 		return new JUnit4TestAdapter(AllTests.class);
