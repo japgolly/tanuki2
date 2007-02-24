@@ -63,6 +63,44 @@ class TrackPropertySelectors {
 	}
 
 	// =============================================================================================== //
+	// = RankArtist
+	// =============================================================================================== //
+
+	/**
+	 * If there is one result whose artist has a higher rank than any other results, then just use it.
+	 */
+	public static class RankArtist extends AbstractTrackPropertySelector {
+		final RankedObjectCollection<String> rankedArtists;
+
+		public RankArtist(RankedObjectCollection<String> rankedArtists) {
+			this.rankedArtists= rankedArtists;
+		}
+
+		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
+			for (String filename : trackPropertyMap.keySet()) {
+				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
+				if (resultArray.size() > 1) {
+					final RankedObjectCollection<TrackProperties> rankedTPs= new RankedObjectCollection<TrackProperties>();
+					for (TrackProperties tp : resultArray) {
+						double rank= 0;
+						String artist= tp.get(TrackPropertyType.ARTIST);
+						if (artist != null) {
+							artist= Helpers.normalizeText(artist);
+							if (rankedArtists.contains(artist))
+								rank= rankedArtists.getRank(artist);
+						}
+						rankedTPs.add(tp, rank);
+					}
+					if (rankedTPs.hasSingleWinner()) {
+						assignTrackPropertiesToFile(ddFiles.get(filename), rankedTPs.getWinner(), sharedAlbumData);
+						successfulFiles.add(filename);
+					}
+				}
+			}
+		}
+	}
+
+	// =============================================================================================== //
 	// = RankEachAlbumPropertyThenRankResults
 	// =============================================================================================== //
 
@@ -120,44 +158,6 @@ class TrackPropertySelectors {
 					for (TrackPropertyType propType : TrackPropertyType.albumTypes)
 						if (winner.get(propType) != null)
 							rankedIndividualAlbumProperties.get(propType).increaseRank(winner.get(propType), 0.1);
-				}
-			}
-		}
-	}
-
-	// =============================================================================================== //
-	// = RankArtist
-	// =============================================================================================== //
-
-	/**
-	 * If there is one result whose artist has a higher rank than any other results, then just use it.
-	 */
-	public static class RankArtist extends AbstractTrackPropertySelector {
-		final RankedObjectCollection<String> rankedArtists;
-
-		public RankArtist(RankedObjectCollection<String> rankedArtists) {
-			this.rankedArtists= rankedArtists;
-		}
-
-		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
-			for (String filename : trackPropertyMap.keySet()) {
-				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
-				if (resultArray.size() > 1) {
-					final RankedObjectCollection<TrackProperties> rankedTPs= new RankedObjectCollection<TrackProperties>();
-					for (TrackProperties tp : resultArray) {
-						double rank= 0;
-						String artist= tp.get(TrackPropertyType.ARTIST);
-						if (artist != null) {
-							artist= Helpers.normalizeText(artist);
-							if (rankedArtists.contains(artist))
-								rank= rankedArtists.getRank(artist);
-						}
-						rankedTPs.add(tp, rank);
-					}
-					if (rankedTPs.hasSingleWinner()) {
-						assignTrackPropertiesToFile(ddFiles.get(filename), rankedTPs.getWinner(), sharedAlbumData);
-						successfulFiles.add(filename);
-					}
 				}
 			}
 		}
