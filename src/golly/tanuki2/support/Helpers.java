@@ -330,10 +330,16 @@ public final class Helpers {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, Map> optimiseDirTree(final Map<String, OptimisibleDirTreeNode> tree) {
-		Map<String, Map> r= new HashMap<String, Map>();
+		final Map<String, Map> root= new HashMap<String, Map>(); 
+		Map<String, Map> r= root;
 		optimiseDirTree("", r, tree); //$NON-NLS-1$
-		if (r.size() == 1 && r.keySet().iterator().next().length() == 0)
+		if (r.size() == 1 && r.keySet().iterator().next().length() == 0) {
 			r= r.get(""); //$NON-NLS-1$
+			if (r == null) {
+				r= root;
+				r.clear();
+			}
+		}
 		return r;
 	}
 
