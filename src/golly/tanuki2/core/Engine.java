@@ -49,16 +49,15 @@ public class Engine {
 	/**
 	 * Returns a map of all artists, and thier rank (occurance count).
 	 */
-	public Map<String, Integer> getRankedArtists(boolean normalizeArtistNames) {
-		final Map<String, Integer> rankedArtists= new HashMap<String, Integer>();
+	public RankedObjectCollection<String> getRankedArtists(boolean normalizeArtistNames) {
+		final RankedObjectCollection<String> rankedArtists= new RankedObjectCollection<String>();
 		for (FileData fd : this.files.values())
 			if (fd.getAlbumData() != null) {
 				String artist= fd.getAlbumData().getArtist();
 				if (artist != null) {
 					if (normalizeArtistNames)
 						artist= Helpers.normalizeText(artist);
-					Integer rank= rankedArtists.get(artist);
-					rankedArtists.put(artist, (rank == null) ? 1 : rank + 1);
+					rankedArtists.increaseRank(artist, 1);
 				}
 			}
 		return rankedArtists;
@@ -167,7 +166,7 @@ public class Engine {
 
 		// ====================================================================
 		// Outer pass 2
-		final Map<String, Integer> rankedArtists= getRankedArtists(true);
+		final RankedObjectCollection<String> rankedArtists= getRankedArtists(true);
 		for (DirData dd : unassignedData.keySet()) {
 			final Map<String, List<TrackProperties>> trackPropertyMap= unassignedData.get(dd);
 			final Map<String, FileData> ddFiles= dd.files;
@@ -183,8 +182,8 @@ public class Engine {
 						String artist= tp.get(TrackPropertyType.ARTIST);
 						if (artist != null) {
 							artist= Helpers.normalizeText(artist);
-							if (rankedArtists.containsKey(artist))
-								rank= rankedArtists.get(artist).doubleValue();
+							if (rankedArtists.contains(artist))
+								rank= rankedArtists.getRank(artist);
 						}
 						rankedTPs.add(tp, rank);
 					}
