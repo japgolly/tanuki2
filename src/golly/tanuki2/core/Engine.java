@@ -132,7 +132,8 @@ public class Engine {
 		trackPropertySelector.run(new TrackPropertySelectors.AssignSingleRows());
 		trackPropertySelector.run(new TrackPropertySelectors.CompareAlbumData());
 		trackPropertySelector.run(new TrackPropertySelectors.RankArtist(getRankedArtists(true)));
-		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults());
+		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(true));
+		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(false));
 
 		// Finished. Clean up.
 		dirsNeedingTrackProprties.clear();

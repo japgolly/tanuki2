@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -189,7 +188,6 @@ public class EngineTest extends TestHelper {
 		assertEngineTrackProperties("B/b3", noprop);
 	}
 
-	@Ignore
 	@Test
 	public void wholeDirHasMultipleResults_noWayOfKnowingWhichIsCorrect() {
 		TrackProperties a1a, a2a, a3a, a1b, a2b, a3b;

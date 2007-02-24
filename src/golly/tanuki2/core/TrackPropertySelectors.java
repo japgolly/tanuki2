@@ -71,6 +71,12 @@ class TrackPropertySelectors {
 	 */
 	public static class RankEachAlbumPropertyThenRankResults extends AbstractTrackPropertySelector {
 
+		private final boolean firstPass;
+
+		public RankEachAlbumPropertyThenRankResults(boolean firstPass) {
+			this.firstPass= firstPass;
+		}
+
 		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
 			// STEP 1: Create individual, ranked album properties
 			final Map<TrackPropertyType, RankedObjectCollection<String>> rankedIndividualAlbumProperties= new HashMap<TrackPropertyType, RankedObjectCollection<String>>();
@@ -99,9 +105,21 @@ class TrackPropertySelectors {
 					}
 					rankedTPs.add(tp, rank);
 				}
+				// Check for single winner
 				if (rankedTPs.hasSingleWinner()) {
 					assignTrackPropertiesToFile(ddFiles.get(filename), rankedTPs.getWinner(), sharedAlbumData);
 					successfulFiles.add(filename);
+				}
+				// If more than one winner and not on first pass..
+				else if (!firstPass && rankedTPs.getWinnerCount() > 1) {
+					// select any of the winners
+					TrackProperties winner= rankedTPs.iterator().next().data;
+					assignTrackPropertiesToFile(ddFiles.get(filename), winner, sharedAlbumData);
+					successfulFiles.add(filename);
+					// and increase the rank of all album properties found in the winner
+					for (TrackPropertyType propType : TrackPropertyType.albumTypes)
+						if (winner.get(propType) != null)
+							rankedIndividualAlbumProperties.get(propType).increaseRank(winner.get(propType), 0.1);
 				}
 			}
 		}
