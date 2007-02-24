@@ -114,4 +114,9 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 	public int size() {
 		return set.size();
 	}
+	
+	@Override
+	public String toString() {
+		return set.toString();
+	}
 }
