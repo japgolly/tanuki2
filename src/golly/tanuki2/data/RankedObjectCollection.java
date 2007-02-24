@@ -23,6 +23,32 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 		return r;
 	}
 
+	public void clear() {
+		set.clear();
+	}
+
+	public boolean contains(RankedObject<T> o) {
+		return set.contains(o);
+	}
+
+	public boolean contains(T o) {
+		for (RankedObject<T> i : this)
+			if (i.data.equals(o))
+				return true;
+		return false;
+	}
+
+	public RankedObject<T> get(T o) {
+		for (RankedObject<T> i : this)
+			if (i.data.equals(o))
+				return i;
+		return null;
+	}
+
+	public double getRank(T o) {
+		return get(o).rank;
+	}
+
 	/**
 	 * Returns the object with the highest rank. If there are multiple objects that all have the highest rank, then
 	 * there is no way of determining which one of them will be returned. If there are no objects in the collection then
@@ -77,7 +103,15 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 		return add(data, incRank);
 	}
 
+	public boolean isEmpty() {
+		return set.isEmpty();
+	}
+
 	public Iterator<RankedObject<T>> iterator() {
 		return set.iterator();
+	}
+
+	public int size() {
+		return set.size();
 	}
 }
