@@ -1,9 +1,10 @@
 package golly.tanuki2.core;
 
-import golly.tanuki2.data.AlbumDataAndRank;
+import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.data.RankedTrackPropertyCollection;
+import golly.tanuki2.data.RankedObject;
+import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
@@ -16,8 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -120,7 +119,7 @@ public class Engine {
 
 	protected void readTrackProprties() {
 		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= new HashMap<DirData, Map<String, List<TrackProperties>>>();
-		final SortedSet<AlbumDataAndRank> sharedAlbumData= new TreeSet<AlbumDataAndRank>();
+		final RankedObjectCollection<AlbumData> sharedAlbumData= new RankedObjectCollection<AlbumData>();
 
 		// ====================================================================
 		// Outer pass 1
@@ -150,7 +149,7 @@ public class Engine {
 			for (String filename : trackPropertyMap.keySet()) {
 				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
 				if (resultArray.size() > 1)
-					second_pass: for (AlbumDataAndRank adr : sharedAlbumData)
+					second_pass: for (RankedObject<AlbumData> adr : sharedAlbumData)
 						for (TrackProperties tp : resultArray)
 							if (adr.data.equals(tp.toAlbumData())) {
 								assignTrackPropertiesToFile(ddFiles.get(filename), tp, sharedAlbumData);
@@ -178,7 +177,7 @@ public class Engine {
 			for (String filename : trackPropertyMap.keySet()) {
 				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
 				if (resultArray.size() > 1) {
-					RankedTrackPropertyCollection rankedTPs= new RankedTrackPropertyCollection();
+					final RankedObjectCollection<TrackProperties> rankedTPs= new RankedObjectCollection<TrackProperties>();
 					for (TrackProperties tp : resultArray) {
 						double rank= 0;
 						String artist= tp.get(TrackPropertyType.ARTIST);
@@ -205,10 +204,10 @@ public class Engine {
 		dirsNeedingTrackProprties.clear();
 	}
 
-	private void assignTrackPropertiesToFile(final FileData fd, TrackProperties tp, final SortedSet<AlbumDataAndRank> sharedAlbumData) {
+	private void assignTrackPropertiesToFile(final FileData fd, TrackProperties tp, final RankedObjectCollection<AlbumData> sharedAlbumData) {
 		fd.setTn(tp.get(TrackPropertyType.TN));
 		fd.setTrack(tp.get(TrackPropertyType.TRACK));
-		AlbumDataAndRank adr= AlbumDataAndRank.addOneToSet(sharedAlbumData, tp.toAlbumData());
-		fd.setAlbumData(adr.data);
+		final AlbumData ad= sharedAlbumData.increaseRank(tp.toAlbumData(), 1).data;
+		fd.setAlbumData(ad);
 	}
 }

@@ -1,15 +1,13 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.data.AlbumData;
-import golly.tanuki2.data.AlbumDataAndRank;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
+import golly.tanuki2.data.RankedObject;
+import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
-
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -31,7 +29,7 @@ public class AlbumEditor {
 
 	public AlbumEditor(Shell parent, DirData dd_) {
 		this.dd= dd_;
-		SortedSet<AlbumDataAndRank> allAlbumData= new TreeSet<AlbumDataAndRank>();
+		final RankedObjectCollection<AlbumData> allAlbumData= new RankedObjectCollection<AlbumData>();
 
 		// Shell
 		shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
@@ -71,7 +69,7 @@ public class AlbumEditor {
 					c.setText(fd.getTrack());
 
 				// Record album data
-				AlbumDataAndRank.addOneToSet(allAlbumData, fd.getAlbumData());
+				allAlbumData.increaseRank(fd.getAlbumData(), 1);
 			}
 		}
 
@@ -81,7 +79,7 @@ public class AlbumEditor {
 
 		// Populate
 		boolean select= true;
-		for (AlbumDataAndRank adr : allAlbumData) {
+		for (RankedObject<AlbumData> adr : allAlbumData) {
 			final AlbumData ad= adr.data;
 			addToCombo(iwArtist, ad.getArtist(), select);
 			addToCombo(iwYear, ad.getYear(), select);

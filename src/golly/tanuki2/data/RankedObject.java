@@ -10,24 +10,24 @@ import golly.tanuki2.support.Helpers;
  * @author Golly
  * @since 24/02/2007
  */
-public abstract class AbstractRankedObject<T> extends AbstractDataObject implements Comparable<AbstractRankedObject<T>> {
+public class RankedObject<T> extends AbstractDataObject implements Comparable<RankedObject<T>> {
 	public final T data;
 	public double rank;
 
-	public AbstractRankedObject(T rankedObject, double rank) {
+	public RankedObject(T rankedObject, double rank) {
 		this.data= rankedObject;
 		this.rank= rank;
 	}
 
-	public int compareTo(AbstractRankedObject<T> b) {
+	public int compareTo(RankedObject<T> b) {
 		return rank == b.rank ? 0 : (rank > b.rank ? -1 : 1);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
-		if (obj instanceof AbstractRankedObject)
-			return data.equals(((AbstractRankedObject) obj).data);
+		if (obj instanceof RankedObject)
+			return data.equals(((RankedObject) obj).data);
 		return data.equals(obj);
 	}
 
