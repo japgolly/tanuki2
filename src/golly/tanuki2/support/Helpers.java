@@ -395,6 +395,20 @@ public final class Helpers {
 		return "(?:" + join(map(array, "(?:", ")"), "|") + ")";
 	}
 
+	public static void removeEmptyCollections(Map<?, ? extends Collection<?>> map) {
+		Object[] keys= map.keySet().toArray();
+		for (Object k : keys)
+			if (map.get(k) == null || map.get(k).isEmpty())
+				map.remove(k);
+	}
+
+	public static void removeEmptyMaps(Map<?, ? extends Map<?, ?>> map) {
+		Object[] keys= map.keySet().toArray();
+		for (Object k : keys)
+			if (map.get(k) == null || map.get(k).isEmpty())
+				map.remove(k);
+	}
+
 	/**
 	 * Takes a <code>Set</code>, and returns a sorted array.
 	 */
