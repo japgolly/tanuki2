@@ -3,9 +3,17 @@ package golly.tanuki2.data;
 import golly.tanuki2.support.Helpers;
 
 /**
- * This is class holds an object and an integer that represents its rank.<br>
+ * This is class holds an object and an integer that represents its rank.
+ * <p>
  * <code>equals()</code> and <code>hashCode()</code> both delegate to the object so this class can be used in place
- * of the object in <code>Set</code>s etc. This is also implements <code>Comparable</code> and sorts by rank.
+ * of the object in <code>Set</code>s etc.
+ * </p>
+ * <p>
+ * This is also implements <code>Comparable</code> and sorts by rank. If the rank of both classes are equal then
+ * <code>super.hashCode()</code> will be compared instead. <code>compareTo()</code> will <b>never</b> return
+ * <code>0</code> and indicate that two ranked objects are the same. The behaviour is required so that ranked objects
+ * may be used correctly in <code>SortedSet</code>s.
+ * </p>
  * 
  * @author Golly
  * @since 24/02/2007
@@ -20,7 +28,9 @@ public class RankedObject<T> extends AbstractDataObject implements Comparable<Ra
 	}
 
 	public int compareTo(RankedObject<T> b) {
-		return rank == b.rank ? 0 : (rank > b.rank ? -1 : 1);
+		if (rank != b.rank)
+			return rank > b.rank ? -1 : 1;
+		return hashCodeThis() > b.hashCodeThis() ? -1 : 1;
 	}
 
 	@Override
@@ -34,6 +44,10 @@ public class RankedObject<T> extends AbstractDataObject implements Comparable<Ra
 	@Override
 	public int hashCode() {
 		return data.hashCode();
+	}
+
+	private int hashCodeThis() {
+		return super.hashCode();
 	}
 
 	@Override
