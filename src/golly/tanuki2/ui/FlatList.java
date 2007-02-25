@@ -56,7 +56,7 @@ public class FlatList implements IFileView {
 		// Create popup menu
 		Menu popupMenu= new Menu(table);
 		table.setMenu(popupMenu);
-		// mi: open folder
+		// mi: copy filenames
 		MenuItem miCopyFilenames= new MenuItem(popupMenu, SWT.PUSH);
 		miCopyFilenames.setText(I18n.l("flatList_menu_copyFilenames") + "\tCtrl+C"); //$NON-NLS-1$ //$NON-NLS-2$
 		miCopyFilenames.addSelectionListener(new SelectionAdapter() {
@@ -80,6 +80,14 @@ public class FlatList implements IFileView {
 				onOpenPrompt();
 			}
 		});
+		// mi: remove items
+		MenuItem miRemoveItems= new MenuItem(popupMenu, SWT.PUSH);
+		miRemoveItems.setText(I18n.l("flatList_menu_removeItems") + "\tDel"); //$NON-NLS-1$ //$NON-NLS-2$
+		miRemoveItems.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				onDelete();
+			}
+		});
 		// popup menu other
 		singleSelectionMenuItems= new MenuItem[] {miOpenFolder, miOpenPrompt};
 		popupMenu.addMenuListener(new MenuAdapter() {
@@ -89,10 +97,15 @@ public class FlatList implements IFileView {
 					mi.setEnabled(single);
 			}
 		});
+
+		// Add key listener
 		table.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.character == 'C' - 'A' + 1) {
 					onCopyFilenames();
+					e.doit= false;
+				} else if (e.character == 127) {
+					onDelete();
 					e.doit= false;
 				}
 			}
@@ -158,6 +171,12 @@ public class FlatList implements IFileView {
 			sb.append(EOL);
 		}
 		sharedUIResources.clipboard.setContents(new Object[] {sb.toString()}, new Transfer[] {TextTransfer.getInstance()});
+	}
+
+	protected void onDelete() {
+		for (TableItem ti : table.getSelection())
+			sharedUIResources.appWindow.remove(ti.getText());
+		sharedUIResources.appWindow.refreshFiles();
 	}
 
 	protected void onOpenFolder() {

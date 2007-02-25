@@ -18,6 +18,15 @@ public final class DirData extends AbstractDataObject {
 		this.files= new HashMap<String, FileData>();
 	}
 
+	public void autoSetHasAudioContent() {
+		for (FileData fd : files.values())
+			if (fd.isAudio()) {
+				setHasAudioContent(true);
+				return;
+			}
+		setHasAudioContent(false);
+	}
+
 	@Override
 	protected String generateToString() {
 		return Helpers.inspectExcept(this, false, "files"); //$NON-NLS-1$

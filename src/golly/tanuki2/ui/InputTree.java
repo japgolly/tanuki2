@@ -48,8 +48,10 @@ public class InputTree implements IFileView {
 			public void keyPressed(KeyEvent e) {
 				if (e.stateMask == SWT.NONE) {
 					// DEL
-					if (e.character == 127)
+					if (e.character == 127) {
 						onDelete();
+						e.doit= false;
+					}
 				} else if (e.stateMask == SWT.CTRL) {
 					// CTRL +, CTRL -
 					if (e.character == '+' || e.character == '-') {

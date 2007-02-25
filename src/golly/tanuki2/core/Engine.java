@@ -66,8 +66,13 @@ public class Engine {
 	public void remove(String item) {
 		if (files.containsKey(item)) {
 			// Remove file
-			files.get(item).getDirData().files.remove(new File(item).getName());
+			DirData dd= files.get(item).getDirData();
+			dd.files.remove(new File(item).getName());
 			files.remove(item);
+			if (dd.files.isEmpty())
+				removeDir(dd.dir);
+			else
+				dd.autoSetHasAudioContent();
 		} else {
 			// Remove dir
 			if (dirs.containsKey(item))
@@ -104,13 +109,9 @@ public class Engine {
 				addFile(dd, f);
 
 		// Set hasAudioContent
-		dd.setHasAudioContent(false);
-		for (FileData fd : dd.files.values())
-			if (fd.isAudio()) {
-				dd.setHasAudioContent(true);
-				dirsNeedingTrackProprties.add(dd);
-				break;
-			}
+		dd.autoSetHasAudioContent();
+		if (dd.hasAudioContent())
+			dirsNeedingTrackProprties.add(dd);
 	}
 
 	/**
