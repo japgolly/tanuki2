@@ -53,8 +53,13 @@ public class FilenameParserTest extends TestHelper {
 	public void testParsingSingle() {
 		subtestParse(fp, "C:\\2\\Nevermore\\[2004] Enemies of Reality\\18 Who Decides.mp3", "Nevermore", 2004, "Enemies of Reality", "18", "Who Decides");
 		subtestParse(fp, "/home/golly/music/4. Done/Unexpect/2006 - In a Flesh Aquarium/06 - Megalomaniac Trees.mp3", "Unexpect", 2006, "In a Flesh Aquarium", "06", "Megalomaniac Trees");
+		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995. Destroy Erase Improve (320)\\07 - Inside What's Within Behind.mp3", "Meshuggah", 1995, "Destroy Erase Improve", "07", "Inside What's Within Behind");
 		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995 - Destroy Erase Improve (320)\\07 - Inside What's Within Behind.mp3", "Meshuggah", 1995, "Destroy Erase Improve", "07", "Inside What's Within Behind");
 		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995 - Destroy Erase Improve (192-320)\\07 - Inside What's Within Behind.mp3", "Meshuggah", 1995, "Destroy Erase Improve", "07", "Inside What's Within Behind");
+		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995 - Destroy Erase Improve (320)\\8. asd.mp3", "Meshuggah", 1995, "Destroy Erase Improve", "8", "asd");
+		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995 - Destroy Erase Improve (320)\\8. ...asd.mp3", "Meshuggah", 1995, "Destroy Erase Improve", "8", "...asd");
+		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995 - Destroy Erase Improve (320)\\8. asd....mp3", "Meshuggah", 1995, "Destroy Erase Improve", "8", "asd...");
+		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995 - Destroy Erase Improve (320)\\10 - Why... - Not_.mp3", "Meshuggah", 1995, "Destroy Erase Improve", "10", "Why... - Not_");
 		subtestParse(fp, "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-black_label_society-concrete_jungle.mp3", "Black_Label_Society", 2006, "Shot_To_Hell", "01", "concrete_jungle");
 		subtestParse(fp, "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-black_label_society-shot_to_hell-concrete_jungle.mp3", "Black_Label_Society", 2006, "Shot_To_Hell", "01", "concrete_jungle");
 		subtestParse(fp, "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-shot_to_hell-black_label_society-concrete_jungle.mp3", "Black_Label_Society", 2006, "Shot_To_Hell", "01", "concrete_jungle");
@@ -63,6 +68,7 @@ public class FilenameParserTest extends TestHelper {
 		subtestParse(fp, "X:\\music\\1. Fresh\\Hawaii - The Natives Are Restless (1985) 320 Kbps\\Hawaii - 01 - Call Of The Wild - The Natives Are Restless.mp3", "Hawaii", 1985, "The Natives Are Restless", "01", "Call Of The Wild");
 		subtestParse(fp, "/Jordan Rudess - 4NYC  (www.heavytorrents.org)\\02 - If I Could.mp3", "Jordan Rudess", null, "4NYC", "02", "If I Could");
 		subtestParse(fp, "/var/music/Virgin_Steele-Visions_of_Eden-2006/05_virgin_steele-bonedust.x", "Virgin_Steele", 2006, "Visions_of_Eden", "05", "bonedust");
+		subtestParse(fp, "/var/music/IN FLAMES Discografia (www.heavytorrents.org)/IN FLAMES Clayman/02 Pinball Map.mp3", "IN FLAMES", null, "Clayman", "02", "Pinball Map");
 	}
 
 	@Test

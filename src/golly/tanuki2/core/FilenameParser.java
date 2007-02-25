@@ -40,14 +40,15 @@ public class FilenameParser implements ITrackProprtyReader {
 		}
 
 		static {
-			trackPropertyPatterns.put(TrackPropertyType.ARTIST, "([^.\\\\/\\[\\](){}]+?)");
+			trackPropertyPatterns.put(TrackPropertyType.ARTIST, "([^\\\\/\\[\\](){}.]+?)");
 			trackPropertyPatterns.put(TrackPropertyType.YEAR, possiblyEnclosed("(\\d{4})"));
-			trackPropertyPatterns.put(TrackPropertyType.ALBUM, "([^.\\\\/]+?)");
+			trackPropertyPatterns.put(TrackPropertyType.ALBUM, "([^\\\\/]+?)");
 			trackPropertyPatterns.put(TrackPropertyType.TN, possiblyEnclosed("(\\d{1,3})"));
-			trackPropertyPatterns.put(TrackPropertyType.TRACK, "([^.\\\\/]+?)");
+			trackPropertyPatterns.put(TrackPropertyType.TRACK, "([^\\\\/]+?)");
 			macros.put("sep", " *- *");
 			macros.put("sepOrSpace", Helpers.regexOr(macros.get("sep"), " +"));
 			macros.put("sepSpaceOrUndsc", Helpers.regexOr(macros.get("sep"), "[ _]+"));
+			macros.put("sepSpaceUndscOrDot", Helpers.regexOr(macros.get("sep"), "[ _]+", "\\. *"));
 			macros.put("website", possiblyEnclosed("(?:[a-z0-9_-]+\\.)+(?:com|org|net)(?:\\.[a-z]{2,3})?"));
 			String bitrate= "(?:96|112|128|160|192|224|256|320|vbr(?: ?(?:hq|[0-9]+))?)" + "(?: ?(?:k|kbps))?";
 			macros.put("bitrate", possiblyEnclosed(bitrate + "(?:" + macros.get("sepOrSpace") + bitrate + ")?"));
@@ -125,9 +126,12 @@ public class FilenameParser implements ITrackProprtyReader {
 
 	@SuppressWarnings("nls")
 	public FilenameParser() {
-		String yearAndAlbum= "[:year:]<sepSpaceOrUndsc>[:album:]";
-		String tnAndTrackWithAA= "(?:<album_andor_artist><sepSpaceOrUndsc>)?[:tn:]<sepSpaceOrUndsc>(?:<album_andor_artist><sepSpaceOrUndsc>)?[:track:](?:<sepSpaceOrUndsc><album_andor_artist>)?";
-		patterns.add(new SmartPattern("[:artist:](?:<sep>Discogr.+?)?", yearAndAlbum, tnAndTrackWithAA));
+		String yearAndAlbumWithArtist= "(?:[:artist:]<sepSpaceOrUndsc>)?[:year:]<sepSpaceUndscOrDot>(?:[:artist:]<sepSpaceOrUndsc>)?[:album:](?:<sepSpaceOrUndsc>[:artist:])?";
+		String albumWithArtist= "(?:[:artist:]<sepSpaceOrUndsc>)?[:album:](?:<sepSpaceOrUndsc>[:artist:])?";
+		String tnAndTrackWithAA= "(?:<album_andor_artist><sepSpaceOrUndsc>)?[:tn:]<sepSpaceUndscOrDot>(?:<album_andor_artist><sepSpaceOrUndsc>)?[:track:](?:<sepSpaceOrUndsc><album_andor_artist>)?";
+		
+		patterns.add(new SmartPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", yearAndAlbumWithArtist, tnAndTrackWithAA));
+		patterns.add(new SmartPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", albumWithArtist, tnAndTrackWithAA));
 		patterns.add(new SmartPattern("[:artist:]<sepSpaceOrUndsc>[:year:]<sepSpaceOrUndsc>[:album:]", tnAndTrackWithAA));
 		patterns.add(new SmartPattern("[:artist:]<sep>[:album:](?:<sepSpaceOrUndsc>[:year:])?", tnAndTrackWithAA));
 	}
