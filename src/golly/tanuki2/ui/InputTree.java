@@ -74,7 +74,7 @@ public class InputTree implements IFileView {
 	public void refreshFiles(HashMap<String, DirData> dirs) {
 		this.dirs= dirs;
 		tree.setRedraw(false);
-		tree.clearAll(true);
+		tree.removeAll();
 
 		// Create a virtual representation of the tree
 		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree= new HashMap<String, OptimisibleDirTreeNode>();

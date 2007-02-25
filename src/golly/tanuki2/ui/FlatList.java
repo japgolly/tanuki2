@@ -109,7 +109,7 @@ public class FlatList implements IFileView {
 
 	public void refreshFiles(HashMap<String, DirData> dirs) {
 		table.setRedraw(false);
-		table.clearAll();
+		table.removeAll();
 
 		for (String dir : Helpers.sort(dirs.keySet())) {
 			final String dir2= dir + File.separator;
