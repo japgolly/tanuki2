@@ -135,6 +135,7 @@ public class InputTree implements IFileView {
 	protected void onEdit() {
 		if (tree.getSelectionCount() != 1)
 			return;
+		
 		final TreeItem ti= tree.getSelection()[0];
 		DirData dd= null;
 		// If selected item is a file
@@ -148,8 +149,12 @@ public class InputTree implements IFileView {
 					break;
 				}
 
+		// Show album editor
 		if (dd != null) {
-			new AlbumEditor(tree.getShell(), dd).show();
+			AlbumEditor ae= new AlbumEditor(tree.getShell(), dd);
+			ae.show();
+			if (ae.didUpdate())
+				sharedUIResources.appWindow.refreshFiles();
 		}
 	}
 
