@@ -74,11 +74,11 @@ public class UIHelpers {
 		button.setText("   " + I18n.l(i18nStringKey) + "   "); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	public static void showGmtError(Shell shell, String i18nStringKey, Object... args) {
+	public static void showTanukiError(Shell shell, String i18nStringKey, Object... args) {
 		showMessageBox(shell, SWT.ICON_ERROR, I18n.l("general_error_title"), I18n.l(i18nStringKey, args)); //$NON-NLS-1$
 	}
 
-	public static void showGmtWarning(Shell shell, String i18nStringKey, Object... args) {
+	public static void showTanukiWarning(Shell shell, String i18nStringKey, Object... args) {
 		showMessageBox(shell, SWT.ICON_WARNING, I18n.l("general_error_title"), I18n.l(i18nStringKey, args)); //$NON-NLS-1$
 	}
 
