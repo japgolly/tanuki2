@@ -1,22 +1,25 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.core.Engine;
-import golly.tanuki2.data.AlbumData;
-import golly.tanuki2.data.DirData;
-import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.File;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
@@ -34,17 +37,19 @@ public class AppWindow {
 	private final static int SPACING= 4;
 
 	private final Display display;
+	private final Engine engine;
+	private final ExpandBar expandBar;
+	private final FileTransfer fileTransfer;
+	private final IFileView inputTree, flatList;
 	private final SharedUIResources sharedUIResources;
 	private final Shell shell;
-	private final Engine engine;
 	private final TabFolder tabFolder;
-	private final IFileView inputTree, flatList;
-	private final ExpandBar expandBar;
 
 	public AppWindow(Display display_, Engine engine_) {
 		display= display_;
 		engine= engine_;
 		sharedUIResources= new SharedUIResources(display);
+		fileTransfer= FileTransfer.getInstance();
 
 		// Create shell
 		shell= new Shell();
@@ -64,11 +69,13 @@ public class AppWindow {
 		// Create tab: input tree
 		TabItem ti= new TabItem(tabFolder, SWT.NONE);
 		inputTree= new InputTree(tabFolder, sharedUIResources);
+		makeDropTarget(inputTree.getWidget());
 		ti.setControl(inputTree.getWidget());
 		ti.setText(I18n.l("main_tab_inputTree")); //$NON-NLS-1$
 		// Create tab: flat list
 		ti= new TabItem(tabFolder, SWT.NONE);
 		flatList= new FlatList(tabFolder, sharedUIResources);
+		makeDropTarget(flatList.getWidget());
 		ti.setControl(flatList.getWidget());
 		ti.setText(I18n.l("main_tab_flatList")); //$NON-NLS-1$
 
@@ -116,16 +123,51 @@ public class AppWindow {
 		engine.addFolder("X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]");
 		engine.addFolder("X:\\music\\4. Done\\Unexpect");
 		engine.addFolder("C:\\2\\Nevermore\\2004 Enemies of Reality");
-		inputTree.refreshFiles(engine.dirs);
-		flatList.refreshFiles(engine.dirs);
+		refreshFiles();
 		tabFolder.setSelection(0);
 	}
 
-	public void show() {
-		shell.open();
-		while (!shell.isDisposed())
-			if (!display.readAndDispatch())
-				display.sleep();
+	private void makeDropTarget(Control widget) {
+		DropTarget target= new DropTarget(widget, DND.DROP_COPY | DND.DROP_DEFAULT);
+		target.setTransfer(new Transfer[] {fileTransfer});
+		target.addDropListener(new DropTargetAdapter() {
+			public void dragEnter(DropTargetEvent event) {
+				dragOperationChanged(event);
+			}
+
+			public void dragOperationChanged(DropTargetEvent event) {
+				if (event.detail != DND.DROP_DEFAULT)
+					return;
+				if ((event.operations & DND.DROP_COPY) != 0)
+					event.detail= DND.DROP_COPY;
+				else
+					event.detail= DND.DROP_NONE;
+			}
+
+			public void drop(DropTargetEvent event) {
+				if (fileTransfer.isSupportedType(event.currentDataType)) {
+					String[] files= (String[]) event.data;
+					boolean added= false;
+					for (String f : files)
+						if (new File(f).isDirectory()) {
+							engine.addFolder(f);
+							added= true;
+						} else
+							; // TODO Handle adding on non-directories
+					if (added)
+						refreshFiles();
+				}
+			}
+		});
+	}
+
+	private void refreshFiles() {
+		display.asyncExec(new Runnable() {
+			public void run() {
+				inputTree.refreshFiles(engine.dirs);
+				flatList.refreshFiles(engine.dirs);
+			}
+		});
 	}
 
 	protected void resizeWidgets() {
@@ -139,5 +181,12 @@ public class AppWindow {
 		expandBar.setBounds(ca.x, ca.y + ca.height - expandBarSize, ca.width, expandBarSize);
 		// Resize input view
 		tabFolder.setBounds(ca.x, ca.y, ca.width, ca.height - expandBarSize - SPACING);
+	}
+
+	public void show() {
+		shell.open();
+		while (!shell.isDisposed())
+			if (!display.readAndDispatch())
+				display.sleep();
 	}
 }
