@@ -41,6 +41,7 @@ public class AppWindow {
 	private final ExpandBar expandBar;
 	private final FileTransfer fileTransfer;
 	private final IFileView inputTree, flatList;
+	private final IFileView[] fileViews;
 	private final SharedUIResources sharedUIResources;
 	private final Shell shell;
 	private final TabFolder tabFolder;
@@ -48,7 +49,7 @@ public class AppWindow {
 	public AppWindow(Display display_, Engine engine_) {
 		display= display_;
 		engine= engine_;
-		sharedUIResources= new SharedUIResources(display);
+		sharedUIResources= new SharedUIResources(display, this);
 		fileTransfer= FileTransfer.getInstance();
 
 		// Create shell
@@ -66,18 +67,18 @@ public class AppWindow {
 
 		// Create tab folder
 		tabFolder= new TabFolder(shell, SWT.NONE);
+		makeDropTarget(tabFolder);
 		// Create tab: input tree
 		TabItem ti= new TabItem(tabFolder, SWT.NONE);
 		inputTree= new InputTree(tabFolder, sharedUIResources);
-		makeDropTarget(inputTree.getWidget());
 		ti.setControl(inputTree.getWidget());
 		ti.setText(I18n.l("main_tab_inputTree")); //$NON-NLS-1$
 		// Create tab: flat list
 		ti= new TabItem(tabFolder, SWT.NONE);
 		flatList= new FlatList(tabFolder, sharedUIResources);
-		makeDropTarget(flatList.getWidget());
 		ti.setControl(flatList.getWidget());
 		ti.setText(I18n.l("main_tab_flatList")); //$NON-NLS-1$
+		fileViews= new IFileView[] {inputTree, flatList};
 
 		// Create expandBar
 		expandBar= new ExpandBar(shell, SWT.NONE);
@@ -161,11 +162,15 @@ public class AppWindow {
 		});
 	}
 
-	private void refreshFiles() {
+	public void refreshFiles() {
 		display.asyncExec(new Runnable() {
 			public void run() {
-				inputTree.refreshFiles(engine.dirs);
-				flatList.refreshFiles(engine.dirs);
+				for (IFileView fv : fileViews)
+					fv.getWidget().setRedraw(false);
+				for (IFileView fv : fileViews)
+					fv.refreshFiles(engine.dirs);
+				for (IFileView fv : fileViews)
+					fv.getWidget().setRedraw(true);
 			}
 		});
 	}
@@ -188,5 +193,9 @@ public class AppWindow {
 		while (!shell.isDisposed())
 			if (!display.readAndDispatch())
 				display.sleep();
+	}
+
+	public void remove(String item) {
+		engine.remove(item);
 	}
 }

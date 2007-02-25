@@ -46,13 +46,19 @@ public class InputTree implements IFileView {
 
 		tree.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
-				if (e.stateMask == SWT.CTRL)
+				if (e.stateMask == SWT.NONE) {
+					// DEL
+					if (e.character == 127)
+						onDelete();
+				} else if (e.stateMask == SWT.CTRL) {
+					// CTRL +, CTRL -
 					if (e.character == '+' || e.character == '-') {
 						tree.setRedraw(false);
 						setExpandedAll(e.character == '+');
 						tree.setRedraw(true);
 						e.doit= false;
 					}
+				}
 			}
 		});
 		tree.addMouseListener(new MouseAdapter() {
@@ -97,6 +103,7 @@ public class InputTree implements IFileView {
 		// Populate the tree widget
 		for (String dir : Helpers.sort(optimisedDirTree.keySet())) {
 			TreeItem ti= new TreeItem(tree, SWT.NONE);
+			ti.setData(dir);
 			ti.setText(dir);
 			ti.setImage(TanukiImage.FOLDER.get());
 			addChildren(ti, optimisedDirTree.get(dir), dir);
@@ -108,6 +115,20 @@ public class InputTree implements IFileView {
 	// =============================================================================================== //
 	// = Events
 	// =============================================================================================== //
+
+	protected void onDelete() {
+		for (TreeItem ti : tree.getSelection())
+			if (ti.getData() instanceof FileData) {
+				// Delete file
+				final FileData fd= (FileData) ti.getData();
+				sharedUIResources.appWindow.remove(Helpers.addPathElement(fd.getDirData().dir, ti.getText()));
+			} else {
+				// Delete dir
+				final String dir= (String) ti.getData();
+				sharedUIResources.appWindow.remove(dir);
+			}
+		sharedUIResources.appWindow.refreshFiles();
+	}
 
 	protected void onEdit() {
 		if (tree.getSelectionCount() != 1)
@@ -139,10 +160,12 @@ public class InputTree implements IFileView {
 		// Add directories
 		if (children != null)
 			for (String dir : Helpers.sort(children.keySet())) {
+				final String fullDir= Helpers.addPathElement(path, dir);
 				TreeItem ti= new TreeItem(parent, SWT.NONE);
+				ti.setData(fullDir);
 				ti.setImage(TanukiImage.FOLDER.get());
 				ti.setText(0, dir);
-				addChildren(ti, children.get(dir), Helpers.addPathElement(path, dir));
+				addChildren(ti, children.get(dir), fullDir);
 			}
 
 		// Add files

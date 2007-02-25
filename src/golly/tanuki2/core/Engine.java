@@ -60,6 +60,28 @@ public class Engine {
 		return rankedArtists;
 	}
 
+	/**
+	 * Removes either a file or a directory (and its decendants).
+	 */
+	public void remove(String item) {
+		if (files.containsKey(item)) {
+			// Remove file
+			files.get(item).getDirData().files.remove(new File(item).getName());
+			files.remove(item);
+		} else {
+			// Remove dir
+			if (dirs.containsKey(item))
+				removeDir(item);
+			final Pattern p= Pattern.compile("^" + Pattern.quote(item) + "[\\\\/].+$"); //$NON-NLS-1$ //$NON-NLS-2$
+			final Set<String> matchingDirs= new HashSet<String>();
+			for (String dir : dirs.keySet())
+				if (p.matcher(dir).matches())
+					matchingDirs.add(dir);
+			for (String dir : matchingDirs)
+				removeDir(dir);
+		}
+	}
+
 	// =============================================================================================== //
 	// = Internal
 	// =============================================================================================== //
@@ -137,5 +159,12 @@ public class Engine {
 
 		// Finished. Clean up.
 		dirsNeedingTrackProprties.clear();
+	}
+
+	private void removeDir(String dir) {
+		DirData dd= dirs.get(dir);
+		for (String file : dd.files.keySet())
+			files.remove(Helpers.addPathElement(dir, file));
+		dirs.remove(dir);
 	}
 }
