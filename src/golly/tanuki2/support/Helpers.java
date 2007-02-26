@@ -51,8 +51,10 @@ public final class Helpers {
 		int i= fieldNames.length;
 		final Field[] fields= new Field[i];
 		try {
-			while (i-- > 0)
-				fields[i]= cls.getField(fieldNames[i]);
+			while (i-- > 0) {
+				fields[i]= cls.getDeclaredField(fieldNames[i]);
+				fields[i].setAccessible(true);
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -330,7 +332,7 @@ public final class Helpers {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, Map> optimiseDirTree(final Map<String, OptimisibleDirTreeNode> tree) {
-		final Map<String, Map> root= new HashMap<String, Map>(); 
+		final Map<String, Map> root= new HashMap<String, Map>();
 		Map<String, Map> r= root;
 		optimiseDirTree("", r, tree); //$NON-NLS-1$
 		if (r.size() == 1 && r.keySet().iterator().next().length() == 0) {
