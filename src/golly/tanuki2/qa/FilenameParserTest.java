@@ -168,6 +168,21 @@ public class FilenameParserTest extends TestHelper {
 		assertTrackPropertiesFound(fn1, makeTrackProperties("IN FLAMES", null, "Trigger", "01", "Trigger [Single Edit]"), r.get(fn1));
 		assertTrackPropertiesFound(fn2, makeTrackProperties("IN FLAMES", null, "Trigger", "02", "Watch Them Feed"), r.get(fn2));
 	}
+	
+	@Test
+	public void testParsingMulti_doesntRemoveWrongAlbumFromFilename() {
+		DirData dd= new DirData("/var/music/IN FLAMES Discografia (www.heavytorrents.org)/IN FLAMES Trigger");
+		final String fn1= "Trigger - 01 Trigger [Single Edit].mp3";
+		final String fn2= "Trigger - 02 Watch Them Feed.mp3";
+		dd.files.put(fn1, makeFileData(dd, true));
+		dd.files.put(fn2, makeFileData(dd, true));
+		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		assertEquals(2, r.size());
+		assertTrue(r.containsKey(fn1));
+		assertTrue(r.containsKey(fn2));
+		assertTrackPropertiesFound(fn1, makeTrackProperties("IN FLAMES", null, "Trigger", "01", "Trigger [Single Edit]"), r.get(fn1));
+		assertTrackPropertiesFound(fn2, makeTrackProperties("IN FLAMES", null, "Trigger", "02", "Watch Them Feed"), r.get(fn2));
+	}
 
 	// =============================================================================================== //
 	// = private

@@ -242,25 +242,76 @@ public class FilenameParser implements ITrackProprtyReader {
 		if (value != null) {
 			final String pre= SmartPattern.macros.get("sepSpaceUndscOrDot");
 			final String post= SmartPattern.macros.get("sepSpaceUndscOrDot");
-			final Pattern patValue= Pattern.compile("^(?:(.*)" + pre + ")?" + makeRegexWithLenientSpacing(value) + "(?:" + post + "(.*))?(\\.[^.]+)$", Pattern.CASE_INSENSITIVE);
-			boolean failed= false;
-			// Check if value found in all files
-			for (String processedFilename : processedFilenameMap.values())
-				if (!patValue.matcher(processedFilename).matches()) {
-					failed= true;
-					break;
+			final Pattern patValue= Pattern.compile("(?:" + pre + ")?" + makeRegexWithLenientSpacing(value) + "(?:" + post + ")?", Pattern.CASE_INSENSITIVE);
+			Matcher m;
+			List<Integer> mins= new ArrayList<Integer>();
+			List<Integer> maxs= new ArrayList<Integer>();
+
+			// Find value in files and store ranges of occurance substrings
+			for (String processedFilename : processedFilenameMap.values()) {
+				m= patValue.matcher(processedFilename);
+				while (m.find()) {
+					final int a= m.start(), b= m.end();
+					boolean added= false;
+					int occurance= mins.size();
+					while (occurance-- > 0) {
+						if (b > mins.get(occurance) && a < maxs.get(occurance)) {
+							added= true;
+							if (a < mins.get(occurance))
+								mins.set(occurance, a);
+							if (b > maxs.get(occurance))
+								maxs.set(occurance, b);
+							break;
+						}
+					}
+					if (!added) {
+						mins.add(a);
+						maxs.add(b);
+					}
 				}
+			}
+			// Check each occurance range and delete unless there is an occurance in range in every filename
+			int occurance= mins.size();
+			while (occurance-- > 0) {
+				boolean foundInAll= true;
+				for (String processedFilename : processedFilenameMap.values()) {
+					boolean foundInFile= false;
+					m= patValue.matcher(processedFilename);
+					while (m.find())
+						if (m.start() >= mins.get(occurance) && m.end() <= maxs.get(occurance)) {
+							foundInFile= true;
+							break;
+						}
+					if (!foundInFile) {
+						foundInAll= false;
+						break;
+					}
+				} // for file
+				if (!foundInAll) {
+					mins.remove(occurance);
+					maxs.remove(occurance);
+				}
+			}
 			// If found, remove it from all files
-			if (!failed)
+			occurance= mins.size();
+			while (occurance-- > 0) {
+				final int min= mins.get(occurance), max= maxs.get(occurance);
 				for (String shortFilename : processedFilenameMap.keySet()) {
-					Matcher m;
 					String f= processedFilenameMap.get(shortFilename);
-					while ((m= patValue.matcher(f)).matches())
-						f= m.replaceFirst("$1 - $2$3");
+					m= patValue.matcher(f);
+					while (m.find()) {
+						final int a= m.start(), b= m.end();
+						if (a >= min && b <= max) {
+							f= f.substring(0, a) + " - " + f.substring(b);
+							break;
+						}
+					}
+
 					f= patRemoveValueFromAllFiles_crapAtBeginning.matcher(f).replaceAll("");
 					f= patRemoveValueFromAllFiles_crapAtEnd.matcher(f).replaceAll("$1");
 					processedFilenameMap.put(shortFilename, f);
 				}
+			}
 		}
 	}
 }
