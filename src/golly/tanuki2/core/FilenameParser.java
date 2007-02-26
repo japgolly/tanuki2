@@ -222,6 +222,18 @@ public class FilenameParser implements ITrackProprtyReader {
 		}
 	}
 
+	private static final String strMakeRegexWithLenientSpacing_sep= "[" + Helpers.whitespaceChars + "_\\.\\-]"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern patMakeRegexWithLenientSpacing_sep= Pattern.compile(strMakeRegexWithLenientSpacing_sep + "+"); //$NON-NLS-1$
+
+	@SuppressWarnings("nls")
+	private String makeRegexWithLenientSpacing(String value) {
+		String[] valueWords= patMakeRegexWithLenientSpacing_sep.split(value);
+		int i= valueWords.length;
+		while (i-- > 0)
+			valueWords[i]= Pattern.quote(valueWords[i]);
+		return Helpers.join(valueWords, strMakeRegexWithLenientSpacing_sep + "*");
+	}
+
 	private static final Pattern patRemoveValueFromAllFiles_crapAtBeginning= Pattern.compile("^ - "); //$NON-NLS-1$
 	private static final Pattern patRemoveValueFromAllFiles_crapAtEnd= Pattern.compile(" - (\\.[^.]+)$"); //$NON-NLS-1$
 
@@ -230,7 +242,7 @@ public class FilenameParser implements ITrackProprtyReader {
 		if (value != null) {
 			final String pre= SmartPattern.macros.get("sepSpaceUndscOrDot");
 			final String post= SmartPattern.macros.get("sepSpaceUndscOrDot");
-			final Pattern patValue= Pattern.compile("^(?:(.*)" + pre + ")?" + Pattern.quote(value) + "(?:" + post + "(.*))?(\\.[^.]+)$", Pattern.CASE_INSENSITIVE);
+			final Pattern patValue= Pattern.compile("^(?:(.*)" + pre + ")?" + makeRegexWithLenientSpacing(value) + "(?:" + post + "(.*))?(\\.[^.]+)$", Pattern.CASE_INSENSITIVE);
 			boolean failed= false;
 			// Check if value found in all files
 			for (String processedFilename : processedFilenameMap.values())

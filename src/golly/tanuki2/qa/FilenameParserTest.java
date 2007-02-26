@@ -122,9 +122,9 @@ public class FilenameParserTest extends TestHelper {
 		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-black_label_society-shot_to_hell-concrete_jungle.mp3"
 		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-shot_to_hell-black_label_society-concrete_jungle.mp3"
 		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-shot_to_hell-concrete_jungle.mp3"
-		// etc
+		// etc...
 		String[] insertValues= new String[] {"", "black_label_society", "black_label_society-shot_to_hell",
-				"shot_to_hell"};
+				"shot_to_hell", "BLACK LABEL  SOCIETY", "Black-Label-Society_SHOT-TO-HELL"};
 		for (String pre : insertValues) {
 			if (pre.length() > 0)
 				pre= pre + "-";
