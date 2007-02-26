@@ -63,44 +63,6 @@ class TrackPropertySelectors {
 	}
 
 	// =============================================================================================== //
-	// = RankArtist
-	// =============================================================================================== //
-
-	/**
-	 * If there is one result whose artist has a higher rank than any other results, then just use it.
-	 */
-	public static class RankArtist extends AbstractTrackPropertySelector {
-		final RankedObjectCollection<String> rankedArtists;
-
-		public RankArtist(RankedObjectCollection<String> rankedArtists) {
-			this.rankedArtists= rankedArtists;
-		}
-
-		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
-			for (String filename : trackPropertyMap.keySet()) {
-				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
-				if (resultArray.size() > 1) {
-					final RankedObjectCollection<TrackProperties> rankedTPs= new RankedObjectCollection<TrackProperties>();
-					for (TrackProperties tp : resultArray) {
-						double rank= 0;
-						String artist= tp.get(TrackPropertyType.ARTIST);
-						if (artist != null) {
-							artist= Helpers.normalizeText(artist);
-							if (rankedArtists.contains(artist))
-								rank= rankedArtists.getRank(artist);
-						}
-						rankedTPs.add(tp, rank);
-					}
-					if (rankedTPs.hasSingleWinner()) {
-						assignTrackPropertiesToFile(ddFiles.get(filename), rankedTPs.getWinner(), sharedAlbumData);
-						successfulFiles.add(filename);
-					}
-				}
-			}
-		}
-	}
-
-	// =============================================================================================== //
 	// = RankEachAlbumPropertyThenRankResults
 	// =============================================================================================== //
 
@@ -109,15 +71,19 @@ class TrackPropertySelectors {
 	 */
 	public static class RankEachAlbumPropertyThenRankResults extends AbstractTrackPropertySelector {
 
+		private final RankedObjectCollection<String> rankedConfirmedArtists;
+		private final RankedObjectCollection<String> rankedUnconfirmedArtists;
 		private final boolean firstPass;
 
-		public RankEachAlbumPropertyThenRankResults(boolean firstPass) {
+		public RankEachAlbumPropertyThenRankResults(RankedObjectCollection<String> rankedConfirmedArtists, RankedObjectCollection<String> rankedUnconfirmedArtists, boolean firstPass) {
+			this.rankedConfirmedArtists= rankedConfirmedArtists;
+			this.rankedUnconfirmedArtists= rankedUnconfirmedArtists;
 			this.firstPass= firstPass;
 		}
 
 		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
-			// STEP 1: Create individual, ranked album properties
 			final Map<TrackPropertyType, RankedObjectCollection<String>> rankedIndividualAlbumProperties= new HashMap<TrackPropertyType, RankedObjectCollection<String>>();
+			// STEP 1: Create individual, ranked album properties
 			for (TrackPropertyType propType : TrackPropertyType.albumTypes) {
 				final RankedObjectCollection<String> roc= new RankedObjectCollection<String>();
 				rankedIndividualAlbumProperties.put(propType, roc);
@@ -126,11 +92,21 @@ class TrackPropertySelectors {
 						String x= tp.get(propType);
 						if (x != null) {
 							x= Helpers.normalizeText(x);
-							roc.increaseRank(x, 1);
+							roc.increaseRank(x, 0.01);
 						}
 					}
 			}
-			// STEP 2: Rank each tp
+			// STEP 2: Also check artists in other dirs (including "undecided"s)
+			final RankedObjectCollection<String> artists= rankedIndividualAlbumProperties.get(TrackPropertyType.ARTIST);
+			for (RankedObject<String> a : artists) {
+				final String na= Helpers.normalizeText(a.data);
+				if (rankedConfirmedArtists.contains(na))
+					artists.increaseRank(na, 100 * rankedConfirmedArtists.getRank(na));
+				if (rankedUnconfirmedArtists.contains(a.data))
+					artists.increaseRank(na, rankedUnconfirmedArtists.getRank(na));
+			}
+
+			// STEP 3: Rank each tp
 			for (String filename : trackPropertyMap.keySet()) {
 				final RankedObjectCollection<TrackProperties> rankedTPs= new RankedObjectCollection<TrackProperties>();
 				for (TrackProperties tp : trackPropertyMap.get(filename)) {
@@ -157,7 +133,7 @@ class TrackPropertySelectors {
 					// and increase the rank of all album properties found in the winner
 					for (TrackPropertyType propType : TrackPropertyType.albumTypes)
 						if (winner.get(propType) != null)
-							rankedIndividualAlbumProperties.get(propType).increaseRank(winner.get(propType), 0.1);
+							rankedIndividualAlbumProperties.get(propType).increaseRank(winner.get(propType), 0.0001);
 				}
 			}
 		}

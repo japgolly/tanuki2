@@ -4,6 +4,7 @@ import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 
@@ -154,12 +155,21 @@ public class Engine {
 		TrackPropertySelectors.Runner trackPropertySelector= new TrackPropertySelectors.Runner(unassignedData);
 		trackPropertySelector.run(new TrackPropertySelectors.AssignSingleRows());
 		trackPropertySelector.run(new TrackPropertySelectors.CompareAlbumData());
-		trackPropertySelector.run(new TrackPropertySelectors.RankArtist(getRankedArtists(true)));
-		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(true));
-		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(false));
+		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(getRankedArtists(true), rankUnconfirmedArtists(unassignedData), true));
+		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(getRankedArtists(true), rankUnconfirmedArtists(unassignedData), false));
 
 		// Finished. Clean up.
 		dirsNeedingTrackProprties.clear();
+	}
+
+	private static RankedObjectCollection<String> rankUnconfirmedArtists(Map<DirData, Map<String, List<TrackProperties>>> unassignedData) {
+		final RankedObjectCollection<String> x= new RankedObjectCollection<String>();
+		for (Map<String, List<TrackProperties>> map : unassignedData.values())
+			for (List<TrackProperties> props : map.values())
+				for (TrackProperties tp : props)
+					if (tp.get(TrackPropertyType.ARTIST) != null)
+						x.increaseRank(Helpers.normalizeText(tp.get(TrackPropertyType.ARTIST)), 1);
+		return x;
 	}
 
 	private void removeDir(String dir) {

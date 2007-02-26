@@ -154,6 +154,33 @@ public class EngineTest extends TestHelper {
 	}
 
 	@Test
+	public void wholeDirHasMultipleResults_checksArtistAgainstOtherPendingDirs() {
+		TrackProperties a1, a2, a3, b1, b2, b3;
+		mtpr.addMockResult("A/a1", makeTrackProperties("Bullshit", 2005, "B", "1", "B One @bad"));
+		mtpr.addMockResult("A/a2", makeTrackProperties("Bullshit", 2005, "B", "2", "B Two @bad"));
+		mtpr.addMockResult("A/a3", makeTrackProperties("Bullshit", 2005, "B", "3", "B Three @bad"));
+		mtpr.addMockResult("B/b1", makeTrackProperties("Crap", 1997, "B", "1", "B One @bad"));
+		mtpr.addMockResult("B/b2", makeTrackProperties("Crap", 1997, "B", "2", "B Two @bad"));
+		mtpr.addMockResult("B/b3", makeTrackProperties("Crap", 1997, "B", "3", "B Three @bad"));
+		mtpr.addMockResult("A/a1", a1= makeTrackProperties("METALLICA", 2006, "A", "1", "A One"));
+		mtpr.addMockResult("A/a2", a2= makeTrackProperties("METALLICA", 2006, "A", "2", "A Two"));
+		mtpr.addMockResult("A/a3", a3= makeTrackProperties("METALLICA", 2006, "A", "3", "A Three"));
+		mtpr.addMockResult("B/b1", b1= makeTrackProperties("Metallica", 1997, "B", "1", "B One @good"));
+		mtpr.addMockResult("B/b2", b2= makeTrackProperties("Metallica", 1997, "B", "2", "B Two @good"));
+		mtpr.addMockResult("B/b3", b3= makeTrackProperties("Metallica", 1997, "B", "3", "B Three @good"));
+		engine.readTrackProprties2();
+		assertEngineTrackProperties("A/a1", a1);
+		assertEngineTrackProperties("A/a2", a2);
+		assertEngineTrackProperties("A/a3", a3);
+		assertEngineTrackProperties("B/b1", b1);
+		assertEngineTrackProperties("B/b2", b2);
+		assertEngineTrackProperties("B/b3", b3);
+		assertEngineTrackProperties("C/c1", noprop);
+		assertEngineTrackProperties("C/c2", noprop);
+		assertEngineTrackProperties("C/c3", noprop);
+	}
+
+	@Test
 	public void wholeDirHasMultipleResults_checksAlbumDataOfOtherTracks() {
 		// || ARTIST       | RANK || YEAR | RANK || ALBUM     | RANK ||
 		// ||--------------|------||------|------||-----------|------||
