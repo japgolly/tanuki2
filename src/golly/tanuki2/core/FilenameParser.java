@@ -123,17 +123,19 @@ public class FilenameParser implements ITrackProprtyReader {
 	private static final Pattern patRemoveExt= Pattern.compile("\\.[^.]+$"); //$NON-NLS-1$
 
 	private final Set<SmartPattern> patterns= new HashSet<SmartPattern>();
+	private final Set<SmartPattern> dirPatterns= new HashSet<SmartPattern>();
 
 	@SuppressWarnings("nls")
 	public FilenameParser() {
+		// No need to check for duplicate artist/album values in the file basename because it is removed automagically in readMultipleTrackProperties()
+		String tnAndTrack= "[:tn:]<sepSpaceUndscOrDot>[:track:]";
 		String yearAndAlbumWithArtist= "(?:[:artist:]<sepSpaceOrUndsc>)?[:year:]<sepSpaceUndscOrDot>(?:[:artist:]<sepSpaceOrUndsc>)?[:album:](?:<sepSpaceOrUndsc>[:artist:])?";
 		String albumWithArtist= "(?:[:artist:]<sepSpaceOrUndsc>)?[:album:](?:<sepSpaceOrUndsc>[:artist:])?";
-		String tnAndTrackWithAA= "(?:<album_andor_artist><sepSpaceOrUndsc>)?[:tn:]<sepSpaceUndscOrDot>(?:<album_andor_artist><sepSpaceOrUndsc>)?[:track:](?:<sepSpaceOrUndsc><album_andor_artist>)?";
-		
-		patterns.add(new SmartPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", yearAndAlbumWithArtist, tnAndTrackWithAA));
-		patterns.add(new SmartPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", albumWithArtist, tnAndTrackWithAA));
-		patterns.add(new SmartPattern("[:artist:]<sepSpaceOrUndsc>[:year:]<sepSpaceOrUndsc>[:album:]", tnAndTrackWithAA));
-		patterns.add(new SmartPattern("[:artist:]<sep>[:album:](?:<sepSpaceOrUndsc>[:year:])?", tnAndTrackWithAA));
+
+		addPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", yearAndAlbumWithArtist, tnAndTrack);
+		addPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", albumWithArtist, tnAndTrack);
+		addPattern("[:artist:]<sepSpaceOrUndsc>[:year:]<sepSpaceOrUndsc>[:album:]", tnAndTrack);
+		addPattern("[:artist:]<sep>[:album:](?:<sepSpaceOrUndsc>[:year:])?", tnAndTrack);
 	}
 
 	public Map<String, List<TrackProperties>> readMultipleTrackProperties(final DirData dd) {
@@ -150,7 +152,7 @@ public class FilenameParser implements ITrackProprtyReader {
 				processedFilenameMap.put(shortFilename, shortFilename);
 			}
 
-		// If all audio files end in the same string, remove it and try to remove it from the dir too
+		// PRE-PROCESS DIR: If all audio files end in the same string, remove it and try to remove it from the dir too
 		if (processedFilenameMap.size() > 1) {
 			Matcher m= patCrapSuffix.matcher(allFilenames);
 			if (m.matches()) {
@@ -160,6 +162,24 @@ public class FilenameParser implements ITrackProprtyReader {
 				processedDir= Pattern.compile(Pattern.quote(m.group(1)) + "$", Pattern.CASE_INSENSITIVE).matcher(processedDir).replaceFirst(""); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
+
+		// PRE-PROCESS DIR: Remove artist/album from filename if found in all files
+		if (processedFilenameMap.size() > 1)
+			for (SmartPattern p : dirPatterns) {
+				boolean failed= false;
+				Matcher m= null;
+				for (String processedFilename : processedFilenameMap.values()) {
+					String filename= Helpers.addPathElement(processedDir, processedFilename);
+					if (!(m= p.pat.matcher(filename)).matches()) {
+						failed= true;
+						break;
+					}
+				}
+				if (!failed) {
+					removeValueFromAllFiles(processedFilenameMap, m.group(p.indexes.get(TrackPropertyType.ALBUM)));
+					removeValueFromAllFiles(processedFilenameMap, m.group(p.indexes.get(TrackPropertyType.ARTIST)));
+				}
+			}
 
 		// Read track properties for each file
 		for (String shortFilename : processedFilenameMap.keySet())
@@ -182,5 +202,53 @@ public class FilenameParser implements ITrackProprtyReader {
 				r.add(tp);
 			}
 		return r;
+	}
+
+	// ======================================================= //
+	// = FilenameParser: Internal
+	// ======================================================= //
+
+	@SuppressWarnings("nls")
+	private void addPattern(String... patternStrings) {
+		patterns.add(new SmartPattern(patternStrings));
+		if (patternStrings.length > 1) {
+			// Make sure the filename pattern doesn't include an artist or album tag
+			final String filenamePattern= patternStrings[patternStrings.length - 1];
+			if (!filenamePattern.contains("[:artist:]") && !filenamePattern.contains("[:album:]")) {
+				// Replace the filename pattern and add
+				patternStrings[patternStrings.length - 1]= "[^\\\\/]+"; //$NON-NLS-1$
+				dirPatterns.add(new SmartPattern(patternStrings));
+			}
+		}
+	}
+
+	private static final Pattern patRemoveValueFromAllFiles_crapAtBeginning= Pattern.compile("^ - "); //$NON-NLS-1$
+	private static final Pattern patRemoveValueFromAllFiles_crapAtEnd= Pattern.compile(" - (\\.[^.]+)$"); //$NON-NLS-1$
+
+	@SuppressWarnings("nls")
+	private void removeValueFromAllFiles(Map<String, String> processedFilenameMap, String value) {
+		if (value != null) {
+			final String pre= SmartPattern.macros.get("sepSpaceUndscOrDot");
+			final String post= SmartPattern.macros.get("sepSpaceUndscOrDot");
+			final Pattern patValue= Pattern.compile("^(?:(.*)" + pre + ")?" + Pattern.quote(value) + "(?:" + post + "(.*))?(\\.[^.]+)$", Pattern.CASE_INSENSITIVE);
+			boolean failed= false;
+			// Check if value found in all files
+			for (String processedFilename : processedFilenameMap.values())
+				if (!patValue.matcher(processedFilename).matches()) {
+					failed= true;
+					break;
+				}
+			// If found, remove it from all files
+			if (!failed)
+				for (String shortFilename : processedFilenameMap.keySet()) {
+					Matcher m;
+					String f= processedFilenameMap.get(shortFilename);
+					while ((m= patValue.matcher(f)).matches())
+						f= m.replaceFirst("$1 - $2$3");
+					f= patRemoveValueFromAllFiles_crapAtBeginning.matcher(f).replaceAll("");
+					f= patRemoveValueFromAllFiles_crapAtEnd.matcher(f).replaceAll("$1");
+					processedFilenameMap.put(shortFilename, f);
+				}
+		}
 	}
 }

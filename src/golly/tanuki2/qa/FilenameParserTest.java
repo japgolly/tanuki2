@@ -31,7 +31,7 @@ public class FilenameParserTest extends TestHelper {
 	public void setup() {
 		fp= new FilenameParser();
 	}
-	
+
 	@Test
 	public void testSmartPattern() {
 		SmartPattern sp= new FilenameParser.SmartPattern("[:artist:]", "[:year:] - [:album:]", "[:tn:] - [:track:]");
@@ -60,14 +60,8 @@ public class FilenameParserTest extends TestHelper {
 		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995 - Destroy Erase Improve (320)\\8. ...asd.mp3", "Meshuggah", 1995, "Destroy Erase Improve", "8", "...asd");
 		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995 - Destroy Erase Improve (320)\\8. asd....mp3", "Meshuggah", 1995, "Destroy Erase Improve", "8", "asd...");
 		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995 - Destroy Erase Improve (320)\\10 - Why... - Not_.mp3", "Meshuggah", 1995, "Destroy Erase Improve", "10", "Why... - Not_");
-		subtestParse(fp, "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-black_label_society-concrete_jungle.mp3", "Black_Label_Society", 2006, "Shot_To_Hell", "01", "concrete_jungle");
-		subtestParse(fp, "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-black_label_society-shot_to_hell-concrete_jungle.mp3", "Black_Label_Society", 2006, "Shot_To_Hell", "01", "concrete_jungle");
-		subtestParse(fp, "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-shot_to_hell-black_label_society-concrete_jungle.mp3", "Black_Label_Society", 2006, "Shot_To_Hell", "01", "concrete_jungle");
-		subtestParse(fp, "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-shot_to_hell-concrete_jungle.mp3", "Black_Label_Society", 2006, "Shot_To_Hell", "01", "concrete_jungle");
 		subtestParse(fp, "X:\\music\\1. Fresh\\Altera Enigma - 2006 - Alteration [VBR HQ]\\06 - Skyward (Outer Atmosphere).mp3", "Altera Enigma", 2006, "Alteration", "06", "Skyward (Outer Atmosphere)");
-		subtestParse(fp, "X:\\music\\1. Fresh\\Hawaii - The Natives Are Restless (1985) 320 Kbps\\Hawaii - 01 - Call Of The Wild - The Natives Are Restless.mp3", "Hawaii", 1985, "The Natives Are Restless", "01", "Call Of The Wild");
 		subtestParse(fp, "/Jordan Rudess - 4NYC  (www.heavytorrents.org)\\02 - If I Could.mp3", "Jordan Rudess", null, "4NYC", "02", "If I Could");
-		subtestParse(fp, "/var/music/Virgin_Steele-Visions_of_Eden-2006/05_virgin_steele-bonedust.x", "Virgin_Steele", 2006, "Visions_of_Eden", "05", "bonedust");
 		subtestParse(fp, "/var/music/IN FLAMES Discografia (www.heavytorrents.org)/IN FLAMES Clayman/02 Pinball Map.mp3", "IN FLAMES", null, "Clayman", "02", "Pinball Map");
 	}
 
@@ -122,6 +116,59 @@ public class FilenameParserTest extends TestHelper {
 		assertTrackPropertiesFound(fn5, makeTrackProperties("Virgin_Steele", 2006, "Visions_of_Eden", "05", "bonedustamrc"), r.get(fn5));
 	}
 
+	@Test
+	public void testParsingMulti_removesArtistAndAlbumFromFilename() {
+		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-black_label_society-concrete_jungle.mp3"
+		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-black_label_society-shot_to_hell-concrete_jungle.mp3"
+		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-shot_to_hell-black_label_society-concrete_jungle.mp3"
+		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-shot_to_hell-concrete_jungle.mp3"
+		// etc
+		String[] insertValues= new String[] {"", "black_label_society", "black_label_society-shot_to_hell",
+				"shot_to_hell"};
+		for (String pre : insertValues) {
+			if (pre.length() > 0)
+				pre= pre + "-";
+			for (String mid : insertValues) {
+				if (mid.length() > 0)
+					mid= "-" + mid + "-";
+				else
+					mid= "-";
+				for (String post : insertValues) {
+					if (post.length() > 0)
+						post= "-" + post;
+
+					DirData dd= new DirData("X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]");
+					final String fn1= pre + "01" + mid + "concrete_jungle" + post + ".mp3";
+					final String fn2= pre + "02" + mid + "woteva_biatch" + post + ".mp3";
+					dd.files.put(fn1, makeFileData(dd, true));
+					dd.files.put(fn2, makeFileData(dd, true));
+					final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+					assertEquals(2, r.size());
+					assertTrue(r.containsKey(fn1));
+					assertTrue(r.containsKey(fn2));
+					assertTrackPropertiesFound(fn1, makeTrackProperties("Black_Label_Society", 2006, "Shot_To_Hell", "01", "concrete_jungle"), r.get(fn1));
+					assertTrackPropertiesFound(fn2, makeTrackProperties("Black_Label_Society", 2006, "Shot_To_Hell", "02", "woteva_biatch"), r.get(fn2));
+				}
+			}
+		}
+	}
+
+	@Test
+	public void testParsingMulti_doesntRemoveAlbumFromFilename() {
+		DirData dd= new DirData("/var/music/IN FLAMES Discografia (www.heavytorrents.org)/IN FLAMES Trigger");
+		final String fn1= "01 Trigger [Single Edit].mp3";
+		final String fn2= "02 Watch Them Feed.mp3";
+		dd.files.put(fn1, makeFileData(dd, true));
+		dd.files.put(fn2, makeFileData(dd, true));
+		dd.files.put("as.jpg", makeFileData(dd, false));
+		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		assertEquals(2, r.size());
+		assertTrue(r.containsKey(fn1));
+		assertTrue(r.containsKey(fn2));
+		assertTrackPropertiesFound(fn1, makeTrackProperties("IN FLAMES", null, "Trigger", "01", "Trigger [Single Edit]"), r.get(fn1));
+		assertTrackPropertiesFound(fn2, makeTrackProperties("IN FLAMES", null, "Trigger", "02", "Watch Them Feed"), r.get(fn2));
+	}
+
 	// =============================================================================================== //
 	// = private
 	// =============================================================================================== //
@@ -148,13 +195,13 @@ public class FilenameParserTest extends TestHelper {
 		final TrackProperties expected= makeTrackProperties(artist, year, album, tn, track);
 
 		final Collection<TrackProperties> r= fp.readTrackProperties(filename);
-//		if (r.size() > 1) {
-//			System.out.println("=================================================================================");
-//			System.out.println(filename);
-//			for (TrackProperties tp : r)
-//				System.out.println("  " + tp.size() + " : " + tp);
-//			System.out.println();
-//		}
+		//		if (r.size() > 1) {
+		//			System.out.println("=================================================================================");
+		//			System.out.println(filename);
+		//			for (TrackProperties tp : r)
+		//				System.out.println("  " + tp.size() + " : " + tp);
+		//			System.out.println();
+		//		}
 		assertTrackPropertiesFound(filename, expected, r);
 
 		File f= new File(filename);
