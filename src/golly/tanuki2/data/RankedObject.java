@@ -20,7 +20,7 @@ import golly.tanuki2.support.Helpers;
  */
 public class RankedObject<T> extends AbstractDataObject implements Comparable<RankedObject<T>> {
 	public final T data;
-	public double rank;
+	private double rank;
 
 	public RankedObject(T rankedObject, double rank) {
 		this.data= rankedObject;
@@ -42,6 +42,16 @@ public class RankedObject<T> extends AbstractDataObject implements Comparable<Ra
 	}
 
 	@Override
+	@SuppressWarnings("nls")
+	protected String generateToString() {
+		return Helpers.inspect(this, false, "data", "rank");
+	}
+
+	public double getRank() {
+		return rank;
+	}
+
+	@Override
 	public int hashCode() {
 		return data.hashCode();
 	}
@@ -50,9 +60,12 @@ public class RankedObject<T> extends AbstractDataObject implements Comparable<Ra
 		return super.hashCode();
 	}
 
-	@Override
-	@SuppressWarnings("nls")
-	protected String generateToString() {
-		return Helpers.inspect(this, false, "data", "rank");
+	public void increaseRank(double incRank) {
+		setRank(rank + incRank);
+	}
+
+	public void setRank(double rank) {
+		this.rank= rank;
+		dataUpdated();
 	}
 }

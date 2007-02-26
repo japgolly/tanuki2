@@ -46,7 +46,7 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 	}
 
 	public double getRank(T o) {
-		return get(o).rank;
+		return get(o).getRank();
 	}
 
 	/**
@@ -74,9 +74,9 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 		for (RankedObject<T> ro : set)
 			if (first) {
 				first= false;
-				highest= ro.rank;
+				highest= ro.getRank();
 			} else {
-				if (highest != ro.rank)
+				if (highest != ro.getRank())
 					break;
 				count++;
 			}
@@ -97,7 +97,7 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 	public RankedObject<T> increaseRank(final T data, double incRank) {
 		for (RankedObject<T> i : this)
 			if (i.data.equals(data)) {
-				i.rank+= incRank;
+				i.increaseRank(incRank);
 				return i;
 			}
 		return add(data, incRank);
