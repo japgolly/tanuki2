@@ -42,7 +42,7 @@ public class InputTree implements IFileView {
 
 	public InputTree(Composite parent, SharedUIResources sharedUIResources_) {
 		this.sharedUIResources= sharedUIResources_;
-		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
+		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		tree.setHeaderVisible(true);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
