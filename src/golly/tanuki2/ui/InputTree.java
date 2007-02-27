@@ -8,8 +8,10 @@ import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -33,12 +35,13 @@ public class InputTree implements IFileView {
 	private static final String albumInfoFmt= "%s / %s / %s"; //$NON-NLS-1$
 	private static final String trackInfoFmt= "   %2s / %s"; //$NON-NLS-1$
 
+	private final Set<String> collapsedDirs= new HashSet<String>();
 	private final SharedUIResources sharedUIResources;
 	private final Tree tree;
-	private HashMap<String, DirData> dirs= null;
+	private Map<String, DirData> dirs= null;
 
-	public InputTree(Composite parent, SharedUIResources sharedUIResources) {
-		this.sharedUIResources= sharedUIResources;
+	public InputTree(Composite parent, SharedUIResources sharedUIResources_) {
+		this.sharedUIResources= sharedUIResources_;
 		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
 		tree.setHeaderVisible(true);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
@@ -50,6 +53,9 @@ public class InputTree implements IFileView {
 					// DEL
 					if (e.character == 127) {
 						onDelete();
+						e.doit= false;
+					} else if (e.keyCode == SWT.F5) {
+						sharedUIResources.appWindow.refreshFiles();
 						e.doit= false;
 					}
 				} else if (e.stateMask == SWT.CTRL) {
@@ -80,9 +86,21 @@ public class InputTree implements IFileView {
 
 	@SuppressWarnings("unchecked")
 	public void refreshFiles(HashMap<String, DirData> dirs) {
+		// init
 		this.dirs= dirs;
 		tree.setRedraw(false);
-		tree.removeAll();
+
+		// Remember which dirs are collapsed
+		collapsedDirs.clear();
+		for (TreeItem i : tree.getItems())
+			recordCollapsedTreeItems(i);
+
+		// Remember current selection
+		int i= tree.getSelectionCount();
+		Object[] selected= new Object[i];
+		TreeItem[] currentlySelectedTreeItems= tree.getSelection();
+		while (i-- > 0)
+			selected[i]= currentlySelectedTreeItems[i].getData();
 
 		// Create a virtual representation of the tree
 		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree= new HashMap<String, OptimisibleDirTreeNode>();
@@ -103,12 +121,24 @@ public class InputTree implements IFileView {
 		final Map<String, Map> optimisedDirTree= Helpers.optimiseDirTree(unoptimisedDirTree);
 
 		// Populate the tree widget
+		tree.removeAll();
 		for (String dir : Helpers.sort(optimisedDirTree.keySet())) {
 			TreeItem ti= new TreeItem(tree, SWT.NONE);
 			ti.setData(dir);
 			ti.setText(dir);
 			ti.setImage(TanukiImage.FOLDER.get());
 			addChildren(ti, optimisedDirTree.get(dir), dir);
+		}
+
+		// Expand items and re-select previously selected
+		List<TreeItem> newSelectedTreeItems= new ArrayList<TreeItem>();
+		for (TreeItem ti : tree.getItems())
+			restorePreviousTreeItemState(ti, selected, newSelectedTreeItems);
+		if (tree.getItemCount() > 0)
+			tree.showItem(tree.getItem(0));
+		if (!newSelectedTreeItems.isEmpty()) {
+			tree.setSelection(newSelectedTreeItems.toArray(new TreeItem[newSelectedTreeItems.size()]));
+			tree.showSelection();
 		}
 
 		tree.setRedraw(true);
@@ -135,7 +165,7 @@ public class InputTree implements IFileView {
 	protected void onEdit() {
 		if (tree.getSelectionCount() != 1)
 			return;
-		
+
 		final TreeItem ti= tree.getSelection()[0];
 		DirData dd= null;
 		// If selected item is a file
@@ -230,6 +260,28 @@ public class InputTree implements IFileView {
 			else
 				foundNonNull= true;
 		return foundNonNull ? String.format(fmt, args) : ""; //$NON-NLS-1$
+	}
+
+	private void recordCollapsedTreeItems(TreeItem ti) {
+		if (ti.getItemCount() > 0) {
+			if (!ti.getExpanded())
+				collapsedDirs.add((String) ti.getData());
+			for (TreeItem i : ti.getItems())
+				recordCollapsedTreeItems(i);
+		}
+	}
+
+	private void restorePreviousTreeItemState(TreeItem ti, Object[] previouslySelected, List<TreeItem> newSelectedTreeItems) {
+		// Find new TIs that should be selected
+		for (Object s : previouslySelected)
+			if (s.equals(ti.getData()))
+				newSelectedTreeItems.add(ti);
+		// Expand/collapse tree
+		if (ti.getItemCount() > 0) {
+			ti.setExpanded(!collapsedDirs.contains((String) ti.getData()));
+			for (TreeItem i : ti.getItems())
+				restorePreviousTreeItemState(i, previouslySelected, newSelectedTreeItems);
+		}
 	}
 
 	private void setExpanded(TreeItem ti, boolean expanded) {
