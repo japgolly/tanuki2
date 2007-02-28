@@ -123,9 +123,7 @@ public class AppWindow {
 		expandItem.setExpanded(true);
 
 		// DELME
-		engine.addFolder("X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]");
-		engine.addFolder("X:\\music\\4. Done\\Unexpect");
-		engine.addFolder("C:\\2\\Nevermore\\2004 Enemies of Reality");
+		engine.addFolder("X:\\music\\1. Fresh\\IN FLAMES Discografia (www.heavytorrents.org)");
 		refreshFiles();
 		tabFolder.setSelection(0);
 	}
