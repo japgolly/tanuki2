@@ -25,6 +25,7 @@ import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -106,19 +107,19 @@ public class AppWindow {
 		expandBar= new ExpandBar(shell, SWT.NONE);
 		expandBar.addExpandListener(new ExpandListener() {
 			public void itemCollapsed(ExpandEvent e) {
-				resize(false);
+				resize((ExpandItem) e.item, false);
 			}
 
 			public void itemExpanded(ExpandEvent e) {
-				resize(true);
+				resize((ExpandItem) e.item, true);
 			}
 
-			private void resize(boolean expanded) {
+			private void resize(ExpandItem ei, boolean expanded) {
 				expandBar.setRedraw(false);
-				if (expandBar.getItem(0).getExpanded() != expanded) {
-					expandBar.getItem(0).setExpanded(expanded);
+				if (ei.getExpanded() != expanded) {
+					ei.setExpanded(expanded);
 					resizeWidgets();
-					expandBar.getItem(0).setExpanded(!expanded);
+					ei.setExpanded(!expanded);
 				} else
 					resizeWidgets();
 				expandBar.setRedraw(true);
@@ -138,6 +139,21 @@ public class AppWindow {
 		new Label(composite, SWT.LEFT).setText("qwe");
 		ExpandItem expandItem= new ExpandItem(expandBar, SWT.NONE, 0);
 		expandItem.setText(I18n.l("stats_txt_sectionHeader")); //$NON-NLS-1$
+		expandItem.setHeight(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		expandItem.setControl(composite);
+		expandItem.setExpanded(true);
+
+		// Create controls area
+		composite= new Composite(expandBar, SWT.NONE);
+		composite.setLayout(UIHelpers.makeGridLayout(4, true, 4, 32));
+		composite.setBackground(shell.getBackground());
+
+		Button b;
+		b= new Button(composite,SWT.PUSH);b.setText("ah");b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.CENTER));
+		b= new Button(composite,SWT.PUSH);b.setText("ah");b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.CENTER));
+
+		expandItem= new ExpandItem(expandBar, SWT.NONE, 1);
+		expandItem.setText(I18n.l("main_sectionHeader_controls")); //$NON-NLS-1$
 		expandItem.setHeight(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		expandItem.setControl(composite);
 		expandItem.setExpanded(true);
