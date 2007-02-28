@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
  * @author Golly
  * @since 16/02/2007
  */
+@SuppressWarnings("nls")
 public final class Helpers {
 	public static class OptimisibleDirTreeNode {
 		public Map<String, OptimisibleDirTreeNode> children= new HashMap<String, OptimisibleDirTreeNode>();
@@ -160,7 +161,7 @@ public final class Helpers {
 		return inspect(obj, includeObjectId, fields.toArray(new Field[fields.size()]));
 	}
 
-	public static final Pattern pROMAL_NUMERAL= Pattern.compile("^(?:M{0,3})(?:D?C{0,3}|C[DM])(?:L?X{0,3}|X[LC])(?:V?I{0,3}|I[VX])$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
+	public static final Pattern pROMAL_NUMERAL= Pattern.compile("^(?:M{0,3})(?:D?C{0,3}|C[DM])(?:L?X{0,3}|X[LC])(?:V?I{0,3}|I[VX])$", Pattern.CASE_INSENSITIVE);
 
 	/**
 	 * Returns <code>true</code> if a given string is a valid roman numeral.
@@ -182,10 +183,10 @@ public final class Helpers {
 		return sb.toString();
 	}
 
-	private static final Pattern pTITLECASE_B= Pattern.compile("\\b"); //$NON-NLS-1$
-	private static final Pattern pTITLECASE_HASW= Pattern.compile(".*\\w.*"); //$NON-NLS-1$
-	private static final Pattern pTITLECASE_ICAP= Pattern.compile("^['\"\\(\\[']*(\\w).*"); //$NON-NLS-1$
-	private static final Pattern pTITLECASE_PREPOST= Pattern.compile("^(\\W*)(.*?)(\\W*)$"); //$NON-NLS-1$
+	private static final Pattern pTITLECASE_B= Pattern.compile("\\b");
+	private static final Pattern pTITLECASE_HASW= Pattern.compile(".*\\w.*");
+	private static final Pattern pTITLECASE_ICAP= Pattern.compile("^['\"\\(\\[']*(\\w).*");
+	private static final Pattern pTITLECASE_PREPOST= Pattern.compile("^(\\W*)(.*?)(\\W*)$");
 	private static final Set<String> ARTICLES, COORDINATING_CONJUNCTIONS, COMMON_PREPOSITIONS;
 	private static final Set<String> TITLECASE_EXCEPTIONS;
 	static {
@@ -221,11 +222,11 @@ public final class Helpers {
 		int i= -1;
 		for (String w : b) {
 			i++;
-			if ((i != lastIndex && w.length() == 1 && ".".equals(b[i + 1])) || isRomanNumeral(w)) //$NON-NLS-1$
+			if ((i != lastIndex && w.length() == 1 && ".".equals(b[i + 1])) || isRomanNumeral(w))
 				t[i]= w.toUpperCase();
 			else if (i == 0 || i == lastIndex)
 				t[i]= makeTitleCase_iCap(w);
-			else if (TITLECASE_EXCEPTIONS.contains(w) || ((i > 1) && "'".equals(b[i - 1]) && pTITLECASE_HASW.matcher(b[i - 2]).matches())) //$NON-NLS-1$
+			else if (TITLECASE_EXCEPTIONS.contains(w) || ((i > 1) && "'".equals(b[i - 1]) && pTITLECASE_HASW.matcher(b[i - 2]).matches()))
 				t[i]= w;
 			else
 				t[i]= makeTitleCase_iCap(w);
@@ -280,9 +281,9 @@ public final class Helpers {
 		return normalizeText(input, null);
 	}
 
-	private static final String KATAKANA_HALF= "ｱｲｳｴｵｧｨｩｪｫｶｷｸｹｺｻｼｽｾｿﾀﾁﾂｯﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖｬｭｮﾗﾘﾙﾚﾛﾜｦﾝｰﾞﾟ"; //$NON-NLS-1$
-	private static final String KATAKANA_FULL= "アイウエオァィゥェォカキクケコサシスセソタチツッテトナニヌネノハヒフヘホマミムメモヤユヨャュョラリルレロワヲンー゛゜"; //$NON-NLS-1$
-	private static final String KATAKANA_TENTEN= "カキクケコサシスセソタチツテトハヒフヘホ"; //$NON-NLS-1$
+	private static final String KATAKANA_HALF= "ｱｲｳｴｵｧｨｩｪｫｶｷｸｹｺｻｼｽｾｿﾀﾁﾂｯﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖｬｭｮﾗﾘﾙﾚﾛﾜｦﾝｰﾞﾟ";
+	private static final String KATAKANA_FULL= "アイウエオァィゥェォカキクケコサシスセソタチツッテトナニヌネノハヒフヘホマミムメモヤユヨャュョラリルレロワヲンー゛゜";
+	private static final String KATAKANA_TENTEN= "カキクケコサシスセソタチツテトハヒフヘホ";
 
 	/**
 	 * Performs the following conversions:
@@ -412,9 +413,9 @@ public final class Helpers {
 	public static Map<String, Map> optimiseDirTree(final Map<String, OptimisibleDirTreeNode> tree) {
 		final Map<String, Map> root= new HashMap<String, Map>();
 		Map<String, Map> r= root;
-		optimiseDirTree("", r, tree); //$NON-NLS-1$
+		optimiseDirTree("", r, tree);
 		if (r.size() == 1 && r.keySet().iterator().next().length() == 0) {
-			r= r.get(""); //$NON-NLS-1$
+			r= r.get("");
 			if (r == null) {
 				r= root;
 				r.clear();
@@ -466,7 +467,7 @@ public final class Helpers {
 				Map<String, Map> currentNode= target.get(path);
 				if (currentNode == null)
 					target.put(path, currentNode= new HashMap<String, Map>());
-				optimiseDirTree("", currentNode, node.children); //$NON-NLS-1$
+				optimiseDirTree("", currentNode, node.children);
 			}
 		} else
 			optimiseDirTree(path, target, node.children);
@@ -504,14 +505,14 @@ public final class Helpers {
 		return r;
 	}
 
-	public static final String whitespaceChars= "\u0020\u3000\n\r\u0009\u000b\u000c\u001c\u001d\u001e\u001f\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2008\u2009\u200a\u200b\u2028\u2029\u205f"; //$NON-NLS-1$
-	private static final Pattern ptnUnicodeTrim= Pattern.compile("^[" + whitespaceChars + "]+|[" + whitespaceChars + "]+$"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	public static final String whitespaceChars= "\u0020\u3000\n\r\u0009\u000b\u000c\u001c\u001d\u001e\u001f\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2008\u2009\u200a\u200b\u2028\u2029\u205f";
+	private static final Pattern ptnUnicodeTrim= Pattern.compile("^[" + whitespaceChars + "]+|[" + whitespaceChars + "]+$");
 
 	/**
 	 * Removes whitespace from the beginning and end of a string.<br>
 	 * Unicode-aware.
 	 */
 	public static String unicodeTrim(String text) {
-		return ptnUnicodeTrim.matcher(text).replaceAll(""); //$NON-NLS-1$
+		return ptnUnicodeTrim.matcher(text).replaceAll("");
 	}
 }
