@@ -12,14 +12,20 @@ import org.eclipse.swt.widgets.Display;
  */
 public class SharedUIResources {
 	public final AppWindow appWindow;
-	public final Color nonAudioBkgColor;
-	public final Color incompleteBkgColor;
 	public final Clipboard clipboard;
+	public final Color deletionBkgColor, deletionFgColor;
+	public final Color incompleteBkgColor, incompleteFgColor;
+	public final Color nonAudioBkgColor, nonAudioFgColor;
 
+	@SuppressWarnings("nls")
 	public SharedUIResources(Display display, AppWindow appWindow) {
 		this.appWindow= appWindow;
-		nonAudioBkgColor= UIResourceManager.getColorGrey("shared_nonAudio_bkg", 234); //$NON-NLS-1$
-		incompleteBkgColor= UIResourceManager.getColor("shared_incomplete_bkg", 255, 225, 225); //$NON-NLS-1$
 		clipboard= new Clipboard(display);
+		deletionBkgColor= UIResourceManager.getColor("shared_deletion_bkg", 255, 245, 245);
+		deletionFgColor= UIResourceManager.getColor("shared_deletion_fg", 255, 0, 0);
+		incompleteBkgColor= UIResourceManager.getColor("shared_incomplete_bkg", 240, 242, 255);
+		incompleteFgColor= UIResourceManager.getColor("shared_incomplete_fg", 0, 0, 255);
+		nonAudioBkgColor= UIResourceManager.getColorGrey("shared_nonAudio_bkg", 240);
+		nonAudioFgColor= UIResourceManager.getColorGrey("shared_nonAudio_fg", 0);
 	}
 }

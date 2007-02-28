@@ -21,6 +21,8 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -42,7 +44,7 @@ public class InputTree implements IFileView {
 
 	public InputTree(Composite parent, SharedUIResources sharedUIResources_) {
 		this.sharedUIResources= sharedUIResources_;
-		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
+		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.CHECK);
 		tree.setHeaderVisible(true);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
@@ -72,6 +74,20 @@ public class InputTree implements IFileView {
 		tree.addMouseListener(new MouseAdapter() {
 			public void mouseDoubleClick(MouseEvent e) {
 				onEdit();
+			}
+		});
+		tree.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				final TreeItem ti= (TreeItem) e.item;
+				if (ti.getData() instanceof FileData) {
+					final FileData fd= (FileData) ti.getData();
+					fd.setMarkedForDeletion(!ti.getChecked());
+					setTreeItemColor(ti, fd);
+				} else {
+					// TODO This should update children
+					ti.setChecked(true);
+					e.doit= false;
+				}
 			}
 		});
 	}
@@ -124,6 +140,7 @@ public class InputTree implements IFileView {
 		tree.removeAll();
 		for (String dir : Helpers.sort(optimisedDirTree.keySet())) {
 			TreeItem ti= new TreeItem(tree, SWT.NONE);
+			ti.setChecked(true);
 			ti.setData(dir);
 			ti.setText(dir);
 			ti.setImage(TanukiImage.FOLDER.get());
@@ -199,6 +216,7 @@ public class InputTree implements IFileView {
 			for (String dir : Helpers.sort(children.keySet())) {
 				final String fullDir= Helpers.addPathElement(path, dir);
 				TreeItem ti= new TreeItem(parent, SWT.NONE);
+				ti.setChecked(true);
 				ti.setData(fullDir);
 				ti.setImage(TanukiImage.FOLDER.get());
 				ti.setText(0, dir);
@@ -214,16 +232,15 @@ public class InputTree implements IFileView {
 				for (String f : Helpers.sort(files.keySet())) {
 					final FileData fd= files.get(f);
 					TreeItem ti= new TreeItem(parent, SWT.NONE);
+					ti.setChecked(!fd.isMarkedForDeletion());
 					ti.setData(fd);
 					ti.setImage(fd.getImage());
 					ti.setText(0, f);
 					if (fd.isAudio()) {
 						ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
 						albumDataSet.add(fd.getAlbumData());
-						if (!fd.isComplete())
-							ti.setBackground(sharedUIResources.incompleteBkgColor);
-					} else
-						ti.setBackground(sharedUIResources.nonAudioBkgColor);
+					}
+					setTreeItemColor(ti, fd);
 				}
 				// Update parent
 				if (dd.hasAudioContent()) {
@@ -237,8 +254,10 @@ public class InputTree implements IFileView {
 							complete= ad.isComplete();
 						}
 					}
-					if (!complete)
+					if (!complete) {
 						parent.setBackground(sharedUIResources.incompleteBkgColor);
+						parent.setForeground(sharedUIResources.incompleteFgColor);
+					}
 				}
 			}
 		}
@@ -294,5 +313,18 @@ public class InputTree implements IFileView {
 		for (TreeItem i : tree.getItems())
 			setExpanded(i, expanded);
 		tree.showSelection();
+	}
+
+	private void setTreeItemColor(TreeItem ti, final FileData fd) {
+		if (fd.isMarkedForDeletion()) {
+			ti.setBackground(sharedUIResources.deletionBkgColor);
+			ti.setForeground(sharedUIResources.deletionFgColor);
+		} else if (!fd.isAudio()) {
+			ti.setBackground(sharedUIResources.nonAudioBkgColor);
+			ti.setForeground(sharedUIResources.nonAudioFgColor);
+		} else if (!fd.isComplete()) {
+			ti.setBackground(sharedUIResources.incompleteBkgColor);
+			ti.setForeground(sharedUIResources.incompleteFgColor);
+		}
 	}
 }

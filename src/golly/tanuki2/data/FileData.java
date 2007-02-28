@@ -12,6 +12,7 @@ public class FileData extends AbstractDataObject {
 	private AlbumData albumData= null;
 	private final DirData dirData;
 	private boolean isAudio= false;
+	private boolean isMarkedForDeletion= false;
 	private TanukiImage mimeImage= null;
 	private Integer tn= null;
 	private String track= null;
@@ -54,6 +55,10 @@ public class FileData extends AbstractDataObject {
 		return albumData.isComplete();
 	}
 
+	public boolean isMarkedForDeletion() {
+		return isMarkedForDeletion;
+	}
+
 	public void setAlbumData(AlbumData albumData) {
 		this.albumData= albumData;
 		dataUpdated();
@@ -62,6 +67,10 @@ public class FileData extends AbstractDataObject {
 	public void setAudio(boolean isAudio) {
 		this.isAudio= isAudio;
 		dataUpdated();
+	}
+
+	public void setMarkedForDeletion(boolean isMarkedForDeletion) {
+		this.isMarkedForDeletion= isMarkedForDeletion;
 	}
 
 	public void setMimeImage(TanukiImage mimeImage) {
