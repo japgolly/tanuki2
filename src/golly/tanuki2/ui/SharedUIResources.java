@@ -1,9 +1,9 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.support.UIResourceManager;
+import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -13,19 +13,14 @@ import org.eclipse.swt.widgets.Display;
 public class SharedUIResources {
 	public final AppWindow appWindow;
 	public final Clipboard clipboard;
-	public final Color deletionBkgColor, deletionFgColor;
-	public final Color incompleteBkgColor, incompleteFgColor;
-	public final Color nonAudioBkgColor, nonAudioFgColor;
+	public final TwoColours deletionColours, incompleteFileColours, nonAudioFileColours;
 
 	@SuppressWarnings("nls")
 	public SharedUIResources(Display display, AppWindow appWindow) {
 		this.appWindow= appWindow;
 		clipboard= new Clipboard(display);
-		deletionBkgColor= UIResourceManager.getColor("shared_deletion_bkg", 255, 240, 240);
-		deletionFgColor= UIResourceManager.getColor("shared_deletion_fg", 250, 0, 0);
-		incompleteBkgColor= UIResourceManager.getColor("shared_incomplete_bkg", 220, 220, 255);
-		incompleteFgColor= UIResourceManager.getColor("shared_incomplete_fg", 0, 0, 255);
-		nonAudioBkgColor= UIResourceManager.getColorGrey("shared_nonAudio_bkg", 240);
-		nonAudioFgColor= UIResourceManager.getColorGrey("shared_nonAudio_fg", 0x50);
+		deletionColours= new TwoColours(UIResourceManager.getColor("shared_deletion_bkg", 255, 237, 237), UIResourceManager.getColor("shared_deletion_fg", 250, 0, 0));
+		incompleteFileColours= new TwoColours(UIResourceManager.getColor("shared_incomplete_bkg", 220, 220, 255), UIResourceManager.getColor("shared_incomplete_fg", 0, 0, 250));
+		nonAudioFileColours= new TwoColours(UIResourceManager.getColorGrey("shared_nonAudio_bkg", 240), UIResourceManager.getColorGrey("shared_nonAudio_fg", 0x50));
 	}
 }

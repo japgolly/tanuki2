@@ -1,8 +1,10 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.core.Engine;
+import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
+import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
 
@@ -202,5 +204,15 @@ public class AppWindow {
 
 	public void remove(String item) {
 		engine.remove(item);
+	}
+
+	public TwoColours getFileItemColours(final FileData fd, boolean checkAlbumDataToo) {
+		if (fd.isMarkedForDeletion())
+			return sharedUIResources.deletionColours;
+		else if (!fd.isAudio())
+			return sharedUIResources.nonAudioFileColours;
+		else if (!fd.isComplete(checkAlbumDataToo))
+			return sharedUIResources.incompleteFileColours;
+		return null;
 	}
 }

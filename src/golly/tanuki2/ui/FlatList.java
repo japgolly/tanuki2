@@ -6,6 +6,7 @@ import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Tanuki2Exception;
+import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
 import java.io.IOException;
@@ -231,16 +232,11 @@ public class FlatList implements IFileView {
 		return getData(getSelected());
 	}
 
-	private void setFileItemColor(TableItem ti, final FileData fd) {
-		if (fd.isMarkedForDeletion()) {
-			ti.setBackground(sharedUIResources.deletionBkgColor);
-			ti.setForeground(sharedUIResources.deletionFgColor);
-		} else if (!fd.isAudio()) {
-			ti.setBackground(sharedUIResources.nonAudioBkgColor);
-			ti.setForeground(sharedUIResources.nonAudioFgColor);
-		} else if (!fd.isComplete(true)) { // Notice that this is true instead of false as it is in InputFiles
-			ti.setBackground(sharedUIResources.incompleteBkgColor);
-			ti.setForeground(sharedUIResources.incompleteFgColor);
+	private void setFileItemColor(final TableItem ti, final FileData fd) {
+		final TwoColours c= sharedUIResources.appWindow.getFileItemColours(fd, true);
+		if (c != null) {
+			ti.setBackground(c.background);
+			ti.setForeground(c.foreground);
 		}
 	}
 }

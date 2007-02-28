@@ -7,6 +7,7 @@ import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
+import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -260,8 +261,9 @@ public class InputTree implements IFileView {
 					} else if (albumDataSet.size() > 1)
 						parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
 					if (!isAlbumDataComplete) {
-						parent.setBackground(sharedUIResources.incompleteBkgColor);
-						parent.setForeground(sharedUIResources.incompleteFgColor);
+						TwoColours c= sharedUIResources.incompleteFileColours;
+						parent.setBackground(c.background);
+						parent.setForeground(c.foreground);
 					}
 				}
 			}
@@ -320,16 +322,11 @@ public class InputTree implements IFileView {
 		tree.showSelection();
 	}
 
-	private void setFileItemColor(TreeItem ti, final FileData fd) {
-		if (fd.isMarkedForDeletion()) {
-			ti.setBackground(sharedUIResources.deletionBkgColor);
-			ti.setForeground(sharedUIResources.deletionFgColor);
-		} else if (!fd.isAudio()) {
-			ti.setBackground(sharedUIResources.nonAudioBkgColor);
-			ti.setForeground(sharedUIResources.nonAudioFgColor);
-		} else if (!fd.isComplete(false)) {
-			ti.setBackground(sharedUIResources.incompleteBkgColor);
-			ti.setForeground(sharedUIResources.incompleteFgColor);
+	private void setFileItemColor(final TreeItem ti, final FileData fd) {
+		final TwoColours c= sharedUIResources.appWindow.getFileItemColours(fd, false);
+		if (c != null) {
+			ti.setBackground(c.background);
+			ti.setForeground(c.foreground);
 		}
 	}
 }
