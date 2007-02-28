@@ -89,7 +89,8 @@ public class AlbumEditor {
 					t.setText(fd.getTrack());
 
 				// Rank album data
-				allAlbumData.increaseRank(fd.getAlbumData(), 1);
+				if (fd.getAlbumData() != null)
+					allAlbumData.increaseRank(fd.getAlbumData(), 1);
 			}
 		}
 
