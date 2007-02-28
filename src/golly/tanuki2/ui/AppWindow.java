@@ -1,6 +1,7 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.core.Engine;
+import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
@@ -243,6 +244,16 @@ public class AppWindow {
 		public void onFilesRemoved() {
 			engine.removeEmptyDirs();
 			onDataUpdated_RefreshNow();
+		}
+
+		public boolean openAlbumEditor(DirData dd, Shell shell) {
+			AlbumEditor ae= new AlbumEditor(shell, dd);
+			ae.show();
+			if (ae.didUpdate()) {
+				onDataUpdated_RefreshNow();
+				return true;
+			} else
+				return false;
 		}
 
 		public void refreshFiles(boolean force) {

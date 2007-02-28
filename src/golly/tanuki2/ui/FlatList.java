@@ -19,6 +19,8 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -38,7 +40,7 @@ public class FlatList implements IFileView {
 	private final SharedUIResources sharedUIResources;
 	private final Table table;
 	private final int INDEX_FILENAME, INDEX_ARTIST, INDEX_YEAR, INDEX_ALBUM, INDEX_TN, INDEX_TRACK;
-	private final MenuItem[] singleSelectionMenuItems;
+	private final MenuItem[] singleSelectionMenuItems, singleAudioSelectionMenuItems;
 
 	public FlatList(Composite parent, SharedUIResources sharedUIResources_) {
 		this.sharedUIResources= sharedUIResources_;
@@ -63,6 +65,14 @@ public class FlatList implements IFileView {
 		miCopyFilenames.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onCopyFilenames();
+			}
+		});
+		// mi: copy filenames
+		MenuItem miEditAlbum= new MenuItem(popupMenu, SWT.PUSH);
+		miEditAlbum.setText(I18n.l("flatList_menu_editAlbum")); //$NON-NLS-1$
+		miEditAlbum.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				onEdit();
 			}
 		});
 		// mi: open folder
@@ -91,11 +101,15 @@ public class FlatList implements IFileView {
 		});
 		// popup menu other
 		singleSelectionMenuItems= new MenuItem[] {miOpenFolder, miOpenPrompt};
+		singleAudioSelectionMenuItems= new MenuItem[] {miEditAlbum};
 		popupMenu.addMenuListener(new MenuAdapter() {
 			public void menuShown(MenuEvent e) {
 				final boolean single= table.getSelectionCount() == 1;
+				final boolean singleAudio= single && ((FileData) table.getSelection()[0].getData()).isAudio();
 				for (MenuItem mi : singleSelectionMenuItems)
 					mi.setEnabled(single);
+				for (MenuItem mi : singleAudioSelectionMenuItems)
+					mi.setEnabled(singleAudio);
 			}
 		});
 
@@ -125,6 +139,11 @@ public class FlatList implements IFileView {
 						e.doit= false;
 					}
 				}
+			}
+		});
+		table.addMouseListener(new MouseAdapter() {
+			public void mouseDoubleClick(MouseEvent e) {
+				onEdit();
 			}
 		});
 		table.addSelectionListener(new SelectionAdapter() {
@@ -206,6 +225,16 @@ public class FlatList implements IFileView {
 		for (TableItem ti : table.getSelection())
 			sharedUIResources.appUIShared.remove(ti.getText());
 		sharedUIResources.appUIShared.onFilesRemoved();
+	}
+
+	protected void onEdit() {
+		if (table.getSelectionCount() != 1)
+			return;
+
+		final TableItem ti= table.getSelection()[0];
+		final FileData fd= (FileData) ti.getData();
+		if (fd.isAudio())
+			sharedUIResources.appUIShared.openAlbumEditor(fd.getDirData(), table.getShell());
 	}
 
 	protected void onOpenFolder() {

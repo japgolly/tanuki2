@@ -203,12 +203,8 @@ public class InputTree implements IFileView {
 				}
 
 		// Show album editor
-		if (dd != null) {
-			AlbumEditor ae= new AlbumEditor(tree.getShell(), dd);
-			ae.show();
-			if (ae.didUpdate())
-				sharedUIResources.appUIShared.onDataUpdated_RefreshNow();
-		}
+		if (dd != null)
+			sharedUIResources.appUIShared.openAlbumEditor(dd, tree.getShell());
 	}
 
 	// =============================================================================================== //
