@@ -183,7 +183,7 @@ public class InputTree implements IFileView {
 				final String dir= (String) ti.getData();
 				sharedUIResources.appWindow.remove(dir);
 			}
-		sharedUIResources.appWindow.refreshFiles();
+		sharedUIResources.appWindow.onFilesRemoved();
 	}
 
 	protected void onEdit() {

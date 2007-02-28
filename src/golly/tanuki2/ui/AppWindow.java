@@ -162,6 +162,11 @@ public class AppWindow {
 		});
 	}
 
+	public void onFilesRemoved() {
+		engine.removeEmptyDirs();
+		refreshFiles();
+	}
+
 	public void refreshFiles() {
 		display.asyncExec(new Runnable() {
 			public void run() {

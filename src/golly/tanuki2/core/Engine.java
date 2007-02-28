@@ -88,6 +88,15 @@ public class Engine {
 		}
 	}
 
+	public void removeEmptyDirs() {
+		final Set<String> emptyDirs= new HashSet<String>();
+		for (String dir : dirs.keySet())
+			if (dirs.get(dir).files.isEmpty())
+				emptyDirs.add(dir);
+		for (String dir : emptyDirs)
+			dirs.remove(dir);
+	}
+
 	// =============================================================================================== //
 	// = Internal
 	// =============================================================================================== //
