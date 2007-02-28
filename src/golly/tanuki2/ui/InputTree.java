@@ -53,16 +53,23 @@ public class InputTree implements IFileView {
 			public void keyPressed(KeyEvent e) {
 				if (e.stateMask == SWT.NONE) {
 					// DEL
-					if (e.character == 127) {
+					if (e.keyCode == SWT.DEL) {
 						onDelete();
 						e.doit= false;
-					} else if (e.keyCode == SWT.F5) {
+					}
+					// F5
+					else if (e.keyCode == SWT.F5) {
 						sharedUIResources.appWindow.refreshFiles();
 						e.doit= false;
 					}
 				} else if (e.stateMask == SWT.CTRL) {
+					// CTRL A
+					if (e.character == 1) {
+						tree.selectAll();
+						e.doit= false;
+					}
 					// CTRL +, CTRL -
-					if (e.character == '+' || e.character == '-') {
+					else if (e.character == '+' || e.character == '-') {
 						tree.setRedraw(false);
 						setExpandedAll(e.character == '+');
 						tree.setRedraw(true);
@@ -238,7 +245,8 @@ public class InputTree implements IFileView {
 					ti.setText(0, f);
 					if (fd.isAudio()) {
 						ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
-						albumDataSet.add(fd.getAlbumData());
+						if (fd.getAlbumData() != null)
+							albumDataSet.add(fd.getAlbumData());
 					}
 					setFileItemColor(ti, fd);
 				}
