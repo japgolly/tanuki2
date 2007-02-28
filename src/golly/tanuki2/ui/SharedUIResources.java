@@ -21,9 +21,9 @@ public class SharedUIResources {
 	public SharedUIResources(Display display, AppWindow appWindow) {
 		this.appWindow= appWindow;
 		clipboard= new Clipboard(display);
-		deletionBkgColor= UIResourceManager.getColor("shared_deletion_bkg", 255, 245, 245);
+		deletionBkgColor= UIResourceManager.getColor("shared_deletion_bkg", 255, 240, 240);
 		deletionFgColor= UIResourceManager.getColor("shared_deletion_fg", 255, 0, 0);
-		incompleteBkgColor= UIResourceManager.getColor("shared_incomplete_bkg", 240, 242, 255);
+		incompleteBkgColor= UIResourceManager.getColor("shared_incomplete_bkg", 220, 220, 255);
 		incompleteFgColor= UIResourceManager.getColor("shared_incomplete_fg", 0, 0, 255);
 		nonAudioBkgColor= UIResourceManager.getColorGrey("shared_nonAudio_bkg", 240);
 		nonAudioFgColor= UIResourceManager.getColorGrey("shared_nonAudio_fg", 0);
