@@ -22,7 +22,7 @@ public class AlbumData extends AbstractDataObject {
 	}
 
 	public boolean isComplete() {
-		if (year == null || album == null)
+		if (artist == null || year == null || album == null)
 			return false;
 		return true;
 	}
