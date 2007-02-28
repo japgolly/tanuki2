@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -23,6 +24,13 @@ public final class Helpers {
 
 	public static String addPathElement(final String path, final String name) {
 		return path.length() == 0 ? name : path + File.separator + name;
+	}
+
+	public static <T> Set<T> arrayToSet(T[] array) {
+		final Set<T> r= new HashSet<T>(array.length);
+		for (T e : array)
+			r.add(e);
+		return r;
 	}
 
 	/**
@@ -152,6 +160,15 @@ public final class Helpers {
 		return inspect(obj, includeObjectId, fields.toArray(new Field[fields.size()]));
 	}
 
+	public static final Pattern pROMAL_NUMERAL= Pattern.compile("^(?:M{0,3})(?:D?C{0,3}|C[DM])(?:L?X{0,3}|X[LC])(?:V?I{0,3}|I[VX])$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
+
+	/**
+	 * Returns <code>true</code> if a given string is a valid roman numeral.
+	 */
+	public static boolean isRomanNumeral(String text) {
+		return pROMAL_NUMERAL.matcher(text).matches();
+	}
+
 	/**
 	 * Works like <code>Array.join()</code> in Ruby.
 	 */
@@ -163,6 +180,67 @@ public final class Helpers {
 			sb.append(a);
 		}
 		return sb.toString();
+	}
+
+	private static final Pattern pTITLECASE_B= Pattern.compile("\\b"); //$NON-NLS-1$
+	private static final Pattern pTITLECASE_HASW= Pattern.compile(".*\\w.*"); //$NON-NLS-1$
+	private static final Pattern pTITLECASE_ICAP= Pattern.compile("^['\"\\(\\[']*(\\w).*"); //$NON-NLS-1$
+	private static final Pattern pTITLECASE_PREPOST= Pattern.compile("^(\\W*)(.*?)(\\W*)$"); //$NON-NLS-1$
+	private static final Set<String> ARTICLES, COORDINATING_CONJUNCTIONS, COMMON_PREPOSITIONS;
+	private static final Set<String> TITLECASE_EXCEPTIONS;
+	static {
+		final String[] saARTICLES= new String[] {"a", "an", "the"};
+		final String[] saCOORDINATING_CONJUNCTIONS= new String[] {"and", "but", "for", "nor", "or", "so", "yet"};
+		final String[] saCOMMON_PREPOSITIONS= new String[] {"about", "beneath", "in", "regarding", "above", "beside",
+				"inside", "round", "across", "between", "into", "since", "after", "beyond", "like", "through",
+				"against", "by", "near", "to", "among", "concerning", "of", "toward", "around", "despite", "off",
+				"under", "as", "down", "on", "unlike", "at", "during", "out", "until", "before", "except", "outside",
+				"up", "behind", "for", "over", "upon", "below", "from", "past", "with"};
+		ARTICLES= arrayToSet(saARTICLES);
+		COORDINATING_CONJUNCTIONS= arrayToSet(saCOORDINATING_CONJUNCTIONS);
+		COMMON_PREPOSITIONS= arrayToSet(saCOMMON_PREPOSITIONS);
+		TITLECASE_EXCEPTIONS= new HashSet<String>();
+		TITLECASE_EXCEPTIONS.addAll(ARTICLES);
+		TITLECASE_EXCEPTIONS.addAll(COORDINATING_CONJUNCTIONS);
+		TITLECASE_EXCEPTIONS.addAll(COMMON_PREPOSITIONS);
+	}
+
+	public static String makeTitleCase(String text) {
+		final Matcher m= pTITLECASE_PREPOST.matcher(text);
+		if (!m.matches())
+			return text;
+		String[] b= pTITLECASE_B.split(m.group(2).toLowerCase());
+		if (b[0].length() == 0) {
+			String[] b2= new String[b.length - 1];
+			System.arraycopy(b, 1, b2, 0, b.length - 1);
+			b= b2;
+		}
+		final int blen= b.length;
+		final int lastIndex= blen - 1;
+		String[] t= new String[blen];
+		int i= -1;
+		for (String w : b) {
+			i++;
+			if ((i != lastIndex && w.length() == 1 && ".".equals(b[i + 1])) || isRomanNumeral(w)) //$NON-NLS-1$
+				t[i]= w.toUpperCase();
+			else if (i == 0 || i == lastIndex)
+				t[i]= makeTitleCase_iCap(w);
+			else if (TITLECASE_EXCEPTIONS.contains(w) || ((i > 1) && "'".equals(b[i - 1]) && pTITLECASE_HASW.matcher(b[i - 2]).matches())) //$NON-NLS-1$
+				t[i]= w;
+			else
+				t[i]= makeTitleCase_iCap(w);
+		}
+		return m.group(1) + join(t, null) + m.group(3);
+	}
+
+	private static String makeTitleCase_iCap(String w) {
+		final Matcher m= pTITLECASE_ICAP.matcher(w);
+		if (m.matches()) {
+			char[] chars= w.toCharArray();
+			chars[m.start(1)]= Character.toUpperCase(chars[m.start(1)]);
+			return new String(chars);
+		} else
+			return w;
 	}
 
 	/**
