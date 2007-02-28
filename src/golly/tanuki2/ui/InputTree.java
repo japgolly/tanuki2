@@ -113,10 +113,10 @@ public class InputTree implements IFileView {
 
 		// Remember current selection
 		int i= tree.getSelectionCount();
-		Object[] selected= new Object[i];
+		String[] selected= new String[i];
 		TreeItem[] currentlySelectedTreeItems= tree.getSelection();
 		while (i-- > 0)
-			selected[i]= currentlySelectedTreeItems[i].getData();
+			selected[i]= getFullFilename(currentlySelectedTreeItems[i]);
 
 		// Create a virtual representation of the tree
 		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree= new HashMap<String, OptimisibleDirTreeNode>();
@@ -178,18 +178,10 @@ public class InputTree implements IFileView {
 			e.doit= false;
 		}
 	}
-	
+
 	protected void onDelete() {
 		for (TreeItem ti : tree.getSelection())
-			if (ti.getData() instanceof FileData) {
-				// Delete file
-				final FileData fd= (FileData) ti.getData();
-				sharedUIResources.appUIShared.remove(Helpers.addPathElement(fd.getDirData().dir, ti.getText()));
-			} else {
-				// Delete dir
-				final String dir= (String) ti.getData();
-				sharedUIResources.appUIShared.remove(dir);
-			}
+			sharedUIResources.appUIShared.remove(getFullFilename(ti));
 		sharedUIResources.appUIShared.onFilesRemoved();
 	}
 
@@ -294,6 +286,13 @@ public class InputTree implements IFileView {
 		return foundNonNull ? String.format(fmt, args) : ""; //$NON-NLS-1$
 	}
 
+	private String getFullFilename(TreeItem ti) {
+		if (ti.getData() instanceof FileData)
+			return Helpers.addPathElement(((FileData) ti.getData()).getDirData().dir, ti.getText());
+		else
+			return (String) ti.getData();
+	}
+
 	private void recordCollapsedTreeItems(TreeItem ti) {
 		if (ti.getItemCount() > 0) {
 			if (!ti.getExpanded())
@@ -303,16 +302,16 @@ public class InputTree implements IFileView {
 		}
 	}
 
-	private void restorePreviousTreeItemState(TreeItem ti, Object[] previouslySelected, List<TreeItem> newSelectedTreeItems) {
+	private void restorePreviousTreeItemState(TreeItem ti, String[] filenamesToSelect, List<TreeItem> newSelectedTreeItems) {
 		// Find new TIs that should be selected
-		for (Object s : previouslySelected)
-			if (s.equals(ti.getData()))
+		for (String s : filenamesToSelect)
+			if (s.equals(getFullFilename(ti)))
 				newSelectedTreeItems.add(ti);
 		// Expand/collapse tree
 		if (ti.getItemCount() > 0) {
 			ti.setExpanded(!collapsedDirs.contains((String) ti.getData()));
 			for (TreeItem i : ti.getItems())
-				restorePreviousTreeItemState(i, previouslySelected, newSelectedTreeItems);
+				restorePreviousTreeItemState(i, filenamesToSelect, newSelectedTreeItems);
 		}
 	}
 
