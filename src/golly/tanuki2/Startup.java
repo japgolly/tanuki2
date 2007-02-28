@@ -26,6 +26,7 @@ public class Startup {
 			I18n.setLocale(Locale.ENGLISH);
 			display= new Display();
 			engine= new Engine();
+			engine.addFolder("X:\\music\\1. Fresh\\IN FLAMES Discografia (www.heavytorrents.org)");// DELME
 			new AppWindow(display, engine).show();
 
 		} finally {
