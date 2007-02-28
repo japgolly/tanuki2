@@ -39,8 +39,8 @@ public class FlatList implements IFileView {
 	private final int INDEX_FILENAME, INDEX_ARTIST, INDEX_YEAR, INDEX_ALBUM, INDEX_TN, INDEX_TRACK;
 	private final MenuItem[] singleSelectionMenuItems;
 
-	public FlatList(Composite parent, SharedUIResources sharedUIResources) {
-		this.sharedUIResources= sharedUIResources;
+	public FlatList(Composite parent, SharedUIResources sharedUIResources_) {
+		this.sharedUIResources= sharedUIResources_;
 
 		// Create table
 		table= new Table(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
@@ -101,12 +101,28 @@ public class FlatList implements IFileView {
 		// Add key listener
 		table.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
-				if (e.character == 'C' - 'A' + 1) {
-					onCopyFilenames();
-					e.doit= false;
-				} else if (e.character == 127) {
-					onDelete();
-					e.doit= false;
+				if (e.stateMask == SWT.NONE) {
+					// DEL
+					if (e.keyCode == SWT.DEL) {
+						onDelete();
+						e.doit= false;
+					}
+					// F5
+					else if (e.keyCode == SWT.F5) {
+						sharedUIResources.appWindow.refreshFiles();
+						e.doit= false;
+					}
+				} else if (e.stateMask == SWT.CTRL) {
+					// CTRL-A
+					if (e.character == 1) {
+						table.selectAll();
+						e.doit= false;
+					}
+					// CTRL-C
+					else if (e.character == 3) {
+						onCopyFilenames();
+						e.doit= false;
+					}
 				}
 			}
 		});
@@ -133,9 +149,7 @@ public class FlatList implements IFileView {
 				ti.setData(fd);
 				ti.setImage(fd.getImage());
 				ti.setText(INDEX_FILENAME, dir2 + file);
-				if (!fd.isAudio())
-					ti.setBackground(sharedUIResources.nonAudioBkgColor);
-				else {
+				if (fd.isAudio()) {
 					if (fd.getTn() != null)
 						ti.setText(INDEX_TN, fd.getTn().toString());
 					if (fd.getTrack() != null)
@@ -149,9 +163,8 @@ public class FlatList implements IFileView {
 						if (ad.getYear() != null)
 							ti.setText(INDEX_YEAR, ad.getYear().toString());
 					}
-					if (!fd.isComplete())
-						ti.setBackground(sharedUIResources.incompleteBkgColor);
 				}
+				setFileItemColor(ti, fd);
 			}
 		}
 		for (TableColumn tc : table.getColumns())
@@ -176,7 +189,7 @@ public class FlatList implements IFileView {
 	protected void onDelete() {
 		for (TableItem ti : table.getSelection())
 			sharedUIResources.appWindow.remove(ti.getText());
-		sharedUIResources.appWindow.refreshFiles();
+		sharedUIResources.appWindow.onFilesRemoved();
 	}
 
 	protected void onOpenFolder() {
@@ -216,5 +229,18 @@ public class FlatList implements IFileView {
 
 	private FileData getSelectedData() {
 		return getData(getSelected());
+	}
+
+	private void setFileItemColor(TableItem ti, final FileData fd) {
+		if (fd.isMarkedForDeletion()) {
+			ti.setBackground(sharedUIResources.deletionBkgColor);
+			ti.setForeground(sharedUIResources.deletionFgColor);
+		} else if (!fd.isAudio()) {
+			ti.setBackground(sharedUIResources.nonAudioBkgColor);
+			ti.setForeground(sharedUIResources.nonAudioFgColor);
+		} else if (!fd.isComplete(true)) { // Notice that this is true instead of false as it is in InputFiles
+			ti.setBackground(sharedUIResources.incompleteBkgColor);
+			ti.setForeground(sharedUIResources.incompleteFgColor);
+		}
 	}
 }
