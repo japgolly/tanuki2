@@ -1,6 +1,7 @@
 package golly.tanuki2.support;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FillLayout;
@@ -18,6 +19,16 @@ import org.eclipse.swt.widgets.Shell;
  * @since 17/02/2007
  */
 public class UIHelpers {
+	public static class TwoColours {
+		public Color background= null, foreground= null;
+		public TwoColours() {
+		}
+		public TwoColours(Color background, Color foreground) {
+			this.background= background;
+			this.foreground= foreground;
+		}
+	}
+	
 	public static void addUnlessExists(Combo combo, String name) {
 		for (String s : combo.getItems())
 			if (name.equals(s))
