@@ -170,6 +170,7 @@ public class InputTree implements IFileView {
 		if (ti.getData() instanceof FileData) {
 			final FileData fd= (FileData) ti.getData();
 			fd.setMarkedForDeletion(!ti.getChecked());
+			setFileItemInfoText(ti, fd);
 			setFileItemColor(ti, fd);
 			sharedUIResources.appUIShared.onDataUpdated(true);
 		} else {
@@ -238,12 +239,11 @@ public class InputTree implements IFileView {
 					ti.setData(fd);
 					ti.setImage(fd.getImage());
 					ti.setText(0, f);
-					if (fd.isAudio()) {
-						ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
+					setFileItemInfoText(ti, fd);
+					setFileItemColor(ti, fd);
+					if (!fd.isMarkedForDeletion() && fd.isAudio())
 						if (fd.getAlbumData() != null)
 							albumDataSet.add(fd.getAlbumData());
-					}
-					setFileItemColor(ti, fd);
 				}
 				// Update parent
 				if (dd.hasAudioContent()) {
@@ -329,5 +329,12 @@ public class InputTree implements IFileView {
 			ti.setBackground(c.background);
 			ti.setForeground(c.foreground);
 		}
+	}
+	
+	private void setFileItemInfoText(TreeItem ti, final FileData fd) {
+		if (fd.isMarkedForDeletion())
+			ti.setText(1, I18n.l("inputTree_txt_markedForDeletion")); //$NON-NLS-1$
+		else if (fd.isAudio())
+			ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
 	}
 }

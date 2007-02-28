@@ -149,8 +149,12 @@ public class AppWindow {
 		composite.setBackground(shell.getBackground());
 
 		Button b;
-		b= new Button(composite,SWT.PUSH);b.setText("ah");b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.CENTER));
-		b= new Button(composite,SWT.PUSH);b.setText("ah");b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.CENTER));
+		b= new Button(composite, SWT.PUSH);
+		b.setText("ah");
+		b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.CENTER));
+		b= new Button(composite, SWT.PUSH);
+		b.setText("ah");
+		b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.CENTER));
 
 		expandItem= new ExpandItem(expandBar, SWT.NONE, 1);
 		expandItem.setText(I18n.l("main_sectionHeader_controls")); //$NON-NLS-1$
@@ -243,7 +247,8 @@ public class AppWindow {
 				return sharedUIResources.nonAudioFileColours;
 			else if (!fd.isComplete(checkAlbumDataToo))
 				return sharedUIResources.incompleteFileColours;
-			return null;
+			else
+				return sharedUIResources.completeFileColours;
 		}
 
 		public void onDataUpdated(boolean isCurrentViewUptodate) {
