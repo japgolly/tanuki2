@@ -194,6 +194,7 @@ public class AppWindow {
 	protected void onFileViewChanged(IFileView fileView) {
 		currentFileView= fileView;
 		appUIShared.refreshFiles(false);
+		currentFileView.getWidget().setFocus();
 	}
 
 	protected void resizeWidgets() {
