@@ -7,6 +7,8 @@ import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -19,6 +21,8 @@ import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -48,6 +52,8 @@ public class AppWindow {
 	private final SharedUIResources sharedUIResources;
 	private final Shell shell;
 	private final TabFolder tabFolder;
+	private final Set<IFileView> fileViewsUptodate= new HashSet<IFileView>();
+	private IFileView currentFileView= null;
 
 	public AppWindow(Display display_, Engine engine_) {
 		appUIShared= new AppUIShared();
@@ -71,18 +77,29 @@ public class AppWindow {
 
 		// Create tab folder
 		tabFolder= new TabFolder(shell, SWT.NONE);
-		makeDropTarget(tabFolder);
 		// Create tab: input tree
 		TabItem ti= new TabItem(tabFolder, SWT.NONE);
 		inputTree= new InputTree(tabFolder, sharedUIResources);
 		ti.setControl(inputTree.getWidget());
+		ti.setData(inputTree);
 		ti.setText(I18n.l("main_tab_inputTree")); //$NON-NLS-1$
 		// Create tab: flat list
 		ti= new TabItem(tabFolder, SWT.NONE);
 		flatList= new FlatList(tabFolder, sharedUIResources);
 		ti.setControl(flatList.getWidget());
+		ti.setData(flatList);
 		ti.setText(I18n.l("main_tab_flatList")); //$NON-NLS-1$
+		// All tabs
 		fileViews= new IFileView[] {inputTree, flatList};
+		// Tab folder again
+		makeDropTarget(tabFolder);
+		tabFolder.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				onFileViewChanged((IFileView) e.item.getData());
+			}
+		});
+		tabFolder.setSelection(0);
+		onFileViewChanged(inputTree);
 
 		// Create expandBar
 		expandBar= new ExpandBar(shell, SWT.NONE);
@@ -123,11 +140,6 @@ public class AppWindow {
 		expandItem.setHeight(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		expandItem.setControl(composite);
 		expandItem.setExpanded(true);
-
-		// DELME
-		engine.addFolder("X:\\music\\1. Fresh\\IN FLAMES Discografia (www.heavytorrents.org)");
-		appUIShared.refreshFiles();
-		tabFolder.setSelection(0);
 	}
 
 	// =============================================================================================== //
@@ -173,10 +185,15 @@ public class AppWindow {
 						} else
 							; // TODO Handle adding on non-directories
 					if (added)
-						appUIShared.refreshFiles();
+						appUIShared.onDataUpdated_RefreshNow();
 				}
 			}
 		});
+	}
+
+	protected void onFileViewChanged(IFileView fileView) {
+		currentFileView= fileView;
+		appUIShared.refreshFiles(false);
 	}
 
 	protected void resizeWidgets() {
@@ -211,22 +228,34 @@ public class AppWindow {
 			return null;
 		}
 
-		public void onFilesRemoved() {
-			engine.removeEmptyDirs();
-			refreshFiles();
+		public void onDataUpdated(boolean isCurrentViewUptodate) {
+			fileViewsUptodate.clear();
+			if (isCurrentViewUptodate)
+				fileViewsUptodate.add(currentFileView);
 		}
 
-		public void refreshFiles() {
-			display.asyncExec(new Runnable() {
-				public void run() {
-					for (IFileView fv : fileViews)
-						fv.getWidget().setRedraw(false);
-					for (IFileView fv : fileViews)
-						fv.refreshFiles(engine.dirs);
-					for (IFileView fv : fileViews)
-						fv.getWidget().setRedraw(true);
-				}
-			});
+		public void onDataUpdated_RefreshNow() {
+			onDataUpdated(false);
+			refreshFiles(false);
+		}
+
+		public void onFilesRemoved() {
+			engine.removeEmptyDirs();
+			onDataUpdated_RefreshNow();
+		}
+
+		public void refreshFiles(boolean force) {
+			final IFileView currentFileView= AppWindow.this.currentFileView;
+			if (force || !fileViewsUptodate.contains(currentFileView)) {
+				fileViewsUptodate.add(currentFileView);
+				display.asyncExec(new Runnable() {
+					public void run() {
+						currentFileView.getWidget().setRedraw(false);
+						currentFileView.refreshFiles(engine.dirs);
+						currentFileView.getWidget().setRedraw(true);
+					}
+				});
+			}
 		}
 
 		public void remove(String item) {

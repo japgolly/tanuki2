@@ -60,7 +60,7 @@ public class InputTree implements IFileView {
 					}
 					// F5
 					else if (e.keyCode == SWT.F5) {
-						sharedUIResources.appUIShared.refreshFiles();
+						sharedUIResources.appUIShared.refreshFiles(true);
 						e.doit= false;
 					}
 				} else if (e.stateMask == SWT.CTRL) {
@@ -86,16 +86,8 @@ public class InputTree implements IFileView {
 		});
 		tree.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				final TreeItem ti= (TreeItem) e.item;
-				if (ti.getData() instanceof FileData) {
-					final FileData fd= (FileData) ti.getData();
-					fd.setMarkedForDeletion(!ti.getChecked());
-					setFileItemColor(ti, fd);
-				} else {
-					// TODO This should update children
-					ti.setChecked(true);
-					e.doit= false;
-				}
+				if (e.detail == SWT.CHECK)
+					onCheck(e);
 			}
 		});
 	}
@@ -173,6 +165,20 @@ public class InputTree implements IFileView {
 	// = Events
 	// =============================================================================================== //
 
+	protected void onCheck(SelectionEvent e) {
+		final TreeItem ti= (TreeItem) e.item;
+		if (ti.getData() instanceof FileData) {
+			final FileData fd= (FileData) ti.getData();
+			fd.setMarkedForDeletion(!ti.getChecked());
+			setFileItemColor(ti, fd);
+			sharedUIResources.appUIShared.onDataUpdated(true);
+		} else {
+			// TODO This should update children
+			ti.setChecked(true);
+			e.doit= false;
+		}
+	}
+	
 	protected void onDelete() {
 		for (TreeItem ti : tree.getSelection())
 			if (ti.getData() instanceof FileData) {
@@ -209,7 +215,7 @@ public class InputTree implements IFileView {
 			AlbumEditor ae= new AlbumEditor(tree.getShell(), dd);
 			ae.show();
 			if (ae.didUpdate())
-				sharedUIResources.appUIShared.refreshFiles();
+				sharedUIResources.appUIShared.onDataUpdated_RefreshNow();
 		}
 	}
 

@@ -110,7 +110,7 @@ public class FlatList implements IFileView {
 					}
 					// F5
 					else if (e.keyCode == SWT.F5) {
-						sharedUIResources.appUIShared.refreshFiles();
+						sharedUIResources.appUIShared.refreshFiles(true);
 						e.doit= false;
 					}
 				} else if (e.stateMask == SWT.CTRL) {
