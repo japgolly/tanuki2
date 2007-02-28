@@ -82,7 +82,7 @@ public class InputTree implements IFileView {
 				if (ti.getData() instanceof FileData) {
 					final FileData fd= (FileData) ti.getData();
 					fd.setMarkedForDeletion(!ti.getChecked());
-					setTreeItemColor(ti, fd);
+					setFileItemColor(ti, fd);
 				} else {
 					// TODO This should update children
 					ti.setChecked(true);
@@ -240,21 +240,18 @@ public class InputTree implements IFileView {
 						ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
 						albumDataSet.add(fd.getAlbumData());
 					}
-					setTreeItemColor(ti, fd);
+					setFileItemColor(ti, fd);
 				}
 				// Update parent
 				if (dd.hasAudioContent()) {
-					boolean complete= false;
-					if (albumDataSet.size() > 1)
-						parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
-					else {
+					boolean isAlbumDataComplete= false;
+					if (albumDataSet.size() == 1) {
 						AlbumData ad= albumDataSet.iterator().next();
-						if (ad != null) {
-							parent.setText(1, formatInfo(albumInfoFmt, ad.getArtist(), ad.getYear(), ad.getAlbum()));
-							complete= ad.isComplete();
-						}
-					}
-					if (!complete) {
+						parent.setText(1, formatInfo(albumInfoFmt, ad.getArtist(), ad.getYear(), ad.getAlbum()));
+						isAlbumDataComplete= ad.isComplete();
+					} else if (albumDataSet.size() > 1)
+						parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
+					if (!isAlbumDataComplete) {
 						parent.setBackground(sharedUIResources.incompleteBkgColor);
 						parent.setForeground(sharedUIResources.incompleteFgColor);
 					}
@@ -315,14 +312,14 @@ public class InputTree implements IFileView {
 		tree.showSelection();
 	}
 
-	private void setTreeItemColor(TreeItem ti, final FileData fd) {
+	private void setFileItemColor(TreeItem ti, final FileData fd) {
 		if (fd.isMarkedForDeletion()) {
 			ti.setBackground(sharedUIResources.deletionBkgColor);
 			ti.setForeground(sharedUIResources.deletionFgColor);
 		} else if (!fd.isAudio()) {
 			ti.setBackground(sharedUIResources.nonAudioBkgColor);
 			ti.setForeground(sharedUIResources.nonAudioFgColor);
-		} else if (!fd.isComplete()) {
+		} else if (!fd.isComplete(false)) {
 			ti.setBackground(sharedUIResources.incompleteBkgColor);
 			ti.setForeground(sharedUIResources.incompleteFgColor);
 		}

@@ -49,10 +49,10 @@ public class FileData extends AbstractDataObject {
 		return isAudio;
 	}
 
-	public boolean isComplete() {
-		if (albumData == null || tn == null || track == null)
+	public boolean isComplete(boolean checkAlbumDataToo) {
+		if (tn == null || track == null)
 			return false;
-		return albumData.isComplete();
+		return checkAlbumDataToo ? (albumData != null && albumData.isComplete()) : true;
 	}
 
 	public boolean isMarkedForDeletion() {
