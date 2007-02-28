@@ -60,7 +60,7 @@ public class InputTree implements IFileView {
 					}
 					// F5
 					else if (e.keyCode == SWT.F5) {
-						sharedUIResources.appWindow.refreshFiles();
+						sharedUIResources.appUIShared.refreshFiles();
 						e.doit= false;
 					}
 				} else if (e.stateMask == SWT.CTRL) {
@@ -178,13 +178,13 @@ public class InputTree implements IFileView {
 			if (ti.getData() instanceof FileData) {
 				// Delete file
 				final FileData fd= (FileData) ti.getData();
-				sharedUIResources.appWindow.remove(Helpers.addPathElement(fd.getDirData().dir, ti.getText()));
+				sharedUIResources.appUIShared.remove(Helpers.addPathElement(fd.getDirData().dir, ti.getText()));
 			} else {
 				// Delete dir
 				final String dir= (String) ti.getData();
-				sharedUIResources.appWindow.remove(dir);
+				sharedUIResources.appUIShared.remove(dir);
 			}
-		sharedUIResources.appWindow.onFilesRemoved();
+		sharedUIResources.appUIShared.onFilesRemoved();
 	}
 
 	protected void onEdit() {
@@ -209,7 +209,7 @@ public class InputTree implements IFileView {
 			AlbumEditor ae= new AlbumEditor(tree.getShell(), dd);
 			ae.show();
 			if (ae.didUpdate())
-				sharedUIResources.appWindow.refreshFiles();
+				sharedUIResources.appUIShared.refreshFiles();
 		}
 	}
 
@@ -323,7 +323,7 @@ public class InputTree implements IFileView {
 	}
 
 	private void setFileItemColor(final TreeItem ti, final FileData fd) {
-		final TwoColours c= sharedUIResources.appWindow.getFileItemColours(fd, false);
+		final TwoColours c= sharedUIResources.appUIShared.getFileItemColours(fd, false);
 		if (c != null) {
 			ti.setBackground(c.background);
 			ti.setForeground(c.foreground);

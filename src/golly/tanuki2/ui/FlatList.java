@@ -110,7 +110,7 @@ public class FlatList implements IFileView {
 					}
 					// F5
 					else if (e.keyCode == SWT.F5) {
-						sharedUIResources.appWindow.refreshFiles();
+						sharedUIResources.appUIShared.refreshFiles();
 						e.doit= false;
 					}
 				} else if (e.stateMask == SWT.CTRL) {
@@ -189,8 +189,8 @@ public class FlatList implements IFileView {
 
 	protected void onDelete() {
 		for (TableItem ti : table.getSelection())
-			sharedUIResources.appWindow.remove(ti.getText());
-		sharedUIResources.appWindow.onFilesRemoved();
+			sharedUIResources.appUIShared.remove(ti.getText());
+		sharedUIResources.appUIShared.onFilesRemoved();
 	}
 
 	protected void onOpenFolder() {
@@ -233,7 +233,7 @@ public class FlatList implements IFileView {
 	}
 
 	private void setFileItemColor(final TableItem ti, final FileData fd) {
-		final TwoColours c= sharedUIResources.appWindow.getFileItemColours(fd, true);
+		final TwoColours c= sharedUIResources.appUIShared.getFileItemColours(fd, true);
 		if (c != null) {
 			ti.setBackground(c.background);
 			ti.setForeground(c.foreground);

@@ -38,6 +38,7 @@ public class AppWindow {
 	private final static int MARGIN= 0;
 	private final static int SPACING= 4;
 
+	private final AppUIShared appUIShared;
 	private final Display display;
 	private final Engine engine;
 	private final ExpandBar expandBar;
@@ -49,9 +50,10 @@ public class AppWindow {
 	private final TabFolder tabFolder;
 
 	public AppWindow(Display display_, Engine engine_) {
+		appUIShared= new AppUIShared();
 		display= display_;
 		engine= engine_;
-		sharedUIResources= new SharedUIResources(display, this);
+		sharedUIResources= new SharedUIResources(display, appUIShared);
 		fileTransfer= FileTransfer.getInstance();
 
 		// Create shell
@@ -124,9 +126,24 @@ public class AppWindow {
 
 		// DELME
 		engine.addFolder("X:\\music\\1. Fresh\\IN FLAMES Discografia (www.heavytorrents.org)");
-		refreshFiles();
+		appUIShared.refreshFiles();
 		tabFolder.setSelection(0);
 	}
+
+	// =============================================================================================== //
+	// = Public
+	// =============================================================================================== //
+
+	public void show() {
+		shell.open();
+		while (!shell.isDisposed())
+			if (!display.readAndDispatch())
+				display.sleep();
+	}
+
+	// =============================================================================================== //
+	// = Internal
+	// =============================================================================================== //
 
 	private void makeDropTarget(Control widget) {
 		DropTarget target= new DropTarget(widget, DND.DROP_COPY | DND.DROP_DEFAULT);
@@ -156,26 +173,8 @@ public class AppWindow {
 						} else
 							; // TODO Handle adding on non-directories
 					if (added)
-						refreshFiles();
+						appUIShared.refreshFiles();
 				}
-			}
-		});
-	}
-
-	public void onFilesRemoved() {
-		engine.removeEmptyDirs();
-		refreshFiles();
-	}
-
-	public void refreshFiles() {
-		display.asyncExec(new Runnable() {
-			public void run() {
-				for (IFileView fv : fileViews)
-					fv.getWidget().setRedraw(false);
-				for (IFileView fv : fileViews)
-					fv.refreshFiles(engine.dirs);
-				for (IFileView fv : fileViews)
-					fv.getWidget().setRedraw(true);
 			}
 		});
 	}
@@ -193,24 +192,45 @@ public class AppWindow {
 		tabFolder.setBounds(ca.x, ca.y, ca.width, ca.height - expandBarSize - SPACING);
 	}
 
-	public void show() {
-		shell.open();
-		while (!shell.isDisposed())
-			if (!display.readAndDispatch())
-				display.sleep();
-	}
+	// =============================================================================================== //
+	// = UI package only
+	// =============================================================================================== //
 
-	public void remove(String item) {
-		engine.remove(item);
-	}
+	/**
+	 * This contains functions for other UI classes to call. They are not publicly accessible.
+	 */
+	final class AppUIShared {
 
-	public TwoColours getFileItemColours(final FileData fd, boolean checkAlbumDataToo) {
-		if (fd.isMarkedForDeletion())
-			return sharedUIResources.deletionColours;
-		else if (!fd.isAudio())
-			return sharedUIResources.nonAudioFileColours;
-		else if (!fd.isComplete(checkAlbumDataToo))
-			return sharedUIResources.incompleteFileColours;
-		return null;
+		public TwoColours getFileItemColours(final FileData fd, boolean checkAlbumDataToo) {
+			if (fd.isMarkedForDeletion())
+				return sharedUIResources.deletionColours;
+			else if (!fd.isAudio())
+				return sharedUIResources.nonAudioFileColours;
+			else if (!fd.isComplete(checkAlbumDataToo))
+				return sharedUIResources.incompleteFileColours;
+			return null;
+		}
+
+		public void onFilesRemoved() {
+			engine.removeEmptyDirs();
+			refreshFiles();
+		}
+
+		public void refreshFiles() {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					for (IFileView fv : fileViews)
+						fv.getWidget().setRedraw(false);
+					for (IFileView fv : fileViews)
+						fv.refreshFiles(engine.dirs);
+					for (IFileView fv : fileViews)
+						fv.getWidget().setRedraw(true);
+				}
+			});
+		}
+
+		public void remove(String item) {
+			engine.remove(item);
+		}
 	}
 }
