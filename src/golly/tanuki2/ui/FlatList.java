@@ -44,7 +44,7 @@ public class FlatList implements IFileView {
 		this.sharedUIResources= sharedUIResources_;
 
 		// Create table
-		table= new Table(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
+		table= new Table(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.CHECK);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		INDEX_FILENAME= addColumn("general_field_filename", SWT.LEFT); //$NON-NLS-1$
@@ -99,7 +99,7 @@ public class FlatList implements IFileView {
 			}
 		});
 
-		// Add key listener
+		// Add table listeners
 		table.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.stateMask == SWT.NONE) {
@@ -125,6 +125,12 @@ public class FlatList implements IFileView {
 						e.doit= false;
 					}
 				}
+			}
+		});
+		table.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (e.detail == SWT.CHECK)
+					onCheck(e);
 			}
 		});
 	}
@@ -165,6 +171,7 @@ public class FlatList implements IFileView {
 							ti.setText(INDEX_YEAR, ad.getYear().toString());
 					}
 				}
+				ti.setChecked(!fd.isMarkedForDeletion());
 				setFileItemColor(ti, fd);
 			}
 		}
@@ -177,6 +184,14 @@ public class FlatList implements IFileView {
 	// =============================================================================================== //
 	// = Events
 	// =============================================================================================== //
+
+	protected void onCheck(SelectionEvent e) {
+		final TableItem ti= (TableItem) e.item;
+		final FileData fd= (FileData) ti.getData();
+		fd.setMarkedForDeletion(!ti.getChecked());
+		setFileItemColor(ti, fd);
+		sharedUIResources.appUIShared.onDataUpdated(true);
+	}
 
 	protected void onCopyFilenames() {
 		StringBuilder sb= new StringBuilder();
