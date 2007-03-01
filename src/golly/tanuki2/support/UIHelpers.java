@@ -4,11 +4,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.MessageBox;
@@ -21,21 +24,44 @@ import org.eclipse.swt.widgets.Shell;
 public class UIHelpers {
 	public static class TwoColours {
 		public Color background= null, foreground= null;
+
 		public TwoColours() {
 		}
+
 		public TwoColours(Color background, Color foreground) {
 			this.background= background;
 			this.foreground= foreground;
 		}
 	}
-	
+
 	public static void addUnlessExists(Combo combo, String name) {
 		for (String s : combo.getItems())
 			if (name.equals(s))
 				return;
 		combo.add(name);
 	}
-	
+
+	/**
+	 * Repositions a window in front of its parent. It will align the center points of both windows, and then makes sure
+	 * the window is in the display client area.
+	 */
+	public static void centerInFrontOfParent(Display display, Shell wnd, Rectangle parentBounds) {
+		Rectangle dca= display.getClientArea();
+		Point s= wnd.getSize();
+		Point l= new Point(parentBounds.x + (parentBounds.width - s.x) / 2, parentBounds.y + (parentBounds.height - s.y) / 2);
+		int d= (l.y + s.y) - (dca.y + dca.height);
+		if (d > 0)
+			l.y-= d;
+		d= (l.x + s.x) - (dca.x + dca.width);
+		if (d > 0)
+			l.x-= d;
+		if (l.x < dca.x)
+			l.x= dca.x;
+		if (l.y < dca.y)
+			l.y= dca.y;
+		wnd.setLocation(l);
+	}
+
 	public static Font createFont(Font baseFont, int style) {
 		FontData[] fds= baseFont.getFontData();
 		for (FontData fd : fds)
@@ -83,6 +109,14 @@ public class UIHelpers {
 
 	public static void setButtonText(Button button, String i18nStringKey) {
 		button.setText("   " + I18n.l(i18nStringKey) + "   "); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public static void setHeight(Control control, int height) {
+		control.setSize(control.getSize().x, height);
+	}
+
+	public static void setWidth(Control control, int width) {
+		control.setSize(width, control.getSize().y);
 	}
 
 	public static void showTanukiError(Shell shell, String i18nStringKey, Object... args) {

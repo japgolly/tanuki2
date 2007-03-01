@@ -14,9 +14,11 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -39,6 +41,7 @@ public class AlbumEditor {
 	private final DirData dd;
 	private final Combo iwArtist, iwYear, iwAlbum;
 	private final Map<String, Text> iwTnMap, iwTrackMap;
+	private final ScrolledComposite trackInfoComposite;
 	private boolean updated= false;
 
 	public AlbumEditor(Shell parent, DirData dd_) {
@@ -59,11 +62,12 @@ public class AlbumEditor {
 		iwAlbum= addAlbumInfoField(composite, "general_field_album", SWT.FILL); //$NON-NLS-1$
 
 		// Track info
+		trackInfoComposite= new ScrolledComposite(shell, SWT.FLAT | SWT.BORDER | SWT.V_SCROLL);
+		trackInfoComposite.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL, 1, true, SWT.FILL));
+		composite= new Composite(trackInfoComposite, SWT.NONE);
+		composite.setLayout(UIHelpers.makeGridLayout(2, false, 0, 2));
 		iwTnMap= new HashMap<String, Text>();
 		iwTrackMap= new HashMap<String, Text>();
-		composite= new Composite(shell, SWT.NONE);
-		composite.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
-		composite.setLayout(UIHelpers.makeGridLayout(2, false, 0, 2));
 		for (String f : Helpers.sort(dd.files.keySet())) {
 			final FileData fd= dd.files.get(f);
 			if (fd.isAudio() && !fd.isMarkedForDeletion()) {
@@ -94,6 +98,15 @@ public class AlbumEditor {
 					allAlbumData.increaseRank(fd.getAlbumData(), 1);
 			}
 		}
+		trackInfoComposite.setAlwaysShowScrollBars(true);
+		trackInfoComposite.setContent(composite);
+		composite.pack();
+		trackInfoComposite.setMinSize(16, composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		trackInfoComposite.addControlListener(new ControlAdapter() {
+			public void controlResized(ControlEvent e) {
+				UIHelpers.setWidth(trackInfoComposite.getContent(), trackInfoComposite.getClientArea().width);
+			}
+		});
 
 		// Buttons
 		composite= new Composite(shell, SWT.NONE);
@@ -127,13 +140,14 @@ public class AlbumEditor {
 			addToCombo(iwAlbum, ad.getAlbum());
 		}
 
-		// Shell again
+		// Resize and position window
 		shell.pack();
-		Rectangle pca= parent.getBounds();
-		Point s= shell.getSize();
-		s.x= 360;
-		shell.setSize(s);
-		shell.setLocation(pca.x + (pca.width - s.x) / 2, pca.y + (pca.height - s.y) / 2);
+		UIHelpers.setWidth(shell, 380);
+		Rectangle dca= Display.getCurrent().getClientArea();
+		Rectangle shellBounds= shell.getBounds();
+		if (shellBounds.height > dca.height)
+			UIHelpers.setHeight(shell, dca.height);
+		UIHelpers.centerInFrontOfParent(Display.getCurrent(), shell, parent.getBounds());
 	}
 
 	public boolean didUpdate() {
