@@ -111,6 +111,7 @@ public class AlbumEditor {
 				UIHelpers.setWidth(trackInfoComposite.getContent(), trackInfoComposite.getClientArea().width);
 			}
 		});
+		trackInfoComposite.getVerticalBar().setIncrement(4);
 
 		// Buttons
 		composite= new Composite(shell, SWT.NONE);
