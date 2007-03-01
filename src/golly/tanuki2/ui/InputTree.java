@@ -193,15 +193,18 @@ public class InputTree implements IFileView {
 		final TreeItem ti= tree.getSelection()[0];
 		DirData dd= null;
 		// If selected item is a file
-		if (ti.getData() instanceof FileData && ((FileData) ti.getData()).isAudio())
-			dd= ((FileData) ti.getData()).getDirData();
+		FileData fd= ti.getData() instanceof FileData ? (FileData) ti.getData() : null;
+		if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion())
+			dd= fd.getDirData();
 		else
 			// Or if directory, get the first audio child-item, and use its DirData
-			for (TreeItem i : ti.getItems())
-				if (i.getData() instanceof FileData && ((FileData) i.getData()).isAudio()) {
-					dd= ((FileData) i.getData()).getDirData();
+			for (TreeItem i : ti.getItems()) {
+				fd= i.getData() instanceof FileData ? (FileData) i.getData() : null;
+				if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
+					dd= fd.getDirData();
 					break;
 				}
+			}
 
 		// Show album editor
 		if (dd != null)
@@ -241,7 +244,7 @@ public class InputTree implements IFileView {
 					ti.setText(0, f);
 					setFileItemInfoText(ti, fd);
 					setFileItemColor(ti, fd);
-					if (!fd.isMarkedForDeletion() && fd.isAudio())
+					if (fd.isAudio() && !fd.isMarkedForDeletion())
 						if (fd.getAlbumData() != null)
 							albumDataSet.add(fd.getAlbumData());
 				}
@@ -330,7 +333,7 @@ public class InputTree implements IFileView {
 			ti.setForeground(c.foreground);
 		}
 	}
-	
+
 	private void setFileItemInfoText(TreeItem ti, final FileData fd) {
 		if (fd.isMarkedForDeletion())
 			ti.setText(1, I18n.l("inputTree_txt_markedForDeletion")); //$NON-NLS-1$

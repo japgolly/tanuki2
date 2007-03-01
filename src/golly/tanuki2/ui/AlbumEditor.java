@@ -65,7 +65,7 @@ public class AlbumEditor {
 		composite.setLayout(UIHelpers.makeGridLayout(2, false, 0, 2));
 		for (String f : Helpers.sort(dd.files.keySet())) {
 			final FileData fd= dd.files.get(f);
-			if (fd.isAudio()) {
+			if (fd.isAudio() && !fd.isMarkedForDeletion()) {
 				// Create track widgets
 				// label
 				Label l= new Label(composite, SWT.LEFT);
@@ -173,7 +173,7 @@ public class AlbumEditor {
 		// Update each track
 		for (String f : Helpers.sort(dd.files.keySet())) {
 			final FileData fd= dd.files.get(f);
-			if (fd.isAudio()) {
+			if (fd.isAudio() && !fd.isMarkedForDeletion()) {
 				fd.setAlbumData(ad);
 				fd.setTn(processWidgetText(iwTnMap.get(f).getText()));
 				fd.setTrack(processWidgetText(iwTrackMap.get(f).getText()));

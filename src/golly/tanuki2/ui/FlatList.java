@@ -105,7 +105,8 @@ public class FlatList implements IFileView {
 		popupMenu.addMenuListener(new MenuAdapter() {
 			public void menuShown(MenuEvent e) {
 				final boolean single= table.getSelectionCount() == 1;
-				final boolean singleAudio= single && ((FileData) table.getSelection()[0].getData()).isAudio();
+				final FileData fd= single ? (FileData) table.getSelection()[0].getData() : null;
+				final boolean singleAudio= single && fd.isAudio() && !fd.isMarkedForDeletion();
 				for (MenuItem mi : singleSelectionMenuItems)
 					mi.setEnabled(single);
 				for (MenuItem mi : singleAudioSelectionMenuItems)
@@ -233,7 +234,7 @@ public class FlatList implements IFileView {
 
 		final TableItem ti= table.getSelection()[0];
 		final FileData fd= (FileData) ti.getData();
-		if (fd.isAudio())
+		if (fd.isAudio() && !fd.isMarkedForDeletion())
 			sharedUIResources.appUIShared.openAlbumEditor(fd.getDirData(), table.getShell());
 	}
 
