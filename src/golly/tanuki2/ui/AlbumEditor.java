@@ -48,6 +48,7 @@ public class AlbumEditor {
 		// Shell
 		shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
 		shell.setLayout(UIHelpers.makeGridLayout(1, true, 4, 4));
+		shell.setText(I18n.l("albumEditor_txt_windowTitle")); //$NON-NLS-1$
 
 		// Album info
 		Composite composite= new Composite(shell, SWT.NONE);
