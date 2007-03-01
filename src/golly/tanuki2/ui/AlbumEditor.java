@@ -19,6 +19,7 @@ import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -26,7 +27,9 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -98,6 +101,7 @@ public class AlbumEditor {
 					allAlbumData.increaseRank(fd.getAlbumData(), 1);
 			}
 		}
+		addListenersToTrackInfoWidgets();
 		trackInfoComposite.setAlwaysShowScrollBars(true);
 		trackInfoComposite.setContent(composite);
 		composite.pack();
@@ -210,6 +214,30 @@ public class AlbumEditor {
 		Combo c= new Combo(composite, SWT.NONE);
 		c.setLayoutData(UIHelpers.makeGridData(1, true, comboStyle));
 		return c;
+	}
+
+	private void addListenersToTrackInfoWidgets() {
+		final Listener makeSureWidgetIsVisible= new Listener() {
+			public void handleEvent(Event e) {
+				Control child= (Control) e.widget;
+				Rectangle bounds= child.getBounds();
+				Rectangle area= trackInfoComposite.getClientArea();
+				Point origin= trackInfoComposite.getOrigin();
+				if (origin.x > bounds.x)
+					origin.x= Math.max(0, bounds.x);
+				if (origin.y > bounds.y)
+					origin.y= Math.max(0, bounds.y);
+				if (origin.x + area.width < bounds.x + bounds.width)
+					origin.x= Math.max(0, bounds.x + bounds.width - area.width);
+				if (origin.y + area.height < bounds.y + bounds.height)
+					origin.y= Math.max(0, bounds.y + bounds.height - area.height);
+				trackInfoComposite.setOrigin(origin);
+			}
+		};
+		for (Text t : iwTnMap.values())
+			t.addListener(SWT.Activate, makeSureWidgetIsVisible);
+		for (Text t : iwTrackMap.values())
+			t.addListener(SWT.Activate, makeSureWidgetIsVisible);
 	}
 
 	private void addToCombo(Combo combo, Integer i) {
