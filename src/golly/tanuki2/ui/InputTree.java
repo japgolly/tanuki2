@@ -90,6 +90,7 @@ public class InputTree implements IFileView {
 					onCheck(e);
 			}
 		});
+		// TODO Add a listener that resizes widths of columns
 	}
 
 	// =============================================================================================== //
@@ -175,7 +176,7 @@ public class InputTree implements IFileView {
 			updateAlbumDirItem(ti.getParentItem(), fd.getDirData());
 			sharedUIResources.appUIShared.onDataUpdated(true);
 		} else {
-			// TODO This should update children
+			// TODO onCheck() on a dir should update children
 			ti.setChecked(true);
 			e.doit= false;
 		}

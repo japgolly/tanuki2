@@ -153,6 +153,7 @@ public class FlatList implements IFileView {
 					onCheck(e);
 			}
 		});
+		// TODO Add a listener that resizes widths of columns
 	}
 
 	// =============================================================================================== //
