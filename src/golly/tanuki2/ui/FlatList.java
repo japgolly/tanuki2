@@ -6,7 +6,7 @@ import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
-import golly.tanuki2.support.Tanuki2Exception;
+import golly.tanuki2.support.TanukiException;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
@@ -250,7 +250,7 @@ public class FlatList implements IFileView {
 		try {
 			Runtime.getRuntime().exec("explorer.exe .", null, new File(getSelectedData().getDirData().dir)); //$NON-NLS-1$
 		} catch (IOException e) {
-			new Tanuki2Exception(e).showErrorDialog();
+			new TanukiException(e).showErrorDialog();
 		}
 	}
 
@@ -259,7 +259,7 @@ public class FlatList implements IFileView {
 		try {
 			Runtime.getRuntime().exec("cmd.exe /C start cmd.exe", null, new File(getSelectedData().getDirData().dir)); //$NON-NLS-1$
 		} catch (IOException e) {
-			new Tanuki2Exception(e).showErrorDialog();
+			new TanukiException(e).showErrorDialog();
 		}
 	}
 

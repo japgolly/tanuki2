@@ -11,16 +11,16 @@ import org.eclipse.swt.widgets.Shell;
  * @author Golly
  * @since 17/02/2007
  */
-public class Tanuki2Exception extends Exception {
+public class TanukiException extends Exception {
 	private static final long serialVersionUID= -9194151115829165719L;
 	private final String code;
 
-	public Tanuki2Exception(String code, String logMessage) {
+	public TanukiException(String code, String logMessage) {
 		this.code= code;
 		Log.log(Log.ERROR, code + ": " + logMessage); //$NON-NLS-1$
 	}
 
-	public Tanuki2Exception(Throwable t) {
+	public TanukiException(Throwable t) {
 		this.code= t.getClass().getSimpleName();
 		try {
 			StringWriter sw= new StringWriter();

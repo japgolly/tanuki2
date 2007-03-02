@@ -53,7 +53,7 @@ public class Config {
 		try {
 			Config.save();
 		} catch (IOException e) {
-			new Tanuki2Exception(e).showErrorDialog();
+			new TanukiException(e).showErrorDialog();
 		}
 	}
 
