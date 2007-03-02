@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -126,25 +125,8 @@ public class AppWindow {
 			}
 		});
 
-		// Create stats area
-		Composite composite= new Composite(expandBar, SWT.BORDER);
-		composite.setLayout(UIHelpers.makeGridLayout(4, true, 0, 2));
-		new Label(composite, SWT.LEFT).setText("qwe");
-		new Label(composite, SWT.LEFT).setText("qwe");
-		new Label(composite, SWT.LEFT).setText("qwe");
-		new Label(composite, SWT.LEFT).setText("qwe");
-		new Label(composite, SWT.LEFT).setText("qwe");
-		new Label(composite, SWT.LEFT).setText("qwe");
-		new Label(composite, SWT.LEFT).setText("qwe");
-		new Label(composite, SWT.LEFT).setText("qwe");
-		ExpandItem expandItem= new ExpandItem(expandBar, SWT.NONE, 0);
-		expandItem.setText(I18n.l("stats_txt_sectionHeader")); //$NON-NLS-1$
-		expandItem.setHeight(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-		expandItem.setControl(composite);
-		expandItem.setExpanded(true);
-
 		// Create controls area
-		composite= new Composite(expandBar, SWT.NONE);
+		Composite composite= new Composite(expandBar, SWT.NONE);
 		composite.setLayout(UIHelpers.makeGridLayout(4, true, 4, 32));
 		composite.setBackground(shell.getBackground());
 
@@ -156,7 +138,7 @@ public class AppWindow {
 		b.setText("ah");
 		b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.CENTER));
 
-		expandItem= new ExpandItem(expandBar, SWT.NONE, 1);
+		ExpandItem expandItem= new ExpandItem(expandBar, SWT.NONE, 0);
 		expandItem.setText(I18n.l("main_sectionHeader_controls")); //$NON-NLS-1$
 		expandItem.setHeight(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		expandItem.setControl(composite);
