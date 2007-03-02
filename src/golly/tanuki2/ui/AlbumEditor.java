@@ -5,6 +5,7 @@ import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.RankedObject;
 import golly.tanuki2.data.RankedObjectCollection;
+import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
@@ -54,6 +55,7 @@ public class AlbumEditor {
 		// Shell
 		shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
 		shell.setLayout(UIHelpers.makeGridLayout(1, true, 4, 4));
+		shell.setImage(TanukiImage.EDITOR.get());
 		shell.setText(I18n.l("albumEditor_txt_windowTitle")); //$NON-NLS-1$
 
 		// Album info
