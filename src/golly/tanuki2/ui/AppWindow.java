@@ -3,6 +3,7 @@ package golly.tanuki2.ui;
 import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
+import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
@@ -66,6 +67,7 @@ public class AppWindow {
 		// Create shell
 		shell= new Shell();
 		shell.setSize(1600, 800);
+		shell.setImage(TanukiImage.TANUKI.get());
 		shell.setText(I18n.l("general_app_title")); //$NON-NLS-1$
 		Display.setAppName(shell.getText());
 		shell.addControlListener(new ControlAdapter() {

@@ -19,6 +19,7 @@ public enum TanukiImage {
 	MIME_IMAGE("image-x-generic.png"), //
 	MIME_TEXT("text-x-generic.png"), //
 	REMOVE("list-remove.png"), //
+	TANUKI("tanuki.ico"), //
 	TERMINAL("utilities-terminal.png"), //
 	;
 
