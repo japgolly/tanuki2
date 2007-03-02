@@ -172,6 +172,7 @@ public class InputTree implements IFileView {
 			fd.setMarkedForDeletion(!ti.getChecked());
 			setFileItemInfoText(ti, fd);
 			setFileItemColor(ti, fd);
+			updateAlbumDirItem(ti.getParentItem(), fd.getDirData());
 			sharedUIResources.appUIShared.onDataUpdated(true);
 		} else {
 			// TODO This should update children
@@ -234,7 +235,6 @@ public class InputTree implements IFileView {
 		if (dd != null) {
 			final Map<String, FileData> files= dd.files;
 			if (!files.isEmpty()) {
-				final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
 				for (String f : Helpers.sort(files.keySet())) {
 					final FileData fd= files.get(f);
 					TreeItem ti= new TreeItem(parent, SWT.NONE);
@@ -244,25 +244,10 @@ public class InputTree implements IFileView {
 					ti.setText(0, f);
 					setFileItemInfoText(ti, fd);
 					setFileItemColor(ti, fd);
-					if (fd.isAudio() && !fd.isMarkedForDeletion())
-						if (fd.getAlbumData() != null)
-							albumDataSet.add(fd.getAlbumData());
 				}
 				// Update parent
-				if (dd.hasAudioContent()) {
-					boolean isAlbumDataComplete= false;
-					if (albumDataSet.size() == 1) {
-						AlbumData ad= albumDataSet.iterator().next();
-						parent.setText(1, formatInfo(albumInfoFmt, ad.getArtist(), ad.getYear(), ad.getAlbum()));
-						isAlbumDataComplete= ad.isComplete();
-					} else if (albumDataSet.size() > 1)
-						parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
-					if (!isAlbumDataComplete) {
-						TwoColours c= sharedUIResources.incompleteFileColours;
-						parent.setBackground(c.background);
-						parent.setForeground(c.foreground);
-					}
-				}
+				if (dd.hasAudioContent())
+					updateAlbumDirItem(parent, dd);
 			}
 		}
 	}
@@ -339,5 +324,33 @@ public class InputTree implements IFileView {
 			ti.setText(1, I18n.l("inputTree_txt_markedForDeletion")); //$NON-NLS-1$
 		else if (fd.isAudio())
 			ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
+	}
+
+	private void updateAlbumDirItem(TreeItem parent, DirData dd) {
+		// Collect album data
+		final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
+		for (FileData fd : dd.files.values())
+			if (fd.isAudio() && !fd.isMarkedForDeletion())
+				if (fd.getAlbumData() != null)
+					albumDataSet.add(fd.getAlbumData());
+		
+		// Check if album data complete and set text
+		boolean isAlbumDataIncomplete= false;
+		if (albumDataSet.isEmpty())
+			parent.setText(1, ""); //$NON-NLS-1$
+		else if (albumDataSet.size() == 1) {
+			AlbumData ad= albumDataSet.iterator().next();
+			parent.setText(1, formatInfo(albumInfoFmt, ad.getArtist(), ad.getYear(), ad.getAlbum()));
+			isAlbumDataIncomplete= !ad.isComplete();
+		} else {
+			parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
+			isAlbumDataIncomplete= true;
+		}
+		
+		// Update item
+		TwoColours c= isAlbumDataIncomplete ? sharedUIResources.itemIncompleteColours : sharedUIResources.itemCompleteColours;
+		parent.setBackground(c.background);
+		parent.setForeground(c.foreground);
+
 	}
 }

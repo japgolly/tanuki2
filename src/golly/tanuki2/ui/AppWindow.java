@@ -246,9 +246,9 @@ public class AppWindow {
 			else if (!fd.isAudio())
 				return sharedUIResources.nonAudioFileColours;
 			else if (!fd.isComplete(checkAlbumDataToo))
-				return sharedUIResources.incompleteFileColours;
+				return sharedUIResources.itemIncompleteColours;
 			else
-				return sharedUIResources.completeFileColours;
+				return sharedUIResources.itemCompleteColours;
 		}
 
 		public void onDataUpdated(boolean isCurrentViewUptodate) {
