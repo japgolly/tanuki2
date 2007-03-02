@@ -327,16 +327,26 @@ public class InputTree implements IFileView {
 	}
 
 	private void updateAlbumDirItem(TreeItem parent, DirData dd) {
-		// Collect album data
+		// Collect data about files
 		final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
-		for (FileData fd : dd.files.values())
-			if (fd.isAudio() && !fd.isMarkedForDeletion())
-				if (fd.getAlbumData() != null)
-					albumDataSet.add(fd.getAlbumData());
-		
-		// Check if album data complete and set text
+		boolean allMarkedForDeletion= true;
+		if (dd.files.isEmpty())
+			allMarkedForDeletion= false;
+		else
+			for (FileData fd : dd.files.values()) {
+				if (!fd.isMarkedForDeletion()) {
+					allMarkedForDeletion= false;
+					if (fd.isAudio())
+						if (fd.getAlbumData() != null)
+							albumDataSet.add(fd.getAlbumData());
+				}
+			}
+
+		// Set text + check if album data complete
 		boolean isAlbumDataIncomplete= false;
-		if (albumDataSet.isEmpty())
+		if (allMarkedForDeletion)
+			parent.setText(1, I18n.l("inputTree_txt_markedForDeletion")); //$NON-NLS-1$
+		else if (!dd.hasAudioContent() || albumDataSet.isEmpty())
 			parent.setText(1, ""); //$NON-NLS-1$
 		else if (albumDataSet.size() == 1) {
 			AlbumData ad= albumDataSet.iterator().next();
@@ -346,9 +356,16 @@ public class InputTree implements IFileView {
 			parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
 			isAlbumDataIncomplete= true;
 		}
-		
+
 		// Update item
-		TwoColours c= isAlbumDataIncomplete ? sharedUIResources.itemIncompleteColours : sharedUIResources.itemCompleteColours;
+		final TwoColours c;
+		if (allMarkedForDeletion)
+			c= sharedUIResources.deletionColours;
+		else if (isAlbumDataIncomplete)
+			c= sharedUIResources.itemIncompleteColours;
+		else
+			c= sharedUIResources.itemCompleteColours;
+		parent.setChecked(!allMarkedForDeletion);
 		parent.setBackground(c.background);
 		parent.setForeground(c.foreground);
 
