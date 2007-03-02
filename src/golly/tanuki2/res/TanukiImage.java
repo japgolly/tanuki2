@@ -11,11 +11,26 @@ import org.eclipse.swt.widgets.Display;
  */
 @SuppressWarnings("nls")
 public enum TanukiImage {
+	COPY("edit-copy.png"), //
+	EDITOR("accessories-text-editor.png"), //
+	EXPLORER("system-file-manager.png"), //
+	FOLDER("folder.png"), //
 	MIME_AUDIO("audio-x-generic.png"), //
 	MIME_IMAGE("image-x-generic.png"), //
 	MIME_TEXT("text-x-generic.png"), //
-	FOLDER("folder.png"), //
+	REMOVE("list-remove.png"), //
+	TERMINAL("utilities-terminal.png"), //
 	;
+
+	// ====== STATIC ======
+
+	private static Display display= null;
+
+	public static void setDisplay(Display display_) {
+		display= display_;
+	}
+
+	// ====== INTERNAL ======
 
 	private final String filename;
 	private Image img= null;
@@ -24,9 +39,11 @@ public enum TanukiImage {
 		this.filename= filename;
 	}
 
+	// ====== PUBLIC ======
+
 	public Image get() {
 		if (img == null) {
-			img= new Image(Display.getCurrent(), TanukiImage.class.getResourceAsStream(filename));
+			img= new Image(display, TanukiImage.class.getResourceAsStream(filename));
 			UIResourceManager.add(TanukiImage.class.getCanonicalName() + filename, img);
 		}
 		return img;

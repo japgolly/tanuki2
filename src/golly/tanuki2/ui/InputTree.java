@@ -50,6 +50,8 @@ public class InputTree implements IFileView {
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
 
+		// TODO Add a context menu to InputTree 
+		
 		tree.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.stateMask == SWT.NONE) {

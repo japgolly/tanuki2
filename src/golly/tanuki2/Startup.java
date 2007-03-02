@@ -3,6 +3,7 @@ package golly.tanuki2;
 import java.util.Locale;
 
 import golly.tanuki2.core.Engine;
+import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIResourceManager;
 import golly.tanuki2.ui.AppWindow;
@@ -25,6 +26,7 @@ public class Startup {
 
 			I18n.setLocale(Locale.ENGLISH);
 			display= new Display();
+			TanukiImage.setDisplay(display);
 			engine= new Engine();
 			engine.addFolder("X:\\music\\1. Fresh\\IN FLAMES Discografia (www.heavytorrents.org)");// DELME
 			new AppWindow(display, engine).show();

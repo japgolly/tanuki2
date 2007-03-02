@@ -3,6 +3,7 @@ package golly.tanuki2.ui;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
+import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Tanuki2Exception;
@@ -61,14 +62,16 @@ public class FlatList implements IFileView {
 		table.setMenu(popupMenu);
 		// mi: copy filenames
 		MenuItem miCopyFilenames= new MenuItem(popupMenu, SWT.PUSH);
+		miCopyFilenames.setImage(TanukiImage.COPY.get());
 		miCopyFilenames.setText(I18n.l("flatList_menu_copyFilenames") + "\tCtrl+C"); //$NON-NLS-1$ //$NON-NLS-2$
 		miCopyFilenames.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onCopyFilenames();
 			}
 		});
-		// mi: copy filenames
+		// mi: edit album
 		MenuItem miEditAlbum= new MenuItem(popupMenu, SWT.PUSH);
+		miEditAlbum.setImage(TanukiImage.EDITOR.get());
 		miEditAlbum.setText(I18n.l("flatList_menu_editAlbum")); //$NON-NLS-1$
 		miEditAlbum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -77,6 +80,7 @@ public class FlatList implements IFileView {
 		});
 		// mi: open folder
 		MenuItem miOpenFolder= new MenuItem(popupMenu, SWT.PUSH);
+		miOpenFolder.setImage(TanukiImage.EXPLORER.get());
 		miOpenFolder.setText(I18n.l("flatList_menu_openFolder")); //$NON-NLS-1$
 		miOpenFolder.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -85,6 +89,7 @@ public class FlatList implements IFileView {
 		});
 		// mi: open prompt
 		MenuItem miOpenPrompt= new MenuItem(popupMenu, SWT.PUSH);
+		miOpenPrompt.setImage(TanukiImage.TERMINAL.get());
 		miOpenPrompt.setText(I18n.l("flatList_menu_openPrompt")); //$NON-NLS-1$
 		miOpenPrompt.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -93,6 +98,7 @@ public class FlatList implements IFileView {
 		});
 		// mi: remove items
 		MenuItem miRemoveItems= new MenuItem(popupMenu, SWT.PUSH);
+		miRemoveItems.setImage(TanukiImage.REMOVE.get());
 		miRemoveItems.setText(I18n.l("flatList_menu_removeItems") + "\tDel"); //$NON-NLS-1$ //$NON-NLS-2$
 		miRemoveItems.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
