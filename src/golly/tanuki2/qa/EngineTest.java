@@ -237,6 +237,9 @@ public class EngineTest extends TestHelper {
 		assertEquals(ad1, ad2);
 		assertEquals(ad1, ad3);
 	}
+	
+	// TODO Add more TrackProperty selection tests: check for matches from different sources
+	// TODO Add more TrackProperty selection tests: choose by number of complete fields
 
 	private void assertEngineTrackProperties(String filename, TrackProperties expected) {
 		assertEngineTrackProperties(filename, expected, null);

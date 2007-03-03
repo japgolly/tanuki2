@@ -185,6 +185,7 @@ public class InputTree implements IFileView {
 	}
 
 	protected void onDelete() {
+		// TODO: Should have a confirmation msg here
 		for (TreeItem ti : tree.getSelection())
 			sharedUIResources.appUIShared.remove(getFullFilename(ti));
 		sharedUIResources.appUIShared.onFilesRemoved();

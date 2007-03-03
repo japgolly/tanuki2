@@ -77,6 +77,8 @@ public class AppWindow {
 				shell.setRedraw(true);
 			}
 		});
+		
+		// TODO: Add a menu with at least exit, preferences, about
 
 		// Create tab folder
 		tabFolder= new TabFolder(shell, SWT.NONE);

@@ -230,6 +230,7 @@ public class FlatList implements IFileView {
 	}
 
 	protected void onDelete() {
+		// TODO: Should have a confirmation msg here
 		for (TableItem ti : table.getSelection())
 			sharedUIResources.appUIShared.remove(ti.getText());
 		sharedUIResources.appUIShared.onFilesRemoved();
