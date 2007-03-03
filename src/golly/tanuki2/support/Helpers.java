@@ -1,7 +1,12 @@
 package golly.tanuki2.support;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,8 +28,14 @@ public final class Helpers {
 		public boolean hasFiles= false;
 	}
 
-	public static String addPathElement(final String path, final String name) {
-		return path.length() == 0 ? name : path + File.separator + name;
+	public static String addPathElements(final String path, final String... elements) {
+		StringBuilder sb= new StringBuilder(path);
+		for (String e : elements) {
+			if (sb.length() != 0)
+				sb.append(File.separatorChar);
+			sb.append(e);
+		}
+		return sb.toString();
 	}
 
 	public static <T> Set<T> arrayToSet(T[] array) {
@@ -51,6 +62,34 @@ public final class Helpers {
 	}
 
 	/**
+	 * Copies/renames a file.
+	 */
+	public static void cp(String srcFile, String destFile, boolean overwrite) throws FileNotFoundException, IOException {
+		if (!overwrite)
+			if (new File(destFile).isFile())
+				return;
+		FileChannel srcChannel= new FileInputStream(srcFile).getChannel();
+		FileChannel dstChannel= new FileOutputStream(destFile).getChannel();
+		dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
+		srcChannel.close();
+		dstChannel.close();
+	}
+
+	/**
+	 * Recursively copies the contents of a whole directory to another directory.<br>
+	 * If the target directory does not already exist it will be created.
+	 */
+	public static void cp_r(File srcDir, File destDir, boolean overwrite) throws IOException {
+		final String destDirPrefix= destDir.getPath() + File.separator;
+		mkdir_p(destDir);
+		for (File f : srcDir.listFiles())
+			if (f.isFile())
+				cp(f.toString(), destDirPrefix + f.getName(), overwrite);
+			else if (f.isDirectory())
+				cp_r(f, new File(destDirPrefix + f.getName()), overwrite);
+	}
+
+	/**
 	 * Takes a String array of field names and returns an array of {@link Field}s.
 	 * 
 	 * @throws RuntimeException if any excxeption occurs.
@@ -68,6 +107,32 @@ public final class Helpers {
 			throw new RuntimeException(e);
 		}
 		return fields;
+	}
+
+	private static final Pattern pGetFileExtention= Pattern.compile("^(?:.+[\\\\/])*[^\\\\/]+\\.([^\\\\/.]*)$");
+
+	public static String getFileExtention(String filename, boolean returnDotToo) {
+		final Matcher m= pGetFileExtention.matcher(filename);
+		if (!m.matches())
+			return "";
+		else
+			return returnDotToo ? "." + m.group(1) : m.group(1);
+	}
+
+	/**
+	 * Returns the system temp dir.
+	 * 
+	 * @throws RuntimeException if the temp dir could not be determined, doesn't exist or isn't a directory.
+	 */
+	public static String getSystemTempDir() {
+		String tmpDir= System.getenv("TEMP");
+		if (tmpDir == null)
+			tmpDir= System.getenv("TMP");
+		if (tmpDir == null)
+			throw new RuntimeException("Could determine temp dir.");
+		if (!(new File(tmpDir).isDirectory()))
+			throw new RuntimeException(tmpDir + " either doesn't exist or is not a directory.");
+		return tmpDir;
 	}
 
 	/**
@@ -183,6 +248,17 @@ public final class Helpers {
 		return sb.toString();
 	}
 
+	private static final Pattern pMAKEFILENAMESAFE_NAUGHTY_CHARS= Pattern.compile("[\\\\/:*?<>|]");
+
+	/**
+	 * Replaces all file-system-unsafe characters with safe alternatives.
+	 */
+	public static String makeFilenameSafe(String filename) {
+		// TODO makeFilenameSafe is win32 specific
+		filename= filename.replace("\"", "''");
+		return pMAKEFILENAMESAFE_NAUGHTY_CHARS.matcher(filename).replaceAll("_");
+	}
+
 	private static final Pattern pTITLECASE_B= Pattern.compile("\\b");
 	private static final Pattern pTITLECASE_HASW= Pattern.compile(".*\\w.*");
 	private static final Pattern pTITLECASE_ICAP= Pattern.compile("^['\"\\(\\[']*(\\w).*");
@@ -272,6 +348,31 @@ public final class Helpers {
 					main.get(k).addAll(newContent.get(k));
 				else
 					main.put(k, newContent.get(k));
+	}
+
+	/**
+	 * Creates a directory and if neccessary all parent directories.
+	 * 
+	 * @return <code>true</code> if the path was created successfully; <code>false</code> if the directory already
+	 *         exists.
+	 * @throws IOException if <code>File.mkdirs()</code> fails, or if the dir already exists but isn't a directory.
+	 */
+	public static boolean mkdir_p(File dir) throws IOException {
+		if (!dir.exists()) {
+			if (!dir.mkdirs())
+				throw new IOException("File.mkdirs() failed.");
+			return true;
+		} else if (!dir.isDirectory())
+			throw new IOException("Cannot create path. " + dir.toString() + " already exists and is not a directory.");
+		else
+			return false;
+	}
+
+	/**
+	 * @See #mkdir_p(File)
+	 */
+	public static boolean mkdir_p(String dir) throws IOException {
+		return mkdir_p(new File(dir));
 	}
 
 	/**
@@ -437,7 +538,7 @@ public final class Helpers {
 			// Has one child
 			// Don't add to target, extend path and optimise child
 			final String name= sourceNodes.keySet().iterator().next();
-			optimiseDirTree_add(Helpers.addPathElement(path, name), target, sourceNodes.get(name));
+			optimiseDirTree_add(Helpers.addPathElements(path, name), target, sourceNodes.get(name));
 			break;
 		}
 		default: {
@@ -494,6 +595,49 @@ public final class Helpers {
 		for (Object k : keys)
 			if (map.get(k) == null || map.get(k).isEmpty())
 				map.remove(k);
+	}
+
+	/**
+	 * Removes a directory if it's empty, and then its parent directory if that's empty and so on and so forth.
+	 * 
+	 * @throws IOException if for some reason an empty directory fails to be removed.
+	 */
+	public static void rmdirPath(File path) throws IOException {
+		if (path.isDirectory() && path.list().length == 0) {
+			if (!path.delete())
+				throw new IOException("rmdir failed. (\"" + path + "\")");
+			File parent= path.getParentFile();
+			if (parent != null)
+				rmdirPath(parent);
+		}
+	}
+
+	/**
+	 * @see #rmdirPath(File)
+	 */
+	public static void rmdirPath(String path) throws IOException {
+		rmdirPath(new File(path));
+	}
+
+	/**
+	 * Removes a directory and all its contents.
+	 */
+	public static void rm_rf(File dir) throws IOException {
+		for (File f : dir.listFiles())
+			if (f.isFile()) {
+				if (!f.delete())
+					throw new IOException("Delete failed. (\"" + f + "\")");
+			} else if (f.isDirectory())
+				rm_rf(f);
+		if (!dir.delete())
+			throw new IOException("Delete failed. (\"" + dir + "\")");
+	}
+
+	/**
+	 * @see #rm_rf(File)
+	 */
+	public static void rm_rf(String dir) throws IOException {
+		rm_rf(new File(dir));
 	}
 
 	/**

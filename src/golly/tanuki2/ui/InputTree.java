@@ -225,7 +225,7 @@ public class InputTree implements IFileView {
 		// Add directories
 		if (children != null)
 			for (String dir : Helpers.sort(children.keySet())) {
-				final String fullDir= Helpers.addPathElement(path, dir);
+				final String fullDir= Helpers.addPathElements(path, dir);
 				TreeItem ti= new TreeItem(parent, SWT.NONE);
 				ti.setChecked(true);
 				ti.setData(fullDir);
@@ -276,7 +276,7 @@ public class InputTree implements IFileView {
 
 	private String getFullFilename(TreeItem ti) {
 		if (ti.getData() instanceof FileData)
-			return Helpers.addPathElement(((FileData) ti.getData()).getDirData().dir, ti.getText());
+			return Helpers.addPathElements(((FileData) ti.getData()).getDirData().dir, ti.getText());
 		else
 			return (String) ti.getData();
 	}

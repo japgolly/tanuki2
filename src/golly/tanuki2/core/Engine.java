@@ -1,5 +1,7 @@
 package golly.tanuki2.core;
 
+import static golly.tanuki2.support.Helpers.addPathElements;
+import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.RankedObjectCollection;
@@ -9,6 +11,7 @@ import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +45,89 @@ public class Engine {
 	public void addFolder(String sourceFolderName) {
 		addFolder(new File(sourceFolderName));
 		readTrackProprties();
+	}
+
+	/**
+	 * Performs the crazy-ass voodoo magic that this whole app is about, mon.
+	 * <ul>
+	 * <li>Renames files with complete file and album data</li>
+	 * <li>Deletes files marks for deletion</li>
+	 * <li>Removes empty directories</li>
+	 * </ul>
+	 */
+	public void doYaVoodoo(final String targetBaseDir) throws IOException {
+		final String targetDirFormat= "[:artist:]\\[:year:] - [:album:]"; //$NON-NLS-1$
+		final String targetAudioFileFormat= "[:tn:] - [:track:]"; //$NON-NLS-1$
+
+		// TODO: Check for missing files (ie files in memory but no longer on hd)
+
+		// make target dir
+		Helpers.mkdir_p(targetBaseDir);
+
+		final Set<String> removeList= new HashSet<String>();
+		try {
+
+			for (final String srcDir : Helpers.sort(dirs.keySet())) {
+				final DirData dd= dirs.get(srcDir);
+				final Map<String, FileData> ddFiles= dd.files;
+
+				AlbumData ad= null;
+				boolean processThisDir= true;
+				for (FileData fd : ddFiles.values())
+					if (fd.isAudio() && !fd.isMarkedForDeletion()) {
+						// make sure all audio files are complete
+						if (!fd.isComplete(false) || fd.getAlbumData() == null) {
+							processThisDir= false;
+							break;
+						}
+						// make sure all album data in sync
+						if (ad == null)
+							ad= fd.getAlbumData();
+						else if (!ad.equals(fd.getAlbumData())) {
+							processThisDir= false;
+							break;
+						}
+					}
+				if (ad == null)
+					processThisDir= false;
+
+				if (processThisDir) {
+					// create target dir
+					final String targetDir= addPathElements(targetBaseDir, formatFilename(targetDirFormat, ad));
+					Helpers.mkdir_p(targetDir);
+
+					for (String f : Helpers.sort(ddFiles.keySet())) {
+						final FileData fd= ddFiles.get(f);
+						final String sourceFullFilename= addPathElements(srcDir, f);
+						// delete files marked for deletion
+						if (fd.isMarkedForDeletion()) {
+							deleteFile(sourceFullFilename);
+							removeList.add(sourceFullFilename);
+						}
+						// move all files not marked for deletion
+						else {
+							final String targetFilename;
+							if (fd.isAudio())
+								targetFilename= formatFilename(targetAudioFileFormat, fd) + Helpers.getFileExtention(f, true);
+							else
+								targetFilename= f;
+							moveFile(sourceFullFilename, addPathElements(targetDir, targetFilename));
+							removeList.add(sourceFullFilename);
+						}
+					}
+
+					// remove empty dirs from HD
+					Helpers.rmdirPath(srcDir);
+
+				} // if (processThisDir)
+			} // for dir
+
+		} finally {
+			// Remove processed files
+			for (String f : removeList)
+				remove(f);
+			removeEmptyDirs();
+		}
 	}
 
 	/**
@@ -88,6 +174,9 @@ public class Engine {
 		}
 	}
 
+	/**
+	 * Removes entries from <code>dirs</code> if their <code>DirData.files</code> collection is empty.
+	 */
 	public void removeEmptyDirs() {
 		final Set<String> emptyDirs= new HashSet<String>();
 		for (String dir : dirs.keySet())
@@ -146,6 +235,36 @@ public class Engine {
 			fd.setMimeImage(TanukiImage.MIME_TEXT);
 	}
 
+	private void deleteFile(final String sourceFilename) throws IOException {
+		// TODO Move to recycling bin
+		if (!new File(sourceFilename).delete())
+			throw new IOException("Delete failed. (\"" + sourceFilename + "\")"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private String formatFilename(String fmt, AlbumData ad) {
+		fmt= fmt.replace("[:artist:]", Helpers.makeFilenameSafe(ad.getArtist())); //$NON-NLS-1$
+		fmt= fmt.replace("[:year:]", ad.getYear().toString()); //$NON-NLS-1$
+		fmt= fmt.replace("[:album:]", Helpers.makeFilenameSafe(ad.getAlbum())); //$NON-NLS-1$
+		return fmt;
+	}
+
+	private String formatFilename(String fmt, FileData fd) {
+		fmt= formatFilename(fmt, fd.getAlbumData());
+		fmt= fmt.replace("[:tn:]", String.format("%02d", fd.getTn())); //$NON-NLS-1$ //$NON-NLS-2$
+		fmt= fmt.replace("[:track:]", Helpers.makeFilenameSafe(fd.getTrack())); //$NON-NLS-1$
+		return fmt;
+	}
+
+	private void moveFile(final String sourceFilename, final String targetFilename) throws IOException {
+		File source= new File(sourceFilename);
+		File target= new File(targetFilename);
+		if (target.isFile()) {
+			// TODO Prompt use to overwrite or not 
+		}
+		if (!source.renameTo(target))
+			throw new IOException("Move failed. (\"" + sourceFilename + "\" --> \"" + targetFilename + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
 	protected void readTrackProprties() {
 		// Read properties
 		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= new HashMap<DirData, Map<String, List<TrackProperties>>>();
@@ -184,7 +303,7 @@ public class Engine {
 	private void removeDir(String dir) {
 		DirData dd= dirs.get(dir);
 		for (String file : dd.files.keySet())
-			files.remove(Helpers.addPathElement(dir, file));
+			files.remove(addPathElements(dir, file));
 		dirs.remove(dir);
 	}
 }

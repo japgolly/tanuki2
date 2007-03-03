@@ -169,7 +169,7 @@ public class FilenameParser implements ITrackProprtyReader {
 				boolean failed= false;
 				Matcher m= null;
 				for (String processedFilename : processedFilenameMap.values()) {
-					String filename= Helpers.addPathElement(processedDir, processedFilename);
+					String filename= Helpers.addPathElements(processedDir, processedFilename);
 					if (!(m= p.pat.matcher(filename)).matches()) {
 						failed= true;
 						break;
@@ -183,7 +183,7 @@ public class FilenameParser implements ITrackProprtyReader {
 
 		// Read track properties for each file
 		for (String shortFilename : processedFilenameMap.keySet())
-			r.put(shortFilename, readTrackProperties(Helpers.addPathElement(processedDir, processedFilenameMap.get(shortFilename))));
+			r.put(shortFilename, readTrackProperties(Helpers.addPathElements(processedDir, processedFilenameMap.get(shortFilename))));
 
 		return r;
 	}
