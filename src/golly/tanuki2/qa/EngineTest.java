@@ -264,20 +264,34 @@ public class EngineTest extends TestHelper {
 	public void testDaVoodoo() throws IOException, URISyntaxException {
 		String sourceDir= prepareVoodooTestSourceDir("sample_data");
 		String targetDir= prepareVoodooTestTargetDir();
-		mtpr.addMockResult(addPathElements(sourceDir, "complete", "01"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "1", "Living Dead Beat"));
-		mtpr.addMockResult(addPathElements(sourceDir, "complete", "02"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "2", "Are You Dead Yet?"));
-		mtpr.addMockResult(addPathElements(sourceDir, "complete", "14"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "14", "Needled 24/7"));
+		mtpr.addMockResult(addPathElements(sourceDir, "complete", "blah", "01"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "1", "Living Dead Beat"));
+		mtpr.addMockResult(addPathElements(sourceDir, "complete", "blah", "02"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "2", "Are You Dead Yet?"));
+		mtpr.addMockResult(addPathElements(sourceDir, "complete", "blah", "14"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "14", "Needled 24/7"));
+		mtpr.addMockResult(addPathElements(sourceDir, "incomplete", "02"), makeTrackProperties("Children Of Bodom", 2003, "Hate Crew Deathroll", "02", "incomplete dir"));
+		mtpr.addMockResult(addPathElements(sourceDir, "other", "remain", "asd"), makeTrackProperties("Children Of Bodom", 2003, "Hate Crew Deathroll", "01", "Angels Don't Kill"));
 		engine.addFolder(sourceDir);
-		engine.files.get(addPathElements(sourceDir, "complete", "www.heavytorrents.org.txt")).setMarkedForDeletion(true);
-		engine.files.get(addPathElements(sourceDir, "complete", "VICL-35940.jpg")).setMarkedForDeletion(true);
-		assertEquals(8, engine.files.size());
+		int fileCount= 1 + 7 + 1 + 3 + 5;
+		assertEquals(fileCount, engine.files.size());
+		engine.files.get(addPathElements(sourceDir, "complete", "blah", "www.heavytorrents.org.txt")).setMarkedForDeletion(true);
+		engine.files.get(addPathElements(sourceDir, "complete", "blah", "VICL-35940.jpg")).setMarkedForDeletion(true);
+		engine.files.get(addPathElements(sourceDir, "incomplete", "crap.txt")).setMarkedForDeletion(true);
+		engine.files.get(addPathElements(sourceDir, "other", "del_all", "byebye.jpg")).setMarkedForDeletion(true);
+		engine.files.get(addPathElements(sourceDir, "other", "remain", "delme.txt")).setMarkedForDeletion(true);
+		engine.remove(addPathElements(sourceDir, "other", "remain", "remain.mp3"));
+		fileCount--;
+		assertEquals(fileCount, engine.files.size());
+		assertFalse(engine.files.get(addPathElements(sourceDir, "incomplete", "01.mp3")).isComplete(true));
+		assertTrue(engine.files.get(addPathElements(sourceDir, "incomplete", "02.mp3")).isComplete(true));
 
 		engine.doYaVoodoo(targetDir);
 
 		// Test target dir
 		assertDirContents(targetDir, "Children Of Bodom");
 		String tdir= addPathElements(targetDir, "Children Of Bodom");
-		assertDirContents(tdir, "2005 - Are You Dead Yet_");
+		assertDirContents(tdir, "2003 - Hate Crew Deathroll", "2005 - Are You Dead Yet_");
+		// Children Of Bodom/2003 - Hate Crew Deathroll
+		assertDirContents(addPathElements(tdir, "2003 - Hate Crew Deathroll"), "01 - Angels Don't Kill.mp3");
+		// Children Of Bodom/2005 - Are You Dead Yet_
 		tdir= addPathElements(tdir, "2005 - Are You Dead Yet_");
 		assertDirContents(tdir, "01 - Living Dead Beat.mp3", "02 - Are You Dead Yet_.mp3", "14 - Needled 24_7.mp3", "autotag.txt", "cover.jpg");
 		assertEquals(1187L, new File(addPathElements(tdir, "01 - Living Dead Beat.mp3")).length());
@@ -288,13 +302,23 @@ public class EngineTest extends TestHelper {
 		assertEquals("ARTIST:  AC-DC", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(tdir, "autotag.txt"))), "UTF-8")).readLine());
 
 		// Test engine.dirs + engine.files
-		assertEquals(1, engine.files.size());
-		assertEquals(1, engine.dirs.size());
-		assertEquals(sourceDir, engine.dirs.keySet().iterator().next());
-		assertEquals(addPathElements(sourceDir, "asd.txt"), engine.files.keySet().iterator().next());
+		assertEquals(1 + 5, engine.files.size());
+		assertEquals(2, engine.dirs.size());
+		assertTrue(engine.dirs.containsKey(sourceDir));
+		assertTrue(engine.dirs.containsKey(addPathElements(sourceDir, "incomplete")));
+		assertTrue(engine.files.containsKey(addPathElements(sourceDir, "asd.txt")));
 
 		// Test source dir
-		assertDirContents(sourceDir, "asd.txt");
+		assertDirContents(sourceDir, "asd.txt", "incomplete", "other");
+		// incomplete
+		assertDirContents(addPathElements(sourceDir, "incomplete"), "01.mp3", "02.mp3", "autotag.txt", "cover.jpg", "crap.txt");
+		// other
+		tdir= addPathElements(sourceDir, "other");
+		assertDirContents(tdir, "empty", "remain");
+		// other/empty
+		assertDirContents(addPathElements(tdir, "empty"));
+		// other/remain
+		assertDirContents(addPathElements(tdir, "remain"), "remain.mp3");
 	}
 
 	// =============================================================================================== //

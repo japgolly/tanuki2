@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -45,6 +46,7 @@ public class Engine {
 	public void addFolder(String sourceFolderName) {
 		addFolder(new File(sourceFolderName));
 		readTrackProprties();
+		removeEmptyDirs();
 	}
 
 	/**
@@ -71,31 +73,61 @@ public class Engine {
 				final DirData dd= dirs.get(srcDir);
 				final Map<String, FileData> ddFiles= dd.files;
 
-				AlbumData ad= null;
-				boolean processThisDir= true;
-				for (FileData fd : ddFiles.values())
-					if (fd.isAudio() && !fd.isMarkedForDeletion()) {
-						// make sure all audio files are complete
-						if (!fd.isComplete(false) || fd.getAlbumData() == null) {
-							processThisDir= false;
-							break;
+				// If the dir has audio content...
+				if (dd.hasAudioContent()) {
+
+					AlbumData ad= null;
+					boolean processThisDir= true;
+					for (FileData fd : ddFiles.values())
+						if (fd.isAudio() && !fd.isMarkedForDeletion()) {
+							// make sure all audio files are complete
+							if (!fd.isComplete(false) || fd.getAlbumData() == null) {
+								processThisDir= false;
+								break;
+							}
+							// make sure all album data in sync
+							if (ad == null)
+								ad= fd.getAlbumData();
+							else if (!ad.equals(fd.getAlbumData())) {
+								processThisDir= false;
+								break;
+							}
 						}
-						// make sure all album data in sync
-						if (ad == null)
-							ad= fd.getAlbumData();
-						else if (!ad.equals(fd.getAlbumData())) {
-							processThisDir= false;
-							break;
+					if (ad == null)
+						processThisDir= false;
+
+					if (processThisDir) {
+						// create target dir
+						final String targetDir= addPathElements(targetBaseDir, formatFilename(targetDirFormat, ad));
+						Helpers.mkdir_p(targetDir);
+
+						for (String f : Helpers.sort(ddFiles.keySet())) {
+							final FileData fd= ddFiles.get(f);
+							final String sourceFullFilename= addPathElements(srcDir, f);
+							// delete files marked for deletion
+							if (fd.isMarkedForDeletion()) {
+								deleteFile(sourceFullFilename);
+								removeList.add(sourceFullFilename);
+							}
+							// move all files not marked for deletion
+							else {
+								final String targetFilename;
+								if (fd.isAudio())
+									targetFilename= formatFilename(targetAudioFileFormat, fd) + Helpers.getFileExtention(f, true).toLowerCase(Locale.ENGLISH);
+								else
+									targetFilename= f;
+								moveFile(sourceFullFilename, addPathElements(targetDir, targetFilename));
+								removeList.add(sourceFullFilename);
+							}
 						}
+
+						// remove empty dirs from HD
+						Helpers.rmdirPath(srcDir);
 					}
-				if (ad == null)
-					processThisDir= false;
-
-				if (processThisDir) {
-					// create target dir
-					final String targetDir= addPathElements(targetBaseDir, formatFilename(targetDirFormat, ad));
-					Helpers.mkdir_p(targetDir);
-
+				}
+				
+				// If the dir doesn't have any audio content
+				else {
 					for (String f : Helpers.sort(ddFiles.keySet())) {
 						final FileData fd= ddFiles.get(f);
 						final String sourceFullFilename= addPathElements(srcDir, f);
@@ -104,22 +136,11 @@ public class Engine {
 							deleteFile(sourceFullFilename);
 							removeList.add(sourceFullFilename);
 						}
-						// move all files not marked for deletion
-						else {
-							final String targetFilename;
-							if (fd.isAudio())
-								targetFilename= formatFilename(targetAudioFileFormat, fd) + Helpers.getFileExtention(f, true);
-							else
-								targetFilename= f;
-							moveFile(sourceFullFilename, addPathElements(targetDir, targetFilename));
-							removeList.add(sourceFullFilename);
-						}
 					}
-
 					// remove empty dirs from HD
 					Helpers.rmdirPath(srcDir);
-
-				} // if (processThisDir)
+				}
+				
 			} // for dir
 
 		} finally {
