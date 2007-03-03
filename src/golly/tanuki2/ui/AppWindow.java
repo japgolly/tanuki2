@@ -4,6 +4,7 @@ import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
+import golly.tanuki2.support.Config;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
@@ -30,8 +31,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -65,11 +68,19 @@ public class AppWindow {
 		fileTransfer= FileTransfer.getInstance();
 
 		// Create shell
-		shell= new Shell();
-		shell.setSize(1600, 800);
+		shell= new Shell(display, SWT.SHELL_TRIM);
 		shell.setImage(TanukiImage.TANUKI.get());
 		shell.setText(I18n.l("general_app_title")); //$NON-NLS-1$
 		Display.setAppName(shell.getText());
+		if (Config.appwndHeight > 64 && Config.appwndWidth > 64 && Config.appwndX >= 0 && Config.appwndY >= 0) {
+			shell.setSize(Config.appwndWidth, Config.appwndHeight);
+			shell.setLocation(Config.appwndX, Config.appwndY);
+		} else {
+			Rectangle ca= display.getClientArea();
+			shell.setSize((int) (ca.width * .8), ((int) (ca.height * .8)));
+			shell.setLocation(ca.x + (int) (ca.width * .1), ca.y + ((int) (ca.height * .1)));
+		}
+		shell.setMaximized(Config.appwndMaximised);
 		shell.addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent e) {
 				shell.setRedraw(false);
@@ -77,7 +88,12 @@ public class AppWindow {
 				shell.setRedraw(true);
 			}
 		});
-		
+		shell.addListener(SWT.Dispose, new Listener() {
+			public void handleEvent(Event event) {
+				saveWindowState();
+			}
+		});
+
 		// TODO: Add a menu with at least exit, preferences, about
 
 		// Create tab folder
@@ -215,6 +231,15 @@ public class AppWindow {
 		expandBar.setBounds(ca.x, ca.y + ca.height - expandBarSize, ca.width, expandBarSize);
 		// Resize input view
 		tabFolder.setBounds(ca.x, ca.y, ca.width, ca.height - expandBarSize - SPACING);
+	}
+
+	protected void saveWindowState() {
+		Config.appwndMaximised= shell.getMaximized();
+		Rectangle b= shell.getBounds();
+		Config.appwndX= b.x;
+		Config.appwndY= b.y;
+		Config.appwndHeight= b.height;
+		Config.appwndWidth= b.width;
 	}
 
 	// =============================================================================================== //

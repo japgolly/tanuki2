@@ -15,6 +15,9 @@ import java.util.Properties;
 @SuppressWarnings("nls")
 public class Config {
 
+	public static int appwndX= -1, appwndY= -1, appwndWidth= -1, appwndHeight= -1;
+	public static boolean appwndMaximised= false;
+
 	// =============================================================================================== //
 	private static final String FILENAME= "settings.xml";
 	private static final String SETTINGS_DESC= "Tanuki2 Settings";
@@ -64,25 +67,34 @@ public class Config {
 				final String v= p.getProperty(name);
 				final Field f= Config.class.getDeclaredField(name);
 				final Class type= f.getType();
+				// String
 				if (type.equals(String.class)) {
-					// String
 					f.set(null, v);
-				} else if (type.equals(ArrayList.class)) {
-					// ArrayList<String>
+				}
+				// ArrayList<String> 
+				else if (type.equals(ArrayList.class)) {
 					f.set(null, stringToArray(v));
-				} else if (type.equals(int.class)) {
-					// int
+				}
+				// int
+				else if (type.equals(int.class)) {
 					try {
 						f.setInt(null, Integer.parseInt(v));
 					} catch (NumberFormatException e) {
 					}
-				} else if (type.equals(Integer.class)) {
-					// Integer
+				}
+				// Integer
+				else if (type.equals(Integer.class)) {
 					try {
 						f.set(null, new Integer(v));
 					} catch (NumberFormatException e) {
 					}
-				} else
+				}
+				// boolean
+				else if (type.equals(boolean.class)) {
+					f.setBoolean(null, "1".equals(v));
+				}
+				// unsupported
+				else
 					throw new RuntimeException("Unsupported type: " + type.toString());
 
 			}
@@ -110,6 +122,9 @@ public class Config {
 				} else if (type.equals(Integer.class) || type.equals(int.class)) {
 					// Integer + int
 					p.setProperty(name, ((Integer) v).toString());
+				} else if (type.equals(Boolean.class) || type.equals(boolean.class)) {
+					// Boolean + boolean
+					p.setProperty(name, ((Boolean) v) ? "1" : "0");
 				} else
 					throw new RuntimeException("Unsupported type: " + type.toString());
 			}
