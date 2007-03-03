@@ -21,6 +21,7 @@ public class TanukiException extends Exception {
 	}
 
 	public TanukiException(Throwable t) {
+		t.printStackTrace(System.err);
 		this.code= t.getClass().getSimpleName();
 		try {
 			StringWriter sw= new StringWriter();
@@ -36,7 +37,7 @@ public class TanukiException extends Exception {
 
 	@Override
 	public String getMessage() {
-		return I18n.l("general_error_title", getCode()); //$NON-NLS-1$
+		return I18n.l("general_error_msg", getCode()); //$NON-NLS-1$
 	}
 
 	/**
