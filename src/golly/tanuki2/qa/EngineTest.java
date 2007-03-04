@@ -10,8 +10,10 @@ import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.support.Helpers;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -20,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -261,9 +264,38 @@ public class EngineTest extends TestHelper {
 	// =============================================================================================== //
 
 	@Test
-	public void testDaVoodoo() throws IOException, URISyntaxException {
+	public void testDaVoodoo_overwriteNull() throws IOException, URISyntaxException {
+		testDaVoodoo(null);
+	}
+
+	@Test
+	public void testDaVoodoo_overwriteTrue() throws IOException, URISyntaxException {
+		testDaVoodoo(true);
+	}
+
+	@Test
+	public void testDaVoodoo_overwriteFalse() throws IOException, URISyntaxException {
+		testDaVoodoo(false);
+	}
+
+	private void createFile(String filename, String content) throws IOException {
+		File f= new File(filename);
+		Helpers.mkdir_p(f.getParentFile());
+		if (f.isFile())
+			f.delete();
+		BufferedWriter out= new BufferedWriter(new FileWriter(f));
+		out.write(content);
+		out.close();
+	}
+
+	public void testDaVoodoo(final Boolean overwriteAll) throws IOException, URISyntaxException {
+		final boolean oldFilesRemain= (overwriteAll != null && !overwriteAll);
 		String sourceDir= prepareVoodooTestSourceDir("sample_data");
 		String targetDir= prepareVoodooTestTargetDir();
+		if (overwriteAll != null) {
+			createFile(addPathElements(targetDir, "Children Of Bodom", "2005 - Are You Dead Yet_", "01 - Living Dead Beat.mp3"), "overwrite1");
+			createFile(addPathElements(targetDir, "Children Of Bodom", "2005 - Are You Dead Yet_", "autotag.txt"), "o2!");
+		}
 		mtpr.addMockResult(addPathElements(sourceDir, "complete", "blah", "01"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "1", "Living Dead Beat"));
 		mtpr.addMockResult(addPathElements(sourceDir, "complete", "blah", "02"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "2", "Are You Dead Yet?"));
 		mtpr.addMockResult(addPathElements(sourceDir, "complete", "blah", "14"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "14", "Needled 24/7"));
@@ -283,7 +315,7 @@ public class EngineTest extends TestHelper {
 		assertFalse(engine.files.get(addPathElements(sourceDir, "incomplete", "01.mp3")).isComplete(true));
 		assertTrue(engine.files.get(addPathElements(sourceDir, "incomplete", "02.mp3")).isComplete(true));
 
-		engine.doYaVoodoo(targetDir);
+		engine.doYaVoodoo(targetDir, null, overwriteAll);
 
 		// Test target dir
 		assertDirContents(targetDir, "Children Of Bodom");
@@ -294,22 +326,26 @@ public class EngineTest extends TestHelper {
 		// Children Of Bodom/2005 - Are You Dead Yet_
 		tdir= addPathElements(tdir, "2005 - Are You Dead Yet_");
 		assertDirContents(tdir, "01 - Living Dead Beat.mp3", "02 - Are You Dead Yet_.mp3", "14 - Needled 24_7.mp3", "autotag.txt", "cover.jpg");
-		assertEquals(1187L, new File(addPathElements(tdir, "01 - Living Dead Beat.mp3")).length());
+		assertEquals(oldFilesRemain ? 10L : 1187L, new File(addPathElements(tdir, "01 - Living Dead Beat.mp3")).length());
 		assertEquals(2L, new File(addPathElements(tdir, "02 - Are You Dead Yet_.mp3")).length());
 		assertEquals(6L, new File(addPathElements(tdir, "14 - Needled 24_7.mp3")).length());
-		assertEquals(81L, new File(addPathElements(tdir, "autotag.txt")).length());
+		assertEquals(oldFilesRemain ? 3L : 81L, new File(addPathElements(tdir, "autotag.txt")).length());
 		assertEquals("14ness", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(tdir, "14 - Needled 24_7.mp3"))), "ASCII")).readLine());
-		assertEquals("ARTIST:  AC-DC", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(tdir, "autotag.txt"))), "UTF-8")).readLine());
+		assertEquals(oldFilesRemain ? "o2!" : "ARTIST:  AC-DC", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(tdir, "autotag.txt"))), "UTF-8")).readLine());
 
 		// Test engine.dirs + engine.files
-		assertEquals(1 + 5, engine.files.size());
-		assertEquals(2, engine.dirs.size());
+		assertEquals(1 + 5 + (oldFilesRemain ? 2 : 0), engine.files.size());
+		assertEquals(2 + (oldFilesRemain ? 1 : 0), engine.dirs.size());
 		assertTrue(engine.dirs.containsKey(sourceDir));
 		assertTrue(engine.dirs.containsKey(addPathElements(sourceDir, "incomplete")));
 		assertTrue(engine.files.containsKey(addPathElements(sourceDir, "asd.txt")));
+		assertEquals(oldFilesRemain, engine.dirs.containsKey(addPathElements(sourceDir, "complete", "blah")));
 
 		// Test source dir
-		assertDirContents(sourceDir, "asd.txt", "incomplete", "other");
+		assertDirContents(sourceDir, "asd.txt", "incomplete", "other", oldFilesRemain ? "complete" : null);
+		// complete/blah
+		if (oldFilesRemain)
+			assertDirContents(addPathElements(sourceDir, "complete", "blah"), "01.mp3", "autotag.txt");
 		// incomplete
 		assertDirContents(addPathElements(sourceDir, "incomplete"), "01.mp3", "02.mp3", "autotag.txt", "cover.jpg", "crap.txt");
 		// other
@@ -336,11 +372,14 @@ public class EngineTest extends TestHelper {
 		if (!d.isDirectory())
 			fail("Directory " + dir + " expected but not found.");
 
+		Set<String> expectedFileSet= Helpers.arrayToSet(expectedFiles);
+		expectedFileSet.remove(null);
+		String[] expectedFiles2= expectedFileSet.toArray(new String[expectedFileSet.size()]);
 		String[] actual= d.list();
-		Arrays.sort(expectedFiles);
+		Arrays.sort(expectedFiles2);
 		Arrays.sort(actual);
-		//		assertEquals(expectedFiles, actual);
-		assertEquals(Arrays.deepToString(expectedFiles), Arrays.deepToString(actual));
+		//		assertEquals(expectedFiles2, actual);
+		assertEquals(Arrays.deepToString(expectedFiles2), Arrays.deepToString(actual));
 	}
 
 	private void assertEngineTrackProperties(String filename, TrackProperties expected) {

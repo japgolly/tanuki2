@@ -376,6 +376,49 @@ public final class Helpers {
 	}
 
 	/**
+	 * Renames/moves a file, overwriting the target if neccessary.
+	 * 
+	 * @throws IOException if anything goes wrong.
+	 */
+	public static void mv(File source, File target) throws IOException {
+		if (source.equals(target))
+			return;
+		if (target.exists() && !target.canWrite())
+			throw new IOException("Cannot move file. Target is read-only. (\"" + target.toString() + "\")");
+		File tmp= new File(addPathElements(target.getParent(), "golly_java_mvhelper_tempfile_7816452937.tmp"));
+		if (tmp.exists())
+			tmp.delete();
+
+		boolean normalRenameWorked= false;
+		try {
+			if (source.renameTo(tmp))
+				normalRenameWorked= true;
+			else
+				cp(source.toString(), tmp.toString(), true);
+			if (target.exists())
+				if (!target.delete())
+					throw new IOException("Failed to delete " + target.toString());
+			tmp.renameTo(target);
+			if (!normalRenameWorked)
+				source.delete();
+		} finally {
+			if (tmp.exists()) {
+				if (normalRenameWorked)
+					tmp.renameTo(source);
+				else
+					tmp.delete();
+			}
+		}
+	}
+
+	/**
+	 * @see #mv(File, File)
+	 */
+	public static void mv(String source, String target) throws IOException {
+		mv(new File(source), new File(target));
+	}
+
+	/**
 	 * @see #normalizeText(String, List)
 	 */
 	public static final String normalizeText(final String input) {

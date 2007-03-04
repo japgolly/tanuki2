@@ -9,6 +9,8 @@ import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
+import golly.tanuki2.support.I18n;
+import golly.tanuki2.ui.YesNoToAllBox;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +22,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * @author Golly
@@ -35,6 +39,7 @@ public class Engine {
 
 	protected final List<ITrackProprtyReader> trackProprtyReaders= new ArrayList<ITrackProprtyReader>();
 	protected final Set<DirData> dirsNeedingTrackProprties= new HashSet<DirData>();
+	private Boolean overwriteAll= null;
 
 	public Engine() {
 		trackProprtyReaders.add(new FilenameParser());
@@ -57,7 +62,9 @@ public class Engine {
 	 * <li>Removes empty directories</li>
 	 * </ul>
 	 */
-	public void doYaVoodoo(final String targetBaseDir) throws IOException {
+	public void doYaVoodoo(final String targetBaseDir, final Shell shell, Boolean overwriteAll) throws IOException {
+		this.overwriteAll= overwriteAll;
+		// TODO output formats shouldn't be hard-coded
 		final String targetDirFormat= "[:artist:]\\[:year:] - [:album:]"; //$NON-NLS-1$
 		final String targetAudioFileFormat= "[:tn:] - [:track:]"; //$NON-NLS-1$
 
@@ -116,8 +123,8 @@ public class Engine {
 									targetFilename= formatFilename(targetAudioFileFormat, fd) + Helpers.getFileExtention(f, true).toLowerCase(Locale.ENGLISH);
 								else
 									targetFilename= f;
-								moveFile(sourceFullFilename, addPathElements(targetDir, targetFilename));
-								removeList.add(sourceFullFilename);
+								if (moveFile(shell, sourceFullFilename, addPathElements(targetDir, targetFilename)))
+									removeList.add(sourceFullFilename);
 							}
 						}
 
@@ -125,7 +132,7 @@ public class Engine {
 						Helpers.rmdirPath(srcDir);
 					}
 				}
-				
+
 				// If the dir doesn't have any audio content
 				else {
 					for (String f : Helpers.sort(ddFiles.keySet())) {
@@ -140,7 +147,7 @@ public class Engine {
 					// remove empty dirs from HD
 					Helpers.rmdirPath(srcDir);
 				}
-				
+
 			} // for dir
 
 		} finally {
@@ -276,14 +283,42 @@ public class Engine {
 		return fmt;
 	}
 
-	private void moveFile(final String sourceFilename, final String targetFilename) throws IOException {
+	private boolean moveFile(final Shell shell, final String sourceFilename, final String targetFilename) throws IOException {
 		File source= new File(sourceFilename);
 		File target= new File(targetFilename);
+
+		if (source.equals(target))
+			return true;
+
+		// Target file already exists
 		if (target.isFile()) {
-			// TODO Prompt use to overwrite or not 
+			final boolean overwrite;
+			if (overwriteAll == null)
+				switch (YesNoToAllBox.show(shell, I18n.l("voodoo_txt_overwritePrompt", targetFilename), YesNoToAllBox.Value.NO)) { //$NON-NLS-1$
+				case NO:
+					overwrite= false;
+					break;
+				case YES:
+					overwrite= true;
+					break;
+				case NO_TO_ALL:
+					overwriteAll= overwrite= false;
+					break;
+				case YES_TO_ALL:
+					overwriteAll= overwrite= true;
+					break;
+				default:
+					throw new RuntimeException(); // This is just to shut up the compiler.
+				}
+			else
+				overwrite= overwriteAll;
+			if (!overwrite)
+				return false;
 		}
-		if (!source.renameTo(target))
-			throw new IOException("Move failed. (\"" + sourceFilename + "\" --> \"" + targetFilename + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		// Move file (and overwrite if neccessary)
+		Helpers.mv(source, target);
+		return true;
 	}
 
 	protected void readTrackProprties() {
