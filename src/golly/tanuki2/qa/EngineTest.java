@@ -7,6 +7,7 @@ import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 
 import java.io.BufferedReader;
@@ -103,6 +104,19 @@ public class EngineTest extends TestHelper {
 	public void setup() {
 		mtpr= new MockTrackProprtyReader();
 		engine= new Engine2(mtpr);
+	}
+
+	@Test
+	public void makeSureRemoveUpdatesTheHasAudioProperty() {
+		engine.addFakeDir("A", "a1.mp3", "a2.mp3", "as.txt");
+		engine.files.get(addPathElements("A", "as.txt")).setAudio(false);
+		engine.files.get(addPathElements("A", "as.txt")).setMimeImage(TanukiImage.MIME_TEXT);
+		final DirData dd= engine.dirs.get("A");
+		assertTrue(dd.hasAudioContent());
+		engine.remove(addPathElements("A", "a2.mp3"));
+		assertTrue(dd.hasAudioContent());
+		engine.remove(addPathElements("A", "a1.mp3"));
+		assertFalse(dd.hasAudioContent());
 	}
 
 	// =============================================================================================== //
