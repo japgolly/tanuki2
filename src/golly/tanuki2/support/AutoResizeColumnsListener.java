@@ -1,5 +1,6 @@
 package golly.tanuki2.support;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -38,10 +39,10 @@ public class AutoResizeColumnsListener implements Listener {
 		this.enabled= false;
 
 		final int columnCount= wwc.getColumnCount();
-		final int availableWidth= c.getClientArea().width;
+		final int availableWidth= c.getSize().x - (c.getBorderWidth() << 1) - (wwc.isVerticalBarVisible() ? c.getVerticalBar().getSize().x : 0);
 
 		if (availableWidth > 8 && columnCount != 0) {
-			System.out.println(c + ": " + disableRedraw);//DELME
+
 			if (disableRedraw)
 				c.setRedraw(false);
 
@@ -92,6 +93,8 @@ public class AutoResizeColumnsListener implements Listener {
 		public abstract void packAllColumns();
 
 		public abstract boolean isEmpty();
+
+		public abstract boolean isVerticalBarVisible();
 	}
 
 	static final class WidgetWithColumns_Table implements WidgetWithColumns {
@@ -125,6 +128,10 @@ public class AutoResizeColumnsListener implements Listener {
 		public boolean isEmpty() {
 			return w.getItemCount() == 0;
 		}
+
+		public boolean isVerticalBarVisible() {
+			return w.computeSize(SWT.DEFAULT, SWT.DEFAULT).y > w.getClientArea().height + w.getHeaderHeight();
+		}
 	}
 
 	static final class WidgetWithColumns_Tree implements WidgetWithColumns {
@@ -157,6 +164,10 @@ public class AutoResizeColumnsListener implements Listener {
 
 		public boolean isEmpty() {
 			return w.getItemCount() == 0;
+		}
+
+		public boolean isVerticalBarVisible() {
+			return w.getVerticalBar().isVisible();
 		}
 	}
 }
