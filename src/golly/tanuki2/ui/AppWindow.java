@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -274,11 +275,6 @@ public class AppWindow {
 			refreshFiles(false);
 		}
 
-		public void onFilesRemoved() {
-			engine.removeEmptyDirs();
-			onDataUpdated_RefreshNow();
-		}
-
 		public boolean openAlbumEditor(DirData dd, Shell shell) {
 			AlbumEditor ae= new AlbumEditor(shell, dd);
 			ae.show();
@@ -313,8 +309,19 @@ public class AppWindow {
 			}
 		}
 
-		public void remove(String item) {
-			engine.remove(item);
+		public boolean removeFiles(String[] files) {
+			final MessageBox mb= new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.APPLICATION_MODAL);
+			mb.setText(I18n.l("general_app_title")); //$NON-NLS-1$
+			mb.setMessage(I18n.l("main_txt_removeSelectedConfirmationMsg")); //$NON-NLS-1$
+			if (mb.open() != SWT.YES)
+				return false;
+
+			for (String f : files)
+				engine.remove(f);
+			engine.removeEmptyDirs();
+			onDataUpdated_RefreshNow();
+			return true;
 		}
+
 	}
 }

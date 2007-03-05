@@ -234,10 +234,11 @@ public class FlatList implements IFileView {
 	}
 
 	protected void onDelete() {
-		// TODO: Should have a confirmation msg here
+		String[] files= new String[table.getSelectionCount()];
+		int i= 0;
 		for (TableItem ti : table.getSelection())
-			sharedUIResources.appUIShared.remove(ti.getText());
-		sharedUIResources.appUIShared.onFilesRemoved();
+			files[i++]= ti.getText();
+		sharedUIResources.appUIShared.removeFiles(files);
 	}
 
 	protected void onEdit() {

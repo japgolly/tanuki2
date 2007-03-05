@@ -191,10 +191,11 @@ public class InputTree implements IFileView {
 	}
 
 	protected void onDelete() {
-		// TODO: Should have a confirmation msg here
+		String[] files= new String[tree.getSelectionCount()];
+		int i= 0;
 		for (TreeItem ti : tree.getSelection())
-			sharedUIResources.appUIShared.remove(getFullFilename(ti));
-		sharedUIResources.appUIShared.onFilesRemoved();
+			files[i++]= getFullFilename(ti);
+		sharedUIResources.appUIShared.removeFiles(files);
 	}
 
 	protected void onEdit() {
