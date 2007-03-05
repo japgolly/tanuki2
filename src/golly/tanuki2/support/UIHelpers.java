@@ -1,5 +1,9 @@
 package golly.tanuki2.support;
 
+import golly.tanuki2.support.AutoResizeColumnsListener.WidgetWithColumns;
+import golly.tanuki2.support.AutoResizeColumnsListener.WidgetWithColumns_Table;
+import golly.tanuki2.support.AutoResizeColumnsListener.WidgetWithColumns_Tree;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
@@ -16,6 +20,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Tree;
 
 /**
  * @author Golly
@@ -39,6 +45,20 @@ public class UIHelpers {
 			if (name.equals(s))
 				return;
 		combo.add(name);
+	}
+
+	public static AutoResizeColumnsListener createAutoResizeColumnsListener(Table t) {
+		return createAutoResizeColumnsListener(new WidgetWithColumns_Table(t), true);
+	}
+
+	public static AutoResizeColumnsListener createAutoResizeColumnsListener(Tree t) {
+		return createAutoResizeColumnsListener(new WidgetWithColumns_Tree(t), true);
+	}
+
+	private static AutoResizeColumnsListener createAutoResizeColumnsListener(WidgetWithColumns wwc, boolean disableRedraw) {
+		final AutoResizeColumnsListener listener= new AutoResizeColumnsListener(wwc);
+		listener.disableRedraw= disableRedraw;
+		return listener;
 	}
 
 	/**

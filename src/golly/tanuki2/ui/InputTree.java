@@ -4,8 +4,10 @@ import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
+import golly.tanuki2.support.AutoResizeColumnsListener;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
@@ -41,6 +43,7 @@ public class InputTree implements IFileView {
 	private final Set<String> collapsedDirs= new HashSet<String>();
 	private final SharedUIResources sharedUIResources;
 	private final Tree tree;
+	private final AutoResizeColumnsListener autoColumnResizer;
 	private Map<String, DirData> dirs= null;
 
 	public InputTree(Composite parent, SharedUIResources sharedUIResources_) {
@@ -51,7 +54,7 @@ public class InputTree implements IFileView {
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
 
 		// TODO Add a context menu to InputTree 
-		
+
 		tree.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.stateMask == SWT.NONE) {
@@ -73,9 +76,11 @@ public class InputTree implements IFileView {
 					}
 					// CTRL +, CTRL -
 					else if (e.character == '+' || e.character == '-') {
+						autoColumnResizer.enabled= autoColumnResizer.disableRedraw= false;
 						tree.setRedraw(false);
 						setExpandedAll(e.character == '+');
 						tree.setRedraw(true);
+						autoColumnResizer.enabled= autoColumnResizer.disableRedraw= true;
 						e.doit= false;
 					}
 				}
@@ -92,22 +97,25 @@ public class InputTree implements IFileView {
 					onCheck(e);
 			}
 		});
-		// TODO Add a listener that resizes widths of columns
+		this.autoColumnResizer= UIHelpers.createAutoResizeColumnsListener(tree);
+		tree.addListener(SWT.Resize, autoColumnResizer);
 	}
 
 	// =============================================================================================== //
 	// = Public
 	// =============================================================================================== //
 
+	public AutoResizeColumnsListener getAutoResizeColumnsListener() {
+		return autoColumnResizer;
+	}
+
 	public Tree getWidget() {
 		return tree;
 	}
 
 	@SuppressWarnings("unchecked")
-	public void refreshFiles(HashMap<String, DirData> dirs) {
-		// init
+	public void refreshFiles(Map<String, DirData> dirs) {
 		this.dirs= dirs;
-		tree.setRedraw(false);
 
 		// Remember which dirs are collapsed
 		collapsedDirs.clear();
@@ -160,8 +168,6 @@ public class InputTree implements IFileView {
 			tree.setSelection(newSelectedTreeItems.toArray(new TreeItem[newSelectedTreeItems.size()]));
 			tree.showSelection();
 		}
-
-		tree.setRedraw(true);
 	}
 
 	// =============================================================================================== //

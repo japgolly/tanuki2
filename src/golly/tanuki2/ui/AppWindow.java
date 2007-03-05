@@ -4,6 +4,7 @@ import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
+import golly.tanuki2.support.AutoResizeColumnsListener;
 import golly.tanuki2.support.Config;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
@@ -294,9 +295,19 @@ public class AppWindow {
 				fileViewsUptodate.add(currentFileView);
 				display.asyncExec(new Runnable() {
 					public void run() {
-						currentFileView.getWidget().setRedraw(false);
+						// Disable redraw and auto-resize-column-listener
+						final Control c= currentFileView.getWidget();
+						final AutoResizeColumnsListener arcl= currentFileView.getAutoResizeColumnsListener();
+						arcl.enabled= arcl.disableRedraw= false;
+						c.setRedraw(false);
+
+						// Refresh files
 						currentFileView.refreshFiles(engine.dirs);
-						currentFileView.getWidget().setRedraw(true);
+
+						// Re-enable redraw and auto-resize-column-listener
+						arcl.resizeColumns();
+						c.setRedraw(true);
+						arcl.enabled= arcl.disableRedraw= true;
 					}
 				});
 			}

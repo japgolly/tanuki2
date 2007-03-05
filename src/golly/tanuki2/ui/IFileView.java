@@ -1,8 +1,9 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.data.DirData;
+import golly.tanuki2.support.AutoResizeColumnsListener;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.swt.widgets.Control;
 
@@ -12,8 +13,9 @@ import org.eclipse.swt.widgets.Control;
  */
 interface IFileView {
 
+	public abstract AutoResizeColumnsListener getAutoResizeColumnsListener();
+
 	public abstract Control getWidget();
 
-	public abstract void refreshFiles(HashMap<String, DirData> dirs);
-
+	public abstract void refreshFiles(Map<String, DirData> dirs);
 }

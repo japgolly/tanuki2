@@ -4,14 +4,17 @@ import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
+import golly.tanuki2.support.AutoResizeColumnsListener;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.TanukiException;
+import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -42,6 +45,7 @@ public class FlatList implements IFileView {
 	private final Table table;
 	private final int INDEX_FILENAME, INDEX_ARTIST, INDEX_YEAR, INDEX_ALBUM, INDEX_TN, INDEX_TRACK;
 	private final MenuItem[] singleSelectionMenuItems, singleAudioSelectionMenuItems;
+	private final AutoResizeColumnsListener autoColumnResizer;
 
 	public FlatList(Composite parent, SharedUIResources sharedUIResources_) {
 		this.sharedUIResources= sharedUIResources_;
@@ -159,19 +163,23 @@ public class FlatList implements IFileView {
 					onCheck(e);
 			}
 		});
-		// TODO Add a listener that resizes widths of columns
+		this.autoColumnResizer= UIHelpers.createAutoResizeColumnsListener(table);
+		table.addListener(SWT.Resize, autoColumnResizer);
 	}
 
 	// =============================================================================================== //
 	// = Public
 	// =============================================================================================== //
 
+	public AutoResizeColumnsListener getAutoResizeColumnsListener() {
+		return autoColumnResizer;
+	}
+
 	public Table getWidget() {
 		return table;
 	}
 
-	public void refreshFiles(HashMap<String, DirData> dirs) {
-		table.setRedraw(false);
+	public void refreshFiles(Map<String, DirData> dirs) {
 		table.removeAll();
 
 		for (String dir : Helpers.sort(dirs.keySet())) {
@@ -202,10 +210,6 @@ public class FlatList implements IFileView {
 				setFileItemColor(ti, fd);
 			}
 		}
-		for (TableColumn tc : table.getColumns())
-			tc.pack();
-
-		table.setRedraw(true);
 	}
 
 	// =============================================================================================== //
