@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class Engine {
 	private final static Pattern patAudio= Pattern.compile("^.+\\.(?:mp3|flac|ape|mp4|m4a|ogg|aac|wmv|wav)$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
-	private final static Pattern patImage= Pattern.compile("^.+\\.(?:jpe?g|gif|png|bmp)$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
+	private final static Pattern patImage= Pattern.compile("^.+\\.(?:jpe?g|gif|png|bmp|tiff?|tga)$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
 	private final static Pattern patText= Pattern.compile("^.+\\.(?:txt|html?|diz|nfo)$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
 
 	public final HashMap<String, DirData> dirs= new HashMap<String, DirData>();
