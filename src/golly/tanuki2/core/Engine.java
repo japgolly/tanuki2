@@ -10,6 +10,7 @@ import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.ui.VoodooProgressDialog;
 import golly.tanuki2.ui.YesNoToAllBox;
 
 import java.io.File;
@@ -22,8 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.eclipse.swt.widgets.Shell;
 
 /**
  * @author Golly
@@ -62,7 +61,7 @@ public class Engine {
 	 * <li>Removes empty directories</li>
 	 * </ul>
 	 */
-	public void doYaVoodoo(final String targetBaseDir, final Shell shell, Boolean overwriteAll) throws IOException {
+	public void doYaVoodoo(final String targetBaseDir, final VoodooProgressDialog progressDlg, Boolean overwriteAll) throws IOException {
 		this.overwriteAll= overwriteAll;
 		// TODO output formats shouldn't be hard-coded
 		final String targetDirFormat= "[:artist:]\\[:year:] - [:album:]"; //$NON-NLS-1$
@@ -70,92 +69,115 @@ public class Engine {
 
 		// TODO: Check for missing files (ie files in memory but no longer on hd)
 
-		// make target dir
+		// Make processing list
+		final Map<String, ProcessingCommands> processingList= new HashMap<String, ProcessingCommands>();
+		int totalCommands= 0;
+		for (final String srcDir : dirs.keySet()) {
+			final DirData dd= dirs.get(srcDir);
+			final Map<String, FileData> ddFiles= dd.files;
+			ProcessingCommands pc= new ProcessingCommands();
+
+			// If the dir has audio content...
+			if (dd.hasAudioContent()) {
+				AlbumData ad= null;
+				boolean processThisDir= true;
+				for (FileData fd : ddFiles.values())
+					if (fd.isAudio() && !fd.isMarkedForDeletion()) {
+						// make sure all audio files are complete
+						if (!fd.isComplete(false) || fd.getAlbumData() == null) {
+							processThisDir= false;
+							break;
+						}
+						// make sure all album data in sync
+						if (ad == null)
+							ad= fd.getAlbumData();
+						else if (!ad.equals(fd.getAlbumData())) {
+							processThisDir= false;
+							break;
+						}
+					}
+				if (ad == null)
+					processThisDir= false;
+
+				if (processThisDir) {
+					pc.targetDirectory= addPathElements(targetBaseDir, formatFilename(targetDirFormat, ad));
+					for (String f : ddFiles.keySet()) {
+						final FileData fd= ddFiles.get(f);
+						// delete files marked for deletion
+						if (fd.isMarkedForDeletion())
+							pc.deletions.add(f);
+						// move all files not marked for deletion
+						else {
+							final String targetFilename;
+							if (fd.isAudio())
+								targetFilename= formatFilename(targetAudioFileFormat, fd) + Helpers.getFileExtention(f, true).toLowerCase(Locale.ENGLISH);
+							else
+								targetFilename= f;
+							pc.moves.put(f, targetFilename);
+						}
+					}
+				}
+			}
+
+			// If the dir doesn't have any audio content
+			else
+				for (String f : ddFiles.keySet()) {
+					final FileData fd= ddFiles.get(f);
+					// delete files marked for deletion
+					if (fd.isMarkedForDeletion())
+						pc.deletions.add(f);
+				}
+
+			// Add to processing list
+			if (pc.getCommandCount() != 0) {
+				processingList.put(srcDir, pc);
+				totalCommands+= pc.getCommandCount();
+			}
+		}
+
+		progressDlg.starting(processingList.size(), totalCommands);
+
+		// Make target base dir
 		Helpers.mkdir_p(targetBaseDir);
 
+		// Start processing
 		final Set<String> removeList= new HashSet<String>();
 		try {
+			for (final String srcDir : Helpers.sort(processingList.keySet())) {
+				final ProcessingCommands pc= processingList.get(srcDir);
 
-			for (final String srcDir : Helpers.sort(dirs.keySet())) {
-				final DirData dd= dirs.get(srcDir);
-				final Map<String, FileData> ddFiles= dd.files;
+				progressDlg.nextDir(srcDir, pc.targetDirectory, pc.getCommandCount());
 
-				// If the dir has audio content...
-				if (dd.hasAudioContent()) {
-
-					AlbumData ad= null;
-					boolean processThisDir= true;
-					for (FileData fd : ddFiles.values())
-						if (fd.isAudio() && !fd.isMarkedForDeletion()) {
-							// make sure all audio files are complete
-							if (!fd.isComplete(false) || fd.getAlbumData() == null) {
-								processThisDir= false;
-								break;
-							}
-							// make sure all album data in sync
-							if (ad == null)
-								ad= fd.getAlbumData();
-							else if (!ad.equals(fd.getAlbumData())) {
-								processThisDir= false;
-								break;
-							}
-						}
-					if (ad == null)
-						processThisDir= false;
-
-					if (processThisDir) {
-						// create target dir
-						final String targetDir= addPathElements(targetBaseDir, formatFilename(targetDirFormat, ad));
-						Helpers.mkdir_p(targetDir);
-
-						for (String f : Helpers.sort(ddFiles.keySet())) {
-							final FileData fd= ddFiles.get(f);
-							final String sourceFullFilename= addPathElements(srcDir, f);
-							// delete files marked for deletion
-							if (fd.isMarkedForDeletion()) {
-								deleteFile(sourceFullFilename);
-								removeList.add(sourceFullFilename);
-							}
-							// move all files not marked for deletion
-							else {
-								final String targetFilename;
-								if (fd.isAudio())
-									targetFilename= formatFilename(targetAudioFileFormat, fd) + Helpers.getFileExtention(f, true).toLowerCase(Locale.ENGLISH);
-								else
-									targetFilename= f;
-								if (moveFile(shell, sourceFullFilename, addPathElements(targetDir, targetFilename)))
-									removeList.add(sourceFullFilename);
-							}
-						}
-
-						// remove empty dirs from HD
-						Helpers.rmdirPath(srcDir);
-					}
-				}
-
-				// If the dir doesn't have any audio content
-				else {
-					for (String f : Helpers.sort(ddFiles.keySet())) {
-						final FileData fd= ddFiles.get(f);
-						final String sourceFullFilename= addPathElements(srcDir, f);
-						// delete files marked for deletion
-						if (fd.isMarkedForDeletion()) {
-							deleteFile(sourceFullFilename);
+				// Move files
+				if (!pc.moves.isEmpty()) {
+					Helpers.mkdir_p(pc.targetDirectory);
+					for (String sourceFilename : Helpers.sort(pc.moves.keySet())) {
+						final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
+						progressDlg.nextFile();
+						if (moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename))))
 							removeList.add(sourceFullFilename);
-						}
 					}
-					// remove empty dirs from HD
-					Helpers.rmdirPath(srcDir);
 				}
 
-			} // for dir
+				// Delete files
+				for (String f : Helpers.sort(pc.deletions)) {
+					final String sourceFullFilename= addPathElements(srcDir, f);
+					progressDlg.nextFile();
+					deleteFile(progressDlg, sourceFullFilename);
+					removeList.add(sourceFullFilename);
+				}
 
+				// remove empty dirs from HD
+				Helpers.rmdirPath(srcDir);
+			}
 		} finally {
 			// Remove processed files
 			for (String f : removeList)
 				remove(f);
 			removeEmptyDirs();
 		}
+
+		progressDlg.finished();
 	}
 
 	/**
@@ -218,6 +240,16 @@ public class Engine {
 	// = Internal
 	// =============================================================================================== //
 
+	private static class ProcessingCommands {
+		public String targetDirectory= null;
+		public Set<String> deletions= new HashSet<String>();
+		public Map<String, String> moves= new HashMap<String, String>();
+
+		public int getCommandCount() {
+			return deletions.size() + moves.size();
+		}
+	}
+
 	/**
 	 * Recursively adds the contents of a folder.
 	 */
@@ -263,9 +295,11 @@ public class Engine {
 			fd.setMimeImage(TanukiImage.MIME_TEXT);
 	}
 
-	private void deleteFile(final String sourceFilename) throws IOException {
+	private void deleteFile(VoodooProgressDialog progressDlg, final String sourceFilename) throws IOException {
 		// TODO Move to recycling bin
-		if (!new File(sourceFilename).delete())
+		final File f= new File(sourceFilename);
+		progressDlg.deleting(f);
+		if (!f.delete())
 			throw new IOException("Delete failed. (\"" + sourceFilename + "\")"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -283,7 +317,7 @@ public class Engine {
 		return fmt;
 	}
 
-	private boolean moveFile(final Shell shell, final String sourceFilename, final String targetFilename) throws IOException {
+	private boolean moveFile(final VoodooProgressDialog progressDlg, final String sourceFilename, final String targetFilename) throws IOException {
 		File source= new File(sourceFilename);
 		File target= new File(targetFilename);
 
@@ -294,7 +328,7 @@ public class Engine {
 		if (target.isFile()) {
 			final boolean overwrite;
 			if (overwriteAll == null)
-				switch (YesNoToAllBox.show(shell, I18n.l("voodoo_txt_overwritePrompt", targetFilename), YesNoToAllBox.Value.NO)) { //$NON-NLS-1$
+				switch (YesNoToAllBox.show(progressDlg.getShell(), I18n.l("voodoo_txt_overwritePrompt", targetFilename), YesNoToAllBox.Value.NO)) { //$NON-NLS-1$
 				case NO:
 					overwrite= false;
 					break;
@@ -317,6 +351,7 @@ public class Engine {
 		}
 
 		// Move file (and overwrite if neccessary)
+		progressDlg.moving(source, target);
 		Helpers.mv(source, target);
 		return true;
 	}

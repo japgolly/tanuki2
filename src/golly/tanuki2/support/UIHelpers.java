@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
@@ -80,6 +81,12 @@ public class UIHelpers {
 		if (l.y < dca.y)
 			l.y= dca.y;
 		wnd.setLocation(l);
+	}
+	
+	public static void configureProgressBar(ProgressBar bar, int min, int max, int selection) {
+		bar.setMinimum(min);
+		bar.setMaximum(max);
+		bar.setSelection(selection);
 	}
 
 	public static Font createFont(Font baseFont, int style) {
