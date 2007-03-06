@@ -76,17 +76,29 @@ public final class Helpers {
 	}
 
 	/**
+	 * @see #cp_r(File, File, boolean, Set)
+	 */
+	public static void cp_r(File srcDir, File destDir, boolean overwrite, String... exceptions) throws IOException {
+		cp_r(srcDir, destDir, overwrite, arrayToSet(exceptions));
+	}
+
+	/**
 	 * Recursively copies the contents of a whole directory to another directory.<br>
 	 * If the target directory does not already exist it will be created.
+	 * 
+	 * @param exceptions A list of filenames that will not be copied. <b>NOTE:</b> wildcards are not supported and the
+	 *            list is currently case-sensitive.
 	 */
-	public static void cp_r(File srcDir, File destDir, boolean overwrite) throws IOException {
+	public static void cp_r(File srcDir, File destDir, boolean overwrite, Set<String> exceptions) throws IOException {
 		final String destDirPrefix= destDir.getPath() + File.separator;
 		mkdir_p(destDir);
 		for (File f : srcDir.listFiles())
-			if (f.isFile())
-				cp(f.toString(), destDirPrefix + f.getName(), overwrite);
-			else if (f.isDirectory())
-				cp_r(f, new File(destDirPrefix + f.getName()), overwrite);
+			if (!exceptions.contains(f.getName())) {
+				if (f.isFile())
+					cp(f.toString(), destDirPrefix + f.getName(), overwrite);
+				else if (f.isDirectory())
+					cp_r(f, new File(destDirPrefix + f.getName()), overwrite, exceptions);
+			}
 	}
 
 	/**
