@@ -21,6 +21,7 @@ public enum TanukiImage {
 	REMOVE("list-remove.png"), //
 	TANUKI("tanuki.ico"), //
 	TERMINAL("utilities-terminal.png"), //
+	VOODOO("voodoo.png"), //
 	;
 
 	// ====== STATIC ======

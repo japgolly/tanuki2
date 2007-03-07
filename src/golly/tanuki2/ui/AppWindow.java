@@ -176,6 +176,7 @@ public class AppWindow {
 		// voodoo button
 		Button b= new Button(composite, SWT.PUSH);
 		b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.RIGHT, 1, false, SWT.FILL));
+		b.setImage(TanukiImage.VOODOO.get());
 		UIHelpers.setButtonText(b, "main_btn_voodoo"); //$NON-NLS-1$
 		b.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
