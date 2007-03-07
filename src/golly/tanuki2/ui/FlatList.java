@@ -62,6 +62,7 @@ public class FlatList implements IFileView {
 		INDEX_TRACK= addColumn("general_field_track", SWT.LEFT); //$NON-NLS-1$
 
 		// Create popup menu
+		// TODO Need to give users access to text processors (title case, remove underscores, etc). Prolly best to put it in a context-menu.
 		Menu popupMenu= new Menu(table);
 		table.setMenu(popupMenu);
 		// mi: copy filenames
