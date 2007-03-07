@@ -6,11 +6,14 @@ import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.AutoResizeColumnsListener;
 import golly.tanuki2.support.Config;
+import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.TanukiException;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,15 +34,18 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * @author Golly
@@ -59,6 +65,8 @@ public class AppWindow {
 	private final SharedUIResources sharedUIResources;
 	private final Shell shell;
 	private final TabFolder tabFolder;
+	private final Text iwTargetDir;
+	private final Button btnTargetDirBrowse;
 	private final Set<IFileView> fileViewsUptodate= new HashSet<IFileView>();
 	private IFileView currentFileView= null;
 
@@ -92,7 +100,7 @@ public class AppWindow {
 		});
 		shell.addListener(SWT.Dispose, new Listener() {
 			public void handleEvent(Event event) {
-				saveWindowState();
+				updateConfig();
 			}
 		});
 
@@ -149,17 +157,37 @@ public class AppWindow {
 
 		// Create controls area
 		Composite composite= new Composite(expandBar, SWT.NONE);
-		composite.setLayout(UIHelpers.makeGridLayout(4, true, 4, 32));
+		composite.setLayout(UIHelpers.makeGridLayout(2, false, 4, 22));
 		composite.setBackground(shell.getBackground());
-
-		Button b;
-		b= new Button(composite, SWT.PUSH);
-		b.setText("ah");
-		b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.CENTER));
-		b= new Button(composite, SWT.PUSH);
-		b.setText("ah");
-		b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.CENTER));
-
+		// group
+		Group g= new Group(composite, SWT.NONE);
+		g.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
+		g.setLayout(UIHelpers.makeGridLayout(2, false, 0, 8));
+		g.setText(I18n.l("main_group_targetDir")); //$NON-NLS-1$
+		// target dir
+		iwTargetDir= new Text(g, SWT.BORDER | SWT.SINGLE);
+		iwTargetDir.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
+		iwTargetDir.setText(Config.targetDir);
+		// target dir browse
+		btnTargetDirBrowse= new Button(g, SWT.PUSH);
+		btnTargetDirBrowse.setLayoutData(UIHelpers.makeGridData(1, false, SWT.RIGHT));
+		UIHelpers.setButtonText(btnTargetDirBrowse, "main_btn_targetDirBrowse"); //$NON-NLS-1$
+		btnTargetDirBrowse.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				onTargetDirBrowse();
+			}
+		});
+		// voodoo button
+		Button b= new Button(composite, SWT.PUSH);
+		b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.RIGHT, 1, false, SWT.FILL));
+		UIHelpers.setButtonText(b, "main_btn_voodoo"); //$NON-NLS-1$
+		b.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				onVoodoo();
+			}
+		});
+		// add to expand bar
+		composite.pack();
 		ExpandItem expandItem= new ExpandItem(expandBar, SWT.NONE, 0);
 		expandItem.setText(I18n.l("main_sectionHeader_controls")); //$NON-NLS-1$
 		expandItem.setHeight(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
@@ -181,6 +209,10 @@ public class AppWindow {
 	// =============================================================================================== //
 	// = Internal
 	// =============================================================================================== //
+
+	private String getCleanedUpTargetDir() {
+		return Helpers.unicodeTrim(Helpers.ensureCorrectDirSeperators(iwTargetDir.getText()));
+	}
 
 	private void makeDropTarget(Control widget) {
 		DropTarget target= new DropTarget(widget, DND.DROP_COPY | DND.DROP_DEFAULT);
@@ -222,6 +254,41 @@ public class AppWindow {
 		currentFileView.getWidget().setFocus();
 	}
 
+	protected void onTargetDirBrowse() {
+		DirectoryDialog dirDlg= new DirectoryDialog(shell);
+		dirDlg.setFilterPath(getCleanedUpTargetDir());
+		dirDlg.setMessage(I18n.l("main_txt_selectTargetDirMsg")); //$NON-NLS-1$
+		String dir= dirDlg.open();
+		if (dir != null) {
+			iwTargetDir.setText(dir);
+			iwTargetDir.setFocus();
+		}
+	}
+
+	protected void onVoodoo() {
+		String targetDir= getCleanedUpTargetDir();
+		// Is target dir empty
+		if (targetDir.length() == 0) {
+			UIHelpers.showTanukiError(shell, "main_err_targetDir_empty"); //$NON-NLS-1$
+			btnTargetDirBrowse.setFocus();
+		}
+		// Is target dir invalid
+		else if (!new File(targetDir).isAbsolute()) {
+			UIHelpers.showTanukiError(shell, "main_err_targetDir_invalid"); //$NON-NLS-1$
+			iwTargetDir.setFocus();
+			iwTargetDir.selectAll();
+		}
+		// Voodoo time
+		else {
+			try {
+				engine.doYaVoodoo(targetDir, new VoodooProgressDialog(shell), null);
+			} catch (IOException e) {
+				new TanukiException(e).showErrorDialog(shell);
+			}
+			appUIShared.onDataUpdated_RefreshNow();
+		}
+	}
+
 	protected void resizeWidgets() {
 		Rectangle ca= shell.getClientArea();
 		ca.width-= (MARGIN << 1);
@@ -235,13 +302,15 @@ public class AppWindow {
 		tabFolder.setBounds(ca.x, ca.y, ca.width, ca.height - expandBarSize - SPACING);
 	}
 
-	protected void saveWindowState() {
+	protected void updateConfig() {
 		Config.appwndMaximised= shell.getMaximized();
 		Rectangle b= shell.getBounds();
 		Config.appwndX= b.x;
 		Config.appwndY= b.y;
 		Config.appwndHeight= b.height;
 		Config.appwndWidth= b.width;
+
+		Config.targetDir= iwTargetDir.getText();
 	}
 
 	// =============================================================================================== //
