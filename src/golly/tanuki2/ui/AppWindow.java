@@ -13,7 +13,6 @@ import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -279,8 +278,9 @@ public class AppWindow {
 		else {
 			try {
 				engine.doYaVoodoo(targetDir, new VoodooProgressDialog(shell), null);
-			} catch (IOException e) {
-				new TanukiException(e).showErrorDialog(shell);
+			} catch (Throwable t) {
+				TanukiException e= (t instanceof TanukiException) ? (TanukiException) t : new TanukiException(t);
+				e.showErrorDialog(shell);
 			}
 			appUIShared.onDataUpdated_RefreshNow();
 		}
