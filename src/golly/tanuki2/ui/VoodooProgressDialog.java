@@ -51,11 +51,11 @@ public class VoodooProgressDialog {
 		});
 
 		// Colours
-		clrDelete= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrDelete_bg", 255, 237, 237), UIResourceManager.getColor("voodooProgessDlg_clrDelete_fg", 250, 0, 0)); //$NON-NLS-1$ //$NON-NLS-2$
-		clrMoveSource= new TwoColours(UIResourceManager.getColorGrey("voodooProgessDlg_clrMoveSource_bg", 230), UIResourceManager.getColorGrey("voodooProgessDlg_clrMoveSource_fg", 26)); //$NON-NLS-1$ //$NON-NLS-2$
-		clrMoveTarget= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrMoveTarget_bg", 210, 255, 210), UIResourceManager.getColorGrey("voodooProgessDlg_clrMoveTarget_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
-		clrDirSource= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrDirSource_bg", 255, 255, 200), UIResourceManager.getColorGrey("voodooProgessDlg_clrDirSource_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
-		clrDirTarget= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrDirTarget_bg", 255, 235, 200), UIResourceManager.getColor("voodooProgessDlg_clrDirTarget_fg", 0, 0, 0)); //$NON-NLS-1$ //$NON-NLS-2$
+		clrDelete= new TwoColours(null, UIResourceManager.getColor("voodooProgessDlg_clrDelete_fg", 224, 0, 0)); //$NON-NLS-1$
+		clrMoveSource= new TwoColours(null, UIResourceManager.getColor("voodooProgessDlg_clrMoveSource_fg", 48, 48, 192)); //$NON-NLS-1$
+		clrMoveTarget= new TwoColours(null, UIResourceManager.getColor("voodooProgessDlg_clrMoveTarget_fg", 0, 128, 0)); //$NON-NLS-1$
+		clrDirSource= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrDirSource_bg", 255, 254, 192), UIResourceManager.getColorGrey("voodooProgessDlg_clrDirSource_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
+		clrDirTarget= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrDirTarget_bg", 214, 255, 214), UIResourceManager.getColorGrey("voodooProgessDlg_clrDirTarget_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// Console
 		console= new StyledText(shell, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.READ_ONLY);
