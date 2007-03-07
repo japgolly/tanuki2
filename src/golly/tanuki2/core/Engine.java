@@ -372,17 +372,12 @@ public class Engine {
 			final Map<String, List<TrackProperties>> trackPropertyMap= new HashMap<String, List<TrackProperties>>();
 			for (ITrackProprtyReader reader : trackProprtyReaders)
 				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
-
-			// TODO: Merge TPs
-			// TODO: Remove duplicate TPs
-
 			unassignedData.put(dd, trackPropertyMap);
 		}
 
 		// Select and assign
 		TrackPropertySelectors.Runner trackPropertySelector= new TrackPropertySelectors.Runner(unassignedData);
 		trackPropertySelector.run(new TrackPropertySelectors.AssignSingleRows());
-		trackPropertySelector.run(new TrackPropertySelectors.CompareAlbumData());
 		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(getRankedArtists(true), rankUnconfirmedArtists(unassignedData), true));
 		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(getRankedArtists(true), rankUnconfirmedArtists(unassignedData), false));
 

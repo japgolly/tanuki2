@@ -41,28 +41,6 @@ class TrackPropertySelectors {
 	}
 
 	// =============================================================================================== //
-	// = CompareAlbumData
-	// =============================================================================================== //
-	/**
-	 * If more than one result, check AlbumData of others in the same dir.
-	 */
-	public static class CompareAlbumData extends AbstractTrackPropertySelector {
-		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
-			for (String filename : trackPropertyMap.keySet()) {
-				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
-				if (resultArray.size() > 1)
-					second_pass: for (RankedObject<AlbumData> adr : sharedAlbumData)
-						for (TrackProperties tp : resultArray)
-							if (adr.data.equals(tp.toAlbumData())) {
-								assignTrackPropertiesToFile(ddFiles.get(filename), tp, sharedAlbumData);
-								successfulFiles.add(filename);
-								break second_pass;
-							}
-			}
-		}
-	}
-
-	// =============================================================================================== //
 	// = RankEachAlbumPropertyThenRankResults
 	// =============================================================================================== //
 
