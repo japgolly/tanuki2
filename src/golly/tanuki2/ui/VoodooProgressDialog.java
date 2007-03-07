@@ -1,5 +1,6 @@
 package golly.tanuki2.ui;
 
+import golly.tanuki2.core.IVoodooProgressMonitor;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIResourceManager;
@@ -25,7 +26,7 @@ import org.eclipse.swt.widgets.Shell;
  * @author Golly
  * @since 06/03/07
  */
-public class VoodooProgressDialog {
+public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	private static final String CONSOLE_INDENT= "  "; //$NON-NLS-1$
 
 	private final Display display;

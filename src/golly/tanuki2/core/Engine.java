@@ -10,7 +10,6 @@ import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
-import golly.tanuki2.ui.VoodooProgressDialog;
 import golly.tanuki2.ui.YesNoToAllBox;
 
 import java.io.File;
@@ -61,7 +60,7 @@ public class Engine {
 	 * <li>Removes empty directories</li>
 	 * </ul>
 	 */
-	public void doYaVoodoo(final String targetBaseDir, final VoodooProgressDialog progressDlg, Boolean overwriteAll) throws IOException {
+	public void doYaVoodoo(final String targetBaseDir, final IVoodooProgressMonitor progressDlg, Boolean overwriteAll) throws IOException {
 		this.overwriteAll= overwriteAll;
 		// TODO output formats shouldn't be hard-coded
 		final String targetDirFormat= "[:artist:]\\[:year:] - [:album:]"; //$NON-NLS-1$
@@ -297,7 +296,7 @@ public class Engine {
 			fd.setMimeImage(TanukiImage.MIME_TEXT);
 	}
 
-	private void deleteFile(VoodooProgressDialog progressDlg, final String sourceFilename) throws IOException {
+	private void deleteFile(IVoodooProgressMonitor progressDlg, final String sourceFilename) throws IOException {
 		// TODO Move to recycling bin
 		final File f= new File(sourceFilename);
 		progressDlg.deleting(f);
@@ -319,7 +318,7 @@ public class Engine {
 		return fmt;
 	}
 
-	private boolean moveFile(final VoodooProgressDialog progressDlg, final String sourceFilename, final String targetFilename) throws IOException {
+	private boolean moveFile(final IVoodooProgressMonitor progressDlg, final String sourceFilename, final String targetFilename) throws IOException {
 		File source= new File(sourceFilename);
 		File target= new File(targetFilename);
 

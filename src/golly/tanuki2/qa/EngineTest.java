@@ -3,15 +3,13 @@ package golly.tanuki2.qa;
 import static golly.tanuki2.support.Helpers.addPathElements;
 import golly.tanuki2.core.Engine;
 import golly.tanuki2.core.ITrackProprtyReader;
+import golly.tanuki2.core.IVoodooProgressMonitor;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
-import golly.tanuki2.support.I18n;
-import golly.tanuki2.support.UIResourceManager;
-import golly.tanuki2.ui.VoodooProgressDialog;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,14 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -99,6 +94,37 @@ class MockTrackProprtyReader extends TestHelper implements ITrackProprtyReader {
 
 /**
  * @author Golly
+ * @since 07/03/2007
+ */
+class MockVoodooProgressMonitor implements IVoodooProgressMonitor {
+	public void deleting(File file) {
+	}
+
+	public void finished() {
+	}
+
+	public Shell getShell() {
+		return null;
+	}
+
+	public void moving(File source, File target) {
+	}
+
+	public void nextDir(String srcDir, String targetDir, int fileCount) {
+	}
+
+	public void nextFile() {
+	}
+
+	public void rmdirs(List<File> removedDirs) {
+	}
+
+	public void starting(int dirCount, int totalFiles) {
+	}
+}
+
+/**
+ * @author Golly
  * @since 24/02/2007
  */
 @SuppressWarnings("nls")
@@ -114,7 +140,6 @@ public class EngineTest extends TestHelper {
 	}
 
 	@Test
-	@Ignore
 	public void makeSureRemoveUpdatesTheHasAudioProperty() {
 		engine.addFakeDir("A", "a1.mp3", "a2.mp3", "as.txt");
 		engine.files.get(addPathElements("A", "as.txt")).setAudio(false);
@@ -132,7 +157,6 @@ public class EngineTest extends TestHelper {
 	// =============================================================================================== //
 
 	@Test
-	@Ignore
 	public void eachTrackHasOneResult() {
 		addFakeDirsToEngine();
 		TrackProperties a1, a2, a3;
@@ -149,7 +173,6 @@ public class EngineTest extends TestHelper {
 	}
 
 	@Test
-	@Ignore
 	public void oneTrackHasMultipleResults_checksAlbumDataOfOtherTracks() {
 		addFakeDirsToEngine();
 		TrackProperties a1, a2, a3;
@@ -168,7 +191,6 @@ public class EngineTest extends TestHelper {
 	}
 
 	@Test
-	@Ignore
 	public void wholeDirHasMultipleResults_checksArtistAgainstSuccessfulDirs() {
 		addFakeDirsToEngine();
 		TrackProperties a1, a2, a3, b1, b2, b3;
@@ -194,7 +216,6 @@ public class EngineTest extends TestHelper {
 	}
 
 	@Test
-	@Ignore
 	public void wholeDirHasMultipleResults_checksArtistAgainstOtherPendingDirs() {
 		addFakeDirsToEngine();
 		TrackProperties a1, a2, a3, b1, b2, b3;
@@ -223,7 +244,6 @@ public class EngineTest extends TestHelper {
 	}
 
 	@Test
-	@Ignore
 	public void wholeDirHasMultipleResults_checksAlbumDataOfOtherTracks() {
 		// || ARTIST       | RANK || YEAR | RANK || ALBUM     | RANK ||
 		// ||--------------|------||------|------||-----------|------||
@@ -260,7 +280,6 @@ public class EngineTest extends TestHelper {
 	}
 
 	@Test
-	@Ignore
 	public void wholeDirHasMultipleResults_noWayOfKnowingWhichIsCorrect() {
 		addFakeDirsToEngine();
 		TrackProperties a1a, a2a, a3a, a1b, a2b, a3b;
@@ -297,13 +316,11 @@ public class EngineTest extends TestHelper {
 	}
 
 	@Test
-	@Ignore
 	public void testDaVoodoo_overwriteTrue() throws IOException, URISyntaxException {
 		testDaVoodoo(true);
 	}
 
 	@Test
-	@Ignore
 	public void testDaVoodoo_overwriteFalse() throws IOException, URISyntaxException {
 		testDaVoodoo(false);
 	}
@@ -345,18 +362,7 @@ public class EngineTest extends TestHelper {
 		assertFalse(engine.files.get(addPathElements(sourceDir, "incomplete", "01.mp3")).isComplete(true));
 		assertTrue(engine.files.get(addPathElements(sourceDir, "incomplete", "02.mp3")).isComplete(true));
 
-		// DELME Should be engine.doYaVoodoo(targetDir, null, overwriteAll);
-		I18n.setLocale(Locale.ENGLISH);
-		Display display= new Display();
-		Shell shell= new Shell(display);
-		try {
-			VoodooProgressDialog dlg= new VoodooProgressDialog(shell);
-			engine.doYaVoodoo(targetDir, dlg, overwriteAll);
-		} finally {
-			shell.dispose();
-			display.dispose();
-			UIResourceManager.disposeAll();
-		}
+		engine.doYaVoodoo(targetDir, new MockVoodooProgressMonitor(), overwriteAll);
 
 		// Test target dir
 		assertDirContents(targetDir, "Children Of Bodom");
