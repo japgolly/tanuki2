@@ -168,7 +168,9 @@ public class Engine {
 				}
 
 				// remove empty dirs from HD
-				Helpers.rmdirPath(srcDir);
+				List<File> removedDirs= new ArrayList<File>();
+				Helpers.rmdirPath(new File(srcDir), removedDirs);
+				progressDlg.rmdirs(removedDirs);
 			}
 		} finally {
 			// Remove processed files

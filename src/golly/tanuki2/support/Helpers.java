@@ -657,21 +657,38 @@ public final class Helpers {
 	 * 
 	 * @throws IOException if for some reason an empty directory fails to be removed.
 	 */
-	public static void rmdirPath(File path) throws IOException {
+	public static void rmdirPath(File path, List<File> removedFiles) throws IOException {
 		if (path.isDirectory() && path.list().length == 0) {
 			if (!path.delete())
 				throw new IOException("rmdir failed. (\"" + path + "\")");
-			File parent= path.getParentFile();
+			if (removedFiles != null)
+				removedFiles.add(path);
+			
+			final File parent= path.getParentFile();
 			if (parent != null)
-				rmdirPath(parent);
+				rmdirPath(parent, removedFiles);
 		}
 	}
 
 	/**
-	 * @see #rmdirPath(File)
+	 * @see #rmdirPath(File, List)
+	 */
+	public static void rmdirPath(File path) throws IOException {
+		rmdirPath(path, null);
+	}
+
+	/**
+	 * @see #rmdirPath(File, List)
 	 */
 	public static void rmdirPath(String path) throws IOException {
 		rmdirPath(new File(path));
+	}
+
+	/**
+	 * @see #rmdirPath(File, List)
+	 */
+	public static void rmdirPath(String path, List<File> removedFiles) throws IOException {
+		rmdirPath(new File(path), null);
 	}
 
 	/**

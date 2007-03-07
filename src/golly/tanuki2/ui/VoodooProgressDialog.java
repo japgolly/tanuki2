@@ -6,6 +6,7 @@ import golly.tanuki2.support.UIResourceManager;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -33,7 +34,7 @@ public class VoodooProgressDialog {
 	private final Label lblOverall1, lblOverallP;
 	private final ProgressBar pbOverall;
 	private final Button btnClose;
-	private final TwoColours clrDelete, clrMoveSource, clrMoveTarget, clrDirSource, clrDirTarget;
+	private final TwoColours clrDelete, clrMoveSource, clrMoveTarget, clrDirSource, clrDirTarget, clrRmdir;
 
 	private boolean running= false;
 	private int totalFiles, currentFileNumber;
@@ -43,6 +44,8 @@ public class VoodooProgressDialog {
 		this.display= parent.getDisplay();
 		this.shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE | SWT.MAX);
 		shell.setLayout(UIHelpers.makeGridLayout(1, true, 4, 16));
+		shell.setImage(parent.getImage());
+		shell.setText(parent.getText());
 		shell.addListener(SWT.Close, new Listener() {
 			public void handleEvent(Event event) {
 				if (running)
@@ -56,6 +59,7 @@ public class VoodooProgressDialog {
 		clrMoveTarget= new TwoColours(null, UIResourceManager.getColor("voodooProgessDlg_clrMoveTarget_fg", 0, 128, 0)); //$NON-NLS-1$
 		clrDirSource= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrDirSource_bg", 255, 254, 192), UIResourceManager.getColorGrey("voodooProgessDlg_clrDirSource_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 		clrDirTarget= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrDirTarget_bg", 214, 255, 214), UIResourceManager.getColorGrey("voodooProgessDlg_clrDirTarget_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
+		clrRmdir= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrRmdir_bg", 255, 232, 232), UIResourceManager.getColorGrey("voodooProgessDlg_clrRmdir_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// Console
 		console= new StyledText(shell, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.READ_ONLY);
@@ -133,6 +137,14 @@ public class VoodooProgressDialog {
 
 	public void moving(File source, File target) {
 		consoleWriteLn(true, "voodoo_consoletxt_fileMoving", source.getName(), clrMoveSource, false, target.getName(), clrMoveTarget, false); //$NON-NLS-1$
+		console.setTopIndex(consoleLines);
+		sleep();
+	}
+
+	public void rmdirs(List<File> removedDirs) {
+		for (File dir : removedDirs)
+			consoleWriteLn(true, "voodoo_consoletxt_rmdir", dir.toString(), clrRmdir, false); //$NON-NLS-1$
+		//		consoleWriteLn(true, "voodoo_consoletxt_rmdir", dir.toString(), clrRmdir, false); //$NON-NLS-1$
 		console.setTopIndex(consoleLines);
 		sleep();
 	}
