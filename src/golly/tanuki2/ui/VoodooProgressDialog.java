@@ -27,10 +27,10 @@ import org.eclipse.swt.widgets.Shell;
  * @since 06/03/07
  */
 public class VoodooProgressDialog implements IVoodooProgressMonitor {
-	private static final String CONSOLE_INDENT= "  "; //$NON-NLS-1$
+	private static final String CONSOLE_INDENT= "    "; //$NON-NLS-1$
 
 	private final Display display;
-	private final Shell shell;
+	private final Shell parent, shell;
 	private final StyledText console;
 	private final Label lblOverall1, lblOverallP;
 	private final ProgressBar pbOverall;
@@ -43,6 +43,7 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 
 	public VoodooProgressDialog(Shell parent) {
 		this.display= parent.getDisplay();
+		this.parent= parent;
 		this.shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE | SWT.MAX);
 		shell.setLayout(UIHelpers.makeGridLayout(1, true, 4, 16));
 		shell.setImage(parent.getImage());
@@ -109,16 +110,20 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	}
 
 	public void starting(int dirCount, int totalFiles) {
-		running= true;
-		this.totalFiles= totalFiles;
-		currentFileNumber= 0;
-		UIHelpers.configureProgressBar(pbOverall, 0, totalFiles, 0);
-		shell.open();
+		if (totalFiles == 0) {
+			UIHelpers.showTanukiError(parent, "voodoo_err_nothingToProcess"); //$NON-NLS-1$
+		} else {
+			running= true;
+			this.totalFiles= totalFiles;
+			currentFileNumber= 0;
+			UIHelpers.configureProgressBar(pbOverall, 0, totalFiles, 0);
+			consoleWriteLn(I18n.l("voodoo_consoletxt_started", dirCount, totalFiles)); //$NON-NLS-1$
+			shell.open();
+		}
 	}
 
 	public void nextDir(String srcDir, String targetDir, int fileCount) {
-		if (consoleLines != 0)
-			consoleWriteLn();
+		consoleWriteLn();
 		consoleWriteLn(false, "voodoo_consoletxt_dirSource", srcDir, clrDirSource, true); //$NON-NLS-1$
 		if (targetDir != null)
 			consoleWriteLn(true, "voodoo_consoletxt_dirTarget", targetDir, clrDirTarget, true); //$NON-NLS-1$
@@ -147,17 +152,20 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	}
 
 	public void finished() {
-		pbOverall.setSelection(currentFileNumber);
-		btnClose.setEnabled(true);
-		btnClose.setFocus();
-		shell.setDefaultButton(btnClose);
-		btnClose.setFocus();
-
-		while (!shell.isDisposed())
-			if (!display.readAndDispatch()) {
-				running= false;
-				display.sleep();
-			}
+		if (totalFiles > 0) {
+			pbOverall.setSelection(currentFileNumber);
+			btnClose.setEnabled(true);
+			btnClose.setFocus();
+			shell.setDefaultButton(btnClose);
+			btnClose.setFocus();
+			consoleWriteLn();
+			consoleWriteLn(I18n.l("voodoo_consoletxt_finished")); //$NON-NLS-1$
+			while (!shell.isDisposed())
+				if (!display.readAndDispatch()) {
+					running= false;
+					display.sleep();
+				}
+		}
 	}
 
 	// =============================================================================================== //
