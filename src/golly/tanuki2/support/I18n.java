@@ -29,7 +29,7 @@ public class I18n {
 	 * Returns a localised string and formats with specified args.
 	 */
 	public static String l(String key, Object... args) {
-		return MessageFormat.format(l(key), args);
+		return args.length == 0 ? l(key) : MessageFormat.format(l(key), args);
 	}
 
 	/**
