@@ -97,7 +97,7 @@ public class Engine {
 							break;
 						}
 					}
-				if (ad == null)
+				if (ad == null || !ad.isComplete())
 					processThisDir= false;
 
 				if (processThisDir) {
