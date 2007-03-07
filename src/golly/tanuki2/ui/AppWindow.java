@@ -61,7 +61,6 @@ public class AppWindow {
 	private final ExpandBar expandBar;
 	private final FileTransfer fileTransfer;
 	private final IFileView inputTree, flatList;
-	private final IFileView[] fileViews;
 	private final SharedUIResources sharedUIResources;
 	private final Shell shell;
 	private final TabFolder tabFolder;
@@ -120,8 +119,6 @@ public class AppWindow {
 		ti.setControl(flatList.getWidget());
 		ti.setData(flatList);
 		ti.setText(I18n.l("main_tab_flatList")); //$NON-NLS-1$
-		// All tabs
-		fileViews= new IFileView[] {inputTree, flatList};
 		// Tab folder again
 		makeDropTarget(tabFolder);
 		tabFolder.addSelectionListener(new SelectionAdapter() {
