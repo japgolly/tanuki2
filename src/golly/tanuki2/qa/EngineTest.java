@@ -2,9 +2,6 @@ package golly.tanuki2.qa;
 
 import static golly.tanuki2.support.Helpers.addPathElements;
 import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
-import golly.tanuki2.core.Engine;
-import golly.tanuki2.core.ITrackProprtyReader;
-import golly.tanuki2.core.IVoodooProgressMonitor;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
@@ -20,109 +17,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.swt.widgets.Shell;
 import org.junit.Before;
 import org.junit.Test;
-
-/**
- * @author Golly
- * @since 24/02/2007
- */
-class Engine2 extends Engine {
-	@SuppressWarnings("nls")
-	public Engine2(ITrackProprtyReader tr) {
-		super();
-		trackProprtyReaders.clear();
-		trackProprtyReaders.add(tr);
-	}
-
-	public void addFakeDir(String path, String... filenames) {
-		DirData dd= new DirData(path);
-		for (String f : filenames) {
-			FileData fd= new FileData(dd);
-			fd.setAudio(true);
-			files.put(addPathElements(path, f), fd);
-			dd.files.put(f, fd);
-		}
-		dd.setHasAudioContent(true);
-		dirs.put(path, dd);
-		dirsNeedingTrackProprties.add(dd);
-	}
-
-	public void readTrackProprties2() {
-		readTrackProprties();
-	}
-}
-
-/**
- * @author Golly
- * @since 24/02/2007
- */
-class MockTrackProprtyReader extends TestHelper implements ITrackProprtyReader {
-
-	private final Map<String, List<TrackProperties>> mockResults= new HashMap<String, List<TrackProperties>>();
-
-	public void addMockResult(String filename, TrackProperties tp) {
-		filename= ensureCorrectDirSeperators(filename) + ".mp3"; //$NON-NLS-1$
-		List<TrackProperties> l= mockResults.get(filename);
-		if (l == null)
-			mockResults.put(filename, l= new ArrayList<TrackProperties>());
-		l.add(tp);
-	}
-
-	public Map<String, List<TrackProperties>> readMultipleTrackProperties(DirData dd) {
-		final Map<String, List<TrackProperties>> r= new HashMap<String, List<TrackProperties>>();
-		for (String f : dd.files.keySet())
-			r.put(f, readTrackProperties(addPathElements(dd.dir, f)));
-		return r;
-	}
-
-	public List<TrackProperties> readTrackProperties(String filename) {
-		List<TrackProperties> r= new ArrayList<TrackProperties>();
-		if (mockResults.containsKey(filename))
-			r.addAll(mockResults.get(filename));
-		return r;
-	}
-
-}
-
-/**
- * @author Golly
- * @since 07/03/2007
- */
-class MockVoodooProgressMonitor implements IVoodooProgressMonitor {
-	public void deleting(File file) {
-	}
-
-	public void finished() {
-	}
-
-	public Shell getShell() {
-		return null;
-	}
-
-	public void moving(File source, File target) {
-	}
-
-	public void nextDir(String srcDir, String targetDir, int fileCount) {
-	}
-
-	public void nextFile() {
-	}
-
-	public void rmdirs(List<File> removedDirs) {
-	}
-
-	public void starting(int dirCount, int totalFiles) {
-	}
-}
 
 /**
  * @author Golly
@@ -376,7 +275,7 @@ public class EngineTest extends TestHelper {
 		assertEquals(oldFilesRemain ? "o2!" : "ARTIST:  AC-DC", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(tdir, "autotag.txt"))), "UTF-8")).readLine());
 
 		// Test engine.dirs + engine.files
-		assertEquals(1 + 5 + 4 +(oldFilesRemain ? 2 : 0), engine.files.size());
+		assertEquals(1 + 5 + 4 + (oldFilesRemain ? 2 : 0), engine.files.size());
 		assertEquals(3 + (oldFilesRemain ? 1 : 0), engine.dirs.size());
 		assertTrue(engine.dirs.containsKey(sourceDir));
 		assertTrue(engine.dirs.containsKey(addPathElements(sourceDir, "incomplete", "1")));
@@ -400,6 +299,27 @@ public class EngineTest extends TestHelper {
 		assertDirContents(addPathElements(tdir, "empty"));
 		// other/remain
 		assertDirContents(addPathElements(tdir, "remain"), "remain.mp3");
+	}
+
+	@Test
+	public void testDaVoodoo_sameSourceAndTargetDir() throws IOException, URISyntaxException {
+		String sourceDir= prepareVoodooTestSourceDir("sample_data2");
+		final String octavarium= addPathElements(sourceDir, "Dream Theater", "2005 - Octavarium");
+		mtpr.addMockResult(addPathElements(octavarium, "05 - Panic Attack"), makeTrackProperties("Dream Theater", 2005, "Octavarium", "5", "Panic Attack"));
+		mtpr.addMockResult(addPathElements(octavarium, "08. Octavarium"), makeTrackProperties("Dream Theater", 2005, "Octavarium", "8", "Octavarium"));
+		engine.addFolder(sourceDir);
+		engine.files.get(addPathElements(octavarium, "del_me.txt")).setMarkedForDeletion(true);
+		assertEquals(4, engine.files.size());
+
+		engine.doYaVoodoo(sourceDir, new MockVoodooProgressMonitor(), null);
+
+		assertDirContents(sourceDir, "Dream Theater");
+		assertDirContents(addPathElements(sourceDir, "Dream Theater"), "2005 - Octavarium");
+		assertDirContents(octavarium, "05 - Panic Attack.mp3", "08 - Octavarium.mp3", "00-dream_theater-octavarium-2005.nfo");
+		assertEquals("5 monkeys", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(octavarium, "05 - Panic Attack.mp3"))), "ASCII")).readLine());
+		assertEquals("8 octo", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(octavarium, "08 - Octavarium.mp3"))), "ASCII")).readLine());
+		assertEquals(0, engine.files.size());
+		assertEquals(0, engine.dirs.size());
 	}
 
 	// =============================================================================================== //
