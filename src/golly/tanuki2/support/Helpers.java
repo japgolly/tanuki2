@@ -722,6 +722,14 @@ public final class Helpers {
 		rm_rf(new File(dir));
 	}
 
+	public static void sleep(long time) {
+		try {
+			Thread.sleep(time);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
 	/**
 	 * Takes a <code>Set</code>, and returns a sorted array.
 	 */
