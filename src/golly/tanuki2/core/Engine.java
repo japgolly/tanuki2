@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
  * @since 16/02/2007
  */
 public class Engine {
+	public static boolean PRETEND_MODE= false;
+
 	private final static Pattern patAudio= Pattern.compile("^.+\\.(?:mp3|flac|ape|mp4|m4a|ogg|aac|wmv|wav)$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
 	private final static Pattern patImage= Pattern.compile("^.+\\.(?:jpe?g|gif|png|bmp|tiff?|tga)$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
 	private final static Pattern patText= Pattern.compile("^.+\\.(?:txt|html?|diz|nfo)$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
@@ -137,7 +139,8 @@ public class Engine {
 		progressDlg.starting(processingList.size(), totalCommands);
 
 		// Make target base dir
-		Helpers.mkdir_p(targetBaseDir);
+		if (!PRETEND_MODE)
+			Helpers.mkdir_p(targetBaseDir);
 
 		// Start processing
 		final Set<String> removeList= new HashSet<String>();
@@ -149,7 +152,8 @@ public class Engine {
 
 				// Move files
 				if (!pc.moves.isEmpty()) {
-					Helpers.mkdir_p(pc.targetDirectory);
+					if (!PRETEND_MODE)
+						Helpers.mkdir_p(pc.targetDirectory);
 					for (String sourceFilename : Helpers.sort(pc.moves.keySet())) {
 						final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
 						progressDlg.nextFile();
@@ -168,7 +172,8 @@ public class Engine {
 
 				// remove empty dirs from HD
 				List<File> removedDirs= new ArrayList<File>();
-				Helpers.rmdirPath(new File(srcDir), removedDirs);
+				if (!PRETEND_MODE)
+					Helpers.rmdirPath(new File(srcDir), removedDirs);
 				progressDlg.rmdirs(removedDirs);
 			}
 		} finally {
@@ -178,6 +183,7 @@ public class Engine {
 			removeEmptyDirs();
 		}
 
+		System.gc();
 		progressDlg.finished();
 	}
 
@@ -300,8 +306,9 @@ public class Engine {
 		// TODO Move to recycling bin
 		final File f= new File(sourceFilename);
 		progressDlg.deleting(f);
-		if (!f.delete())
-			throw new IOException("Delete failed. (\"" + sourceFilename + "\")"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (!PRETEND_MODE)
+			if (!f.delete())
+				throw new IOException("Delete failed. (\"" + sourceFilename + "\")"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private String formatFilename(String fmt, AlbumData ad) {
@@ -353,7 +360,8 @@ public class Engine {
 
 		// Move file (and overwrite if neccessary)
 		progressDlg.moving(source, target);
-		Helpers.mv(source, target);
+		if (!PRETEND_MODE)
+			Helpers.mv(source, target);
 		return true;
 	}
 
