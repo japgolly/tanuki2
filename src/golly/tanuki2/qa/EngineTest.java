@@ -203,8 +203,17 @@ public class EngineTest extends TestHelper {
 		assertEquals(ad1, ad3);
 	}
 
+	@Test
+	public void oneTrack_mostCompleteFields() {
+		addFakeDirsToEngine();
+		TrackProperties a1;
+		mtpr.addMockResult("A/a1", makeTrackProperties("Bullshit", null, "No year", "2", "A Two @bad"));
+		mtpr.addMockResult("A/a1", a1= makeTrackProperties("asd", 2006, "qwe", "2", "A Two @bad"));
+		engine.readTrackProprties2();
+		assertEngineTrackProperties("A/a1", a1);
+	}
+
 	// TODO Add more TrackProperty selection tests: check for matches from different sources
-	// TODO Add more TrackProperty selection tests: choose by number of complete fields
 
 	// =============================================================================================== //
 	// = Public
