@@ -10,6 +10,7 @@ import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.UIResourceManager;
 import golly.tanuki2.ui.VoodooProgressDialog;
 
 import java.io.BufferedReader;
@@ -348,12 +349,13 @@ public class EngineTest extends TestHelper {
 		I18n.setLocale(Locale.ENGLISH);
 		Display display= new Display();
 		Shell shell= new Shell(display);
-		VoodooProgressDialog dlg= new VoodooProgressDialog(shell);
 		try {
+			VoodooProgressDialog dlg= new VoodooProgressDialog(shell);
 			engine.doYaVoodoo(targetDir, dlg, overwriteAll);
 		} finally {
 			shell.dispose();
 			display.dispose();
+			UIResourceManager.disposeAll();
 		}
 
 		// Test target dir
