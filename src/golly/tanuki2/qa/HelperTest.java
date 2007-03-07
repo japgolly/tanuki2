@@ -1,5 +1,6 @@
 package golly.tanuki2.qa;
 
+import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
 
@@ -30,10 +31,10 @@ public class HelperTest extends TestHelper {
 		//		debugDirTree(r);
 
 		assertDirTreeNode(r, "c:/music");
-		Map<String, Map> p= r.get(osCompatFilename("c:/music"));
+		Map<String, Map> p= r.get(ensureCorrectDirSeperators("c:/music"));
 		assertDirTreeNode(p, "new stuff", "old stuff/2006/burnt");
-		assertNull(p.get(osCompatFilename("old stuff/2006/burnt")));
-		p= p.get(osCompatFilename("new stuff"));
+		assertNull(p.get(ensureCorrectDirSeperators("old stuff/2006/burnt")));
+		p= p.get(ensureCorrectDirSeperators("new stuff"));
 		assertDirTreeNode(p, "napster", "winmx");
 		assertNull(p.get("napster"));
 		assertNull(p.get("winmx"));
@@ -70,10 +71,10 @@ public class HelperTest extends TestHelper {
 		sC_music_blah_qwe2.hasFiles= true;
 
 		Map<String, Map> r= Helpers.optimiseDirTree(s);
-//		debugDirTree(r);
+		//		debugDirTree(r);
 
 		assertDirTreeNode(r, "c:/music");
-		Map<String, Map> p, pMusic= r.get(osCompatFilename("c:/music"));
+		Map<String, Map> p, pMusic= r.get(ensureCorrectDirSeperators("c:/music"));
 		assertDirTreeNode(pMusic, "new stuff", "old stuff", "blah");
 
 		p= pMusic.get("new stuff");
@@ -83,7 +84,7 @@ public class HelperTest extends TestHelper {
 
 		p= pMusic.get("old stuff");
 		assertDirTreeNode(p, "2006/burnt");
-		p= p.get(osCompatFilename("2006/burnt"));
+		p= p.get(ensureCorrectDirSeperators("2006/burnt"));
 		assertDirTreeNode(p, "asd");
 		assertNull(p.get("asd"));
 
@@ -91,8 +92,8 @@ public class HelperTest extends TestHelper {
 		assertDirTreeNode(p, "blah1", "blah2");
 		assertNull(p.get("blah1"));
 		p= p.get("blah2");
-		assertDirTreeNode(p, "zxc", osCompatFilename("qwe/qwe2"));
-		assertNull(p.get(osCompatFilename("qwe/qwe2")));
+		assertDirTreeNode(p, "zxc", ensureCorrectDirSeperators("qwe/qwe2"));
+		assertNull(p.get(ensureCorrectDirSeperators("qwe/qwe2")));
 		p= p.get("zxc");
 		assertDirTreeNode(p, "zxc2");
 		assertNull(p.get("zxc2"));
@@ -101,7 +102,7 @@ public class HelperTest extends TestHelper {
 	private void assertDirTreeNode(Map<String, ?> map, String... keys) {
 		assertEquals(keys.length, map.size());
 		for (String key : keys)
-			assertTrue(map.containsKey(osCompatFilename(key)));
+			assertTrue(map.containsKey(ensureCorrectDirSeperators(key)));
 	}
 
 	private OptimisibleDirTreeNode addOptimisibleDirTreeNode(OptimisibleDirTreeNode parent, String name) {

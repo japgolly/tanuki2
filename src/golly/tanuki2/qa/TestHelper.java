@@ -5,9 +5,6 @@ import static golly.tanuki2.data.TrackPropertyType.ARTIST;
 import static golly.tanuki2.data.TrackPropertyType.TN;
 import static golly.tanuki2.data.TrackPropertyType.TRACK;
 import static golly.tanuki2.data.TrackPropertyType.YEAR;
-
-import java.io.File;
-
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
@@ -28,7 +25,7 @@ public abstract class TestHelper extends Assert {
 		ad.setAlbum(album);
 		assertEquals(ad, test);
 	}
-	
+
 	protected FileData makeFileData(DirData dd, boolean isAudio) {
 		FileData fd= new FileData(dd);
 		fd.setAudio(isAudio);
@@ -44,13 +41,4 @@ public abstract class TestHelper extends Assert {
 		expected.put(TRACK, track);
 		return expected;
 	}
-
-	protected String osCompatFilename(String filename) {
-		if (File.separatorChar == '/')
-			return filename.replace('\\', '/');
-		else
-			return filename.replace('/', '\\');
-
-	}
-
 }

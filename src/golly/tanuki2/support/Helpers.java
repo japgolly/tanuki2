@@ -102,6 +102,16 @@ public final class Helpers {
 	}
 
 	/**
+	 * Replaces all forward-slashes with backward-slashes or vice-versa depending on the OS.
+	 */
+	public static String ensureCorrectDirSeperators(String filename) {
+		if (File.separatorChar == '/')
+			return filename.replace('\\', '/');
+		else
+			return filename.replace('/', '\\');
+	}
+
+	/**
 	 * Takes a String array of field names and returns an array of {@link Field}s.
 	 * 
 	 * @throws RuntimeException if any excxeption occurs.
@@ -663,7 +673,7 @@ public final class Helpers {
 				throw new IOException("rmdir failed. (\"" + path + "\")");
 			if (removedFiles != null)
 				removedFiles.add(path);
-			
+
 			final File parent= path.getParentFile();
 			if (parent != null)
 				rmdirPath(parent, removedFiles);

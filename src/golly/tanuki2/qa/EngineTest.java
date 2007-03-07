@@ -1,6 +1,7 @@
 package golly.tanuki2.qa;
 
 import static golly.tanuki2.support.Helpers.addPathElements;
+import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
 import golly.tanuki2.core.Engine;
 import golly.tanuki2.core.ITrackProprtyReader;
 import golly.tanuki2.core.IVoodooProgressMonitor;
@@ -69,7 +70,7 @@ class MockTrackProprtyReader extends TestHelper implements ITrackProprtyReader {
 	private final Map<String, List<TrackProperties>> mockResults= new HashMap<String, List<TrackProperties>>();
 
 	public void addMockResult(String filename, TrackProperties tp) {
-		filename= osCompatFilename(filename) + ".mp3"; //$NON-NLS-1$
+		filename= ensureCorrectDirSeperators(filename) + ".mp3"; //$NON-NLS-1$
 		List<TrackProperties> l= mockResults.get(filename);
 		if (l == null)
 			mockResults.put(filename, l= new ArrayList<TrackProperties>());
@@ -434,7 +435,7 @@ public class EngineTest extends TestHelper {
 	}
 
 	private void assertEngineTrackProperties(String filename, TrackProperties expected1, TrackProperties expected2) {
-		filename= osCompatFilename(filename) + ".mp3"; //$NON-NLS-1$
+		filename= ensureCorrectDirSeperators(filename) + ".mp3"; //$NON-NLS-1$
 		FileData fd= engine.files.get(filename);
 		if (fd == null) {
 			System.err.println("assertEngineTrackProperties failed: key not found: " + filename);
