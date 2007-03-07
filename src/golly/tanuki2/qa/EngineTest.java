@@ -326,16 +326,6 @@ public class EngineTest extends TestHelper {
 		testDaVoodoo(false);
 	}
 
-	private void createFile(String filename, String content) throws IOException {
-		File f= new File(filename);
-		Helpers.mkdir_p(f.getParentFile());
-		if (f.isFile())
-			f.delete();
-		BufferedWriter out= new BufferedWriter(new FileWriter(f));
-		out.write(content);
-		out.close();
-	}
-
 	public void testDaVoodoo(final Boolean overwriteAll) throws IOException, URISyntaxException {
 		final boolean oldFilesRemain= (overwriteAll != null && !overwriteAll);
 		String sourceDir= prepareVoodooTestSourceDir("sample_data");
@@ -454,6 +444,16 @@ public class EngineTest extends TestHelper {
 			System.err.println("  expected: " + expected2);
 		System.err.println("  found   : " + test);
 		fail("assertEngineTrackProperties failed.");
+	}
+
+	private void createFile(String filename, String content) throws IOException {
+		File f= new File(filename);
+		Helpers.mkdir_p(f.getParentFile());
+		if (f.isFile())
+			f.delete();
+		BufferedWriter out= new BufferedWriter(new FileWriter(f));
+		out.write(content);
+		out.close();
 	}
 
 	private String prepareVoodooTestSourceDir(String sampleDataDir) throws IOException, URISyntaxException {
