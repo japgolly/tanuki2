@@ -133,21 +133,17 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	public void deleting(File file) {
 		consoleWriteLn(true, "voodoo_consoletxt_fileDeleting", file.getName(), clrDelete, false); //$NON-NLS-1$
 		console.setTopIndex(consoleLines);
-		sleep();
 	}
 
 	public void moving(File source, File target) {
 		consoleWriteLn(true, "voodoo_consoletxt_fileMoving", source.getName(), clrMoveSource, false, target.getName(), clrMoveTarget, false); //$NON-NLS-1$
 		console.setTopIndex(consoleLines);
-		sleep();
 	}
 
 	public void rmdirs(List<File> removedDirs) {
 		for (File dir : removedDirs)
 			consoleWriteLn(true, "voodoo_consoletxt_rmdir", dir.toString(), clrRmdir, false); //$NON-NLS-1$
-		//		consoleWriteLn(true, "voodoo_consoletxt_rmdir", dir.toString(), clrRmdir, false); //$NON-NLS-1$
 		console.setTopIndex(consoleLines);
-		sleep();
 	}
 
 	public void finished() {
@@ -218,14 +214,5 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		while (i-- > 0)
 			tmp[i]= '_';
 		return new String(tmp);
-	}
-
-	// DELME
-	private void sleep() {
-		try {
-			Thread.sleep(300);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
 	}
 }
