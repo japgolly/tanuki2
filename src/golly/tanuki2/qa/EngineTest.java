@@ -2,6 +2,7 @@ package golly.tanuki2.qa;
 
 import static golly.tanuki2.support.Helpers.addPathElements;
 import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
+import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
@@ -50,6 +51,42 @@ public class EngineTest extends TestHelper {
 		assertTrue(dd.hasAudioContent());
 		engine.remove(addPathElements("A", "a1.mp3"));
 		assertFalse(dd.hasAudioContent());
+	}
+
+	@Test
+	public void testAddingSingleFilesAfterThatDirAlreadyExistsInMemory() throws IOException, URISyntaxException {
+		Engine engine= new Engine();
+		final String sourceDir= prepareVoodooTestSourceDir("sample_data2");
+		final String octo= addPathElements(sourceDir, "Dream Theater", "2005 - Octavarium");
+		engine.add(octo);
+		assertEquals(4, engine.files.size());
+		assertTrue(engine.files.get(addPathElements(octo, "08. Octavarium.mp3")).isComplete(true));
+
+		engine.remove(addPathElements(octo, "08. Octavarium.mp3"));
+		engine.remove(addPathElements(octo, "del_me.txt"));
+		assertEquals(2, engine.files.size());
+
+		FileData fd5= engine.files.get(addPathElements(octo, "05 - Panic Attack.mp3"));
+		fd5.getAlbumData().setAlbum("xxx");
+		fd5.getAlbumData().setYear((String) null);
+		fd5.setTrack("mah mah");
+		final String fd5str= fd5.toString();
+
+		engine.add(addPathElements(octo, "08. Octavarium.mp3"), addPathElements(octo, "del_me.txt"));
+		assertEquals(4, engine.files.size());
+		assertEquals(fd5str, engine.files.get(addPathElements(octo, "05 - Panic Attack.mp3")).toString());
+		FileData fd8= new FileData(engine.dirs.get(octo));
+		fd8.setAudio(true);
+		fd8.setMarkedForDeletion(false);
+		fd8.setMimeImage(TanukiImage.MIME_AUDIO);
+		fd8.setTn(8);
+		fd8.setTrack("Octavarium");
+		AlbumData ad8= new AlbumData();
+		ad8.setArtist("Dream Theater");
+		ad8.setAlbum("Octavarium");
+		ad8.setYear(2005);
+		fd8.setAlbumData(ad8);
+		assertEquals(fd8.toString(), engine.files.get(addPathElements(octo, "08. Octavarium.mp3")).toString());
 	}
 
 	// =============================================================================================== //
@@ -216,7 +253,7 @@ public class EngineTest extends TestHelper {
 	// TODO Add more TrackProperty selection tests: check for matches from different sources
 
 	// =============================================================================================== //
-	// = Public
+	// = Voodoo tests
 	// =============================================================================================== //
 
 	@Test
@@ -249,7 +286,7 @@ public class EngineTest extends TestHelper {
 		mtpr.addMockResult(addPathElements(sourceDir, "incomplete", "2", "201"), makeTrackProperties("Incomplete 2", null, "blah", "01", "incomplete dir"));
 		mtpr.addMockResult(addPathElements(sourceDir, "incomplete", "2", "202"), makeTrackProperties("Incomplete 2", null, "blah", "02", "incomplete dir"));
 		mtpr.addMockResult(addPathElements(sourceDir, "other", "remain", "asd"), makeTrackProperties("Children Of Bodom", 2003, "Hate Crew Deathroll", "01", "Angels Don't Kill"));
-		engine.addFolder(sourceDir);
+		engine.add(sourceDir);
 		int fileCount= 1 + 7 + 1 + 3 + 5 + 4;
 		assertEquals(fileCount, engine.files.size());
 		engine.files.get(addPathElements(sourceDir, "complete", "blah", "www.heavytorrents.org.txt")).setMarkedForDeletion(true);
@@ -316,7 +353,7 @@ public class EngineTest extends TestHelper {
 		final String octavarium= addPathElements(sourceDir, "Dream Theater", "2005 - Octavarium");
 		mtpr.addMockResult(addPathElements(octavarium, "05 - Panic Attack"), makeTrackProperties("Dream Theater", 2005, "Octavarium", "5", "Panic Attack"));
 		mtpr.addMockResult(addPathElements(octavarium, "08. Octavarium"), makeTrackProperties("Dream Theater", 2005, "Octavarium", "8", "Octavarium"));
-		engine.addFolder(sourceDir);
+		engine.add(sourceDir);
 		engine.files.get(addPathElements(octavarium, "del_me.txt")).setMarkedForDeletion(true);
 		assertEquals(4, engine.files.size());
 

@@ -231,15 +231,8 @@ public class AppWindow {
 			public void drop(DropTargetEvent event) {
 				if (fileTransfer.isSupportedType(event.currentDataType)) {
 					String[] files= (String[]) event.data;
-					boolean added= false;
-					for (String f : files)
-						if (new File(f).isDirectory()) {
-							engine.addFolder(f);
-							added= true;
-						} else
-							; // TODO Handle adding on non-directories
-					if (added)
-						appUIShared.onDataUpdated_RefreshNow();
+					engine.add(files);
+					appUIShared.onDataUpdated_RefreshNow();
 				}
 			}
 		});

@@ -55,6 +55,10 @@ public class FileData extends AbstractDataObject {
 		return checkAlbumDataToo ? (albumData != null && albumData.isComplete()) : true;
 	}
 
+	public boolean isEmpty() {
+		return (albumData == null || albumData.isEmpty()) && tn == null && track == null;
+	}
+
 	public boolean isMarkedForDeletion() {
 		return isMarkedForDeletion;
 	}

@@ -27,6 +27,10 @@ public class AlbumData extends AbstractDataObject {
 		return true;
 	}
 
+	public boolean isEmpty() {
+		return artist == null && album == null && year == null;
+	}
+
 	public void setAlbum(String album) {
 		this.album= album;
 		dataUpdated();
@@ -37,12 +41,12 @@ public class AlbumData extends AbstractDataObject {
 		dataUpdated();
 	}
 
-	public void setYear(String year) {
-		setYear((Integer) (year == null ? null : Integer.parseInt(year)));
-	}
-
 	public void setYear(Integer year) {
 		this.year= year;
 		dataUpdated();
+	}
+
+	public void setYear(String year) {
+		setYear((Integer) (year == null ? null : Integer.parseInt(year)));
 	}
 }

@@ -46,10 +46,16 @@ public class Engine {
 	}
 
 	/**
-	 * Recursively adds the contents of a folder.
+	 * Add files, and recursively add contents of folders to the processing list.
 	 */
-	public void addFolder(String sourceFolderName) {
-		addFolder(new File(sourceFolderName));
+	public void add(String... filesAndDirs) {
+		for (String filename : filesAndDirs) {
+			File f= new File(filename);
+			if (f.isDirectory())
+				addFolder(f);
+			else
+				addFile(f);
+		}
 		readTrackProprties();
 		removeEmptyDirs();
 	}
@@ -257,32 +263,22 @@ public class Engine {
 		}
 	}
 
-	/**
-	 * Recursively adds the contents of a folder.
-	 */
 	private void addFolder(File sourceFolder) {
-		// Create or get DirData
-		final String sourceFolderName= sourceFolder.getAbsolutePath();
-		DirData dd= dirs.get(sourceFolderName);
-		if (dd == null)
-			dirs.put(sourceFolderName, dd= new DirData(sourceFolderName));
-
-		// Add dir contents
+		final DirData dd= getOrCreateDirData(sourceFolder.getAbsolutePath());
 		for (File f : sourceFolder.listFiles())
 			if (f.isDirectory())
 				addFolder(f);
 			else
 				addFile(dd, f);
-
-		// Set hasAudioContent
-		dd.autoSetHasAudioContent();
-		if (dd.hasAudioContent())
-			dirsNeedingTrackProprties.add(dd);
+		afterAddingFilesToDir(dd);
 	}
 
-	/**
-	 * Adds a file.
-	 */
+	private void addFile(File f) {
+		final DirData dd= getOrCreateDirData(f.getParentFile().getAbsolutePath());
+		addFile(dd, f);
+		afterAddingFilesToDir(dd);
+	}
+
 	private void addFile(DirData dd, File f) {
 		// Create or get FileData
 		final String fullFilename= f.getAbsolutePath();
@@ -302,6 +298,15 @@ public class Engine {
 			fd.setMimeImage(TanukiImage.MIME_TEXT);
 	}
 
+	private void afterAddingFilesToDir(final DirData dd) {
+		// Update dd
+		dd.autoSetHasAudioContent();
+
+		// Place in dirsNeedingTrackProprties
+		if (dd.hasAudioContent())
+			dirsNeedingTrackProprties.add(dd);
+	}
+
 	private void deleteFile(IVoodooProgressMonitor progressDlg, final String sourceFilename) throws IOException {
 		// TODO Move to recycling bin
 		final File f= new File(sourceFilename);
@@ -309,6 +314,13 @@ public class Engine {
 		if (!PRETEND_MODE)
 			if (!f.delete())
 				throw new IOException("Delete failed. (\"" + sourceFilename + "\")"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private DirData getOrCreateDirData(String dir) {
+		DirData dd= dirs.get(dir);
+		if (dd == null)
+			dirs.put(dir, dd= new DirData(dir));
+		return dd;
 	}
 
 	private String formatFilename(String fmt, AlbumData ad) {
@@ -369,9 +381,23 @@ public class Engine {
 		// Read properties
 		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= new HashMap<DirData, Map<String, List<TrackProperties>>>();
 		for (DirData dd : dirsNeedingTrackProprties) {
+
+			// Read properties from each reader
 			final Map<String, List<TrackProperties>> trackPropertyMap= new HashMap<String, List<TrackProperties>>();
 			for (ITrackProprtyReader reader : trackProprtyReaders)
 				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
+
+			// Remove for files that already have 
+			Set<String> removeList= new HashSet<String>();
+			for (String f : trackPropertyMap.keySet()) {
+				FileData fd= dd.files.get(f);
+				if (fd.isMarkedForDeletion() || !fd.isEmpty())
+					removeList.add(f);
+			}
+			for (String f : removeList)
+				trackPropertyMap.remove(f);
+
+			// Keep values
 			unassignedData.put(dd, trackPropertyMap);
 		}
 
