@@ -15,9 +15,11 @@ public enum TanukiImage {
 	EDITOR("accessories-text-editor.png"), //
 	EXPLORER("system-file-manager.png"), //
 	FOLDER("folder.png"), //
+	INTERNET("applications-internet.png"), //
 	MIME_AUDIO("audio-x-generic.png"), //
 	MIME_IMAGE("image-x-generic.png"), //
 	MIME_TEXT("text-x-generic.png"), //
+	PASTE("edit-paste.png"), //
 	REMOVE("list-remove.png"), //
 	TANUKI("tanuki.ico"), //
 	TERMINAL("utilities-terminal.png"), //

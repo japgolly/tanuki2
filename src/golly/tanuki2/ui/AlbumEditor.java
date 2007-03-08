@@ -9,8 +9,12 @@ import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
+import golly.tanuki2.support.UIResourceManager;
+import golly.tanuki2.support.WebBrowser;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -20,6 +24,7 @@ import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -54,12 +59,37 @@ public class AlbumEditor {
 
 		// Shell
 		shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
-		shell.setLayout(UIHelpers.makeGridLayout(1, true, 4, 4));
+		shell.setLayout(UIHelpers.makeGridLayout(1, true, 0, 8));
 		shell.setImage(TanukiImage.EDITOR.get());
 		shell.setText(I18n.l("albumEditor_txt_windowTitle")); //$NON-NLS-1$
 
-		// Album info
+		// Utility buttons
 		Composite composite= new Composite(shell, SWT.NONE);
+		composite.setLayoutData(UIHelpers.makeGridData(1, false, SWT.FILL));
+		composite.setLayout(UIHelpers.makeGridLayout(2, true, 0, 6));
+		// button: google
+		Button btnGoogle= new Button(composite, SWT.PUSH);
+		btnGoogle.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
+		UIHelpers.setButtonText(btnGoogle, "albumEditor_btn_google"); //$NON-NLS-1$
+		btnGoogle.setImage(TanukiImage.INTERNET.get());
+		btnGoogle.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				onGoogle();
+			}
+		});
+		// button: read clipboard
+		Button btnReadClipboard= new Button(composite, SWT.PUSH);
+		btnReadClipboard.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
+		UIHelpers.setButtonText(btnReadClipboard, "albumEditor_btn_readClipboard"); //$NON-NLS-1$
+		btnReadClipboard.setImage(TanukiImage.PASTE.get());
+		btnReadClipboard.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				onReadClipboard();
+			}
+		});
+
+		// Album info
+		composite= new Composite(shell, SWT.NONE);
 		composite.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
 		composite.setLayout(UIHelpers.makeGridLayout(2, false, 0, 6));
 		iwArtist= addAlbumInfoField(composite, "general_field_artist", SWT.FILL); //$NON-NLS-1$
@@ -71,6 +101,8 @@ public class AlbumEditor {
 		trackInfoComposite.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL, 1, true, SWT.FILL));
 		composite= new Composite(trackInfoComposite, SWT.NONE);
 		composite.setLayout(UIHelpers.makeGridLayout(2, false, 0, 2));
+		composite.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		Color trackInfoColour= UIResourceManager.getColor("albumeditor_trackinfo_bg", 255, 255, 200); //$NON-NLS-1$
 		iwTnMap= new HashMap<String, Text>();
 		iwTrackMap= new HashMap<String, Text>();
 		for (String f : Helpers.sort(dd.files.keySet())) {
@@ -79,12 +111,14 @@ public class AlbumEditor {
 				// Create track widgets
 				// label
 				Label l= new Label(composite, SWT.LEFT);
+				l.setBackground(composite.getBackground());
 				l.setText(f);
 				GridData ld= UIHelpers.makeGridData(2, true, SWT.LEFT);
 				ld.verticalIndent= 6;
 				l.setLayoutData(ld);
 				// tn widget
 				Text t= new Text(composite, SWT.BORDER);
+				t.setBackground(trackInfoColour);
 				iwTnMap.put(f, t);
 				ld= UIHelpers.makeGridData(1, false, SWT.LEFT);
 				ld.minimumWidth= ld.widthHint= 24;
@@ -93,6 +127,7 @@ public class AlbumEditor {
 					t.setText(fd.getTn().toString());
 				// track widget
 				t= new Text(composite, SWT.BORDER);
+				t.setBackground(trackInfoColour);
 				iwTrackMap.put(f, t);
 				t.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
 				if (fd.getTrack() != null)
@@ -115,7 +150,7 @@ public class AlbumEditor {
 		});
 		trackInfoComposite.getVerticalBar().setIncrement(4);
 
-		// Buttons
+		// Ok and Cancel buttons
 		composite= new Composite(shell, SWT.NONE);
 		composite.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
 		composite.setLayout(UIHelpers.makeGridLayout(2, true, 0, 24));
@@ -155,6 +190,10 @@ public class AlbumEditor {
 		if (shellBounds.height > dca.height)
 			UIHelpers.setHeight(shell, dca.height);
 		UIHelpers.centerInFrontOfParent(Display.getCurrent(), shell, parent.getBounds());
+
+		// other
+		shell.setDefaultButton(btnOk);
+		iwArtist.setFocus();
 	}
 
 	public boolean didUpdate() {
@@ -176,6 +215,26 @@ public class AlbumEditor {
 
 	protected void onCancel() {
 		shell.close();
+	}
+
+	protected void onGoogle() {
+		final List<String> searchTermList= new ArrayList<String>();
+		String x;
+		if ((x= processWidgetText(iwArtist.getText())) != null)
+			searchTermList.add(x);
+		if ((x= processWidgetText(iwAlbum.getText())) != null)
+			searchTermList.add(x);
+
+		if (searchTermList.isEmpty())
+			WebBrowser.open("http://www.google.com"); //$NON-NLS-1$
+		else {
+			int i= searchTermList.size();
+			final String[] searchTermArray= searchTermList.toArray(new String[i]);
+			while (i-- > 0)
+				if (searchTermArray[i].indexOf(' ') != -1)
+					searchTermArray[i]= "\"" + searchTermArray[i] + "\""; //$NON-NLS-1$ //$NON-NLS-2$
+			WebBrowser.open(WebBrowser.getGoogleSearchUrl(searchTermArray));
+		}
 	}
 
 	protected void onOk() {
@@ -204,6 +263,11 @@ public class AlbumEditor {
 
 		this.updated= true;
 		shell.close();
+	}
+
+	protected void onReadClipboard() {
+		// TODO
+		System.out.println("unimplemented");
 	}
 
 	// =============================================================================================== //
