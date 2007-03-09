@@ -5,6 +5,7 @@ import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.support.Helpers;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -120,6 +121,7 @@ public class FilenameParser implements ITrackProprtyReader {
 	// =============================================================================================== //
 
 	private static final Pattern patCrapSuffix= Pattern.compile("^[^/]+?([ \\-_\\[({\\.][^/]*?)/(?:[^/]+?\\1/)+$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
+	private static final Pattern patDirSep= Pattern.compile("[\\\\/]"); //$NON-NLS-1$
 	private static final Pattern patRemoveExt= Pattern.compile("\\.[^.]+$"); //$NON-NLS-1$
 
 	private final Set<SmartPattern> patterns= new HashSet<SmartPattern>();
@@ -141,7 +143,7 @@ public class FilenameParser implements ITrackProprtyReader {
 	public Map<String, List<TrackProperties>> readMultipleTrackProperties(final DirData dd) {
 		final Map<String, List<TrackProperties>> r= new HashMap<String, List<TrackProperties>>();
 
-		// Make a map of processed filenames
+		// Make a map of processed filenames (audio files only)
 		Map<String, String> processedFilenameMap= new HashMap<String, String>();
 		String processedDir= dd.dir;
 		StringBuilder allFilenames= new StringBuilder();
@@ -160,6 +162,35 @@ public class FilenameParser implements ITrackProprtyReader {
 				for (String f : processedFilenameMap.keySet())
 					processedFilenameMap.put(f, p.matcher(processedFilenameMap.get(f)).replaceFirst(".x")); //$NON-NLS-1$
 				processedDir= Pattern.compile(Pattern.quote(m.group(1)) + "$", Pattern.CASE_INSENSITIVE).matcher(processedDir).replaceFirst(""); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+
+		// PRE-PROCESS DIR: Convert underscores to spaces if no spaces in any audio files
+		{
+			boolean spacesFound= false, underscoresFound= false;
+			for (String processedFilename : processedFilenameMap.values()) {
+				if (processedFilename.indexOf(' ') != -1) {
+					spacesFound= true;
+					break;
+				}
+				if (!underscoresFound)
+					if (processedFilename.indexOf('_') != -1)
+						underscoresFound= true;
+			}
+			if (underscoresFound && !spacesFound) {
+				// Convert underscores in filenames
+				for (String f : processedFilenameMap.keySet())
+					processedFilenameMap.put(f, processedFilenameMap.get(f).replace('_', ' '));
+				// Convert underscores in directories
+				String[] de= patDirSep.split(processedDir);
+				int i= de.length;
+				while (i-- > 0) {
+					if (de[i].indexOf(' ') == -1)
+						de[i]= de[i].replace('_', ' ');
+					else
+						break;
+				}
+				processedDir= Helpers.join(de, File.separator);
 			}
 		}
 

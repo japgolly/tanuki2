@@ -68,9 +68,9 @@ public class FilenameParserTest extends TestHelper {
 	@Test
 	public void testParsingMulti_commonSuffixInFilesAndDir() {
 		// Test that readMultipleTrackProperties removes common suffix from filenames AND DIR
-		DirData dd= new DirData("/var/music/Virgin_Steele-Visions_of_Eden-2006-AMRC");
-		final String fn4= "04_virgin_steele-black_light_on_black-amrc.mp3";
-		final String fn5= "05_virgin_steele-bonedust-amrc.mp3";
+		DirData dd= new DirData("/var/music/Virgin Steele-Visions of Eden-2006-AMRC");
+		final String fn4= "04 virgin steele-black light on black-amrc.mp3";
+		final String fn5= "05 virgin steele-bonedust-amrc.mp3";
 		dd.files.put(fn4, makeFileData(dd, true));
 		dd.files.put(fn5, makeFileData(dd, true));
 		dd.files.put("as.jpg", makeFileData(dd, false));
@@ -78,16 +78,16 @@ public class FilenameParserTest extends TestHelper {
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn4));
 		assertTrue(r.containsKey(fn5));
-		assertTrackPropertiesFound(fn4, makeTrackProperties("Virgin_Steele", 2006, "Visions_of_Eden", "04", "black_light_on_black"), r.get(fn4));
-		assertTrackPropertiesFound(fn5, makeTrackProperties("Virgin_Steele", 2006, "Visions_of_Eden", "05", "bonedust"), r.get(fn5));
+		assertTrackPropertiesFound(fn4, makeTrackProperties("Virgin Steele", 2006, "Visions of Eden", "04", "black light on black"), r.get(fn4));
+		assertTrackPropertiesFound(fn5, makeTrackProperties("Virgin Steele", 2006, "Visions of Eden", "05", "bonedust"), r.get(fn5));
 	}
 
 	@Test
 	public void testParsingMulti_commonSuffixInFilesOnly() {
 		// Test that readMultipleTrackProperties removes common suffix from filenames ONLY
-		DirData dd= new DirData("/var/music/Virgin_Steele-Visions_of_Eden-2006");
-		final String fn4= "04_virgin_steele-black_light_on_black-amrc.mp3";
-		final String fn5= "05_virgin_steele-bonedust-amrc.mp3";
+		DirData dd= new DirData("/var/music/Virgin Steele-Visions of Eden-2006");
+		final String fn4= "04 virgin steele-black light on black-amrc.mp3";
+		final String fn5= "05 virgin steele-bonedust-amrc.mp3";
 		dd.files.put(fn4, makeFileData(dd, true));
 		dd.files.put(fn5, makeFileData(dd, true));
 		dd.files.put("as.jpg", makeFileData(dd, false));
@@ -95,16 +95,16 @@ public class FilenameParserTest extends TestHelper {
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn4));
 		assertTrue(r.containsKey(fn5));
-		assertTrackPropertiesFound(fn4, makeTrackProperties("Virgin_Steele", 2006, "Visions_of_Eden", "04", "black_light_on_black"), r.get(fn4));
-		assertTrackPropertiesFound(fn5, makeTrackProperties("Virgin_Steele", 2006, "Visions_of_Eden", "05", "bonedust"), r.get(fn5));
+		assertTrackPropertiesFound(fn4, makeTrackProperties("Virgin Steele", 2006, "Visions of Eden", "04", "black light on black"), r.get(fn4));
+		assertTrackPropertiesFound(fn5, makeTrackProperties("Virgin Steele", 2006, "Visions of Eden", "05", "bonedust"), r.get(fn5));
 	}
 
 	@Test
 	public void testParsingMulti_doesntRemoveCommonSuffix() {
 		// Test that readMultipleTrackProperties doesnt remove text from filenames
-		DirData dd= new DirData("/var/music/Virgin_Steele-Visions_of_Eden-2006");
-		final String fn4= "04_virgin_steele-black_light_on_blackamrc.mp3";
-		final String fn5= "05_virgin_steele-bonedustamrc.mp3";
+		DirData dd= new DirData("/var/music/Virgin Steele-Visions of Eden-2006");
+		final String fn4= "04 virgin steele-black light on blackamrc.mp3";
+		final String fn5= "05 virgin steele-bonedustamrc.mp3";
 		dd.files.put(fn4, makeFileData(dd, true));
 		dd.files.put(fn5, makeFileData(dd, true));
 		dd.files.put("as.jpg", makeFileData(dd, false));
@@ -112,19 +112,19 @@ public class FilenameParserTest extends TestHelper {
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn4));
 		assertTrue(r.containsKey(fn5));
-		assertTrackPropertiesFound(fn4, makeTrackProperties("Virgin_Steele", 2006, "Visions_of_Eden", "04", "black_light_on_blackamrc"), r.get(fn4));
-		assertTrackPropertiesFound(fn5, makeTrackProperties("Virgin_Steele", 2006, "Visions_of_Eden", "05", "bonedustamrc"), r.get(fn5));
+		assertTrackPropertiesFound(fn4, makeTrackProperties("Virgin Steele", 2006, "Visions of Eden", "04", "black light on blackamrc"), r.get(fn4));
+		assertTrackPropertiesFound(fn5, makeTrackProperties("Virgin Steele", 2006, "Visions of Eden", "05", "bonedustamrc"), r.get(fn5));
 	}
 
 	@Test
 	public void testParsingMulti_removesArtistAndAlbumFromFilename() {
-		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-black_label_society-concrete_jungle.mp3"
-		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-black_label_society-shot_to_hell-concrete_jungle.mp3"
-		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-shot_to_hell-black_label_society-concrete_jungle.mp3"
-		// "X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]\\01-shot_to_hell-concrete_jungle.mp3"
+		// "X:\\music\\1. Fresh\\Black Label Society-Shot To Hell-2006[www.heavytorrents.org]\\01-black label society-concrete jungle.mp3"
+		// "X:\\music\\1. Fresh\\Black Label Society-Shot To Hell-2006[www.heavytorrents.org]\\01-black label society-shot to hell-concrete jungle.mp3"
+		// "X:\\music\\1. Fresh\\Black Label Society-Shot To Hell-2006[www.heavytorrents.org]\\01-shot to hell-black label society-concrete jungle.mp3"
+		// "X:\\music\\1. Fresh\\Black Label Society-Shot To Hell-2006[www.heavytorrents.org]\\01-shot to hell-concrete jungle.mp3"
 		// etc...
-		String[] insertValues= new String[] {"", "black_label_society", "black_label_society-shot_to_hell",
-				"shot_to_hell", "BLACK LABEL  SOCIETY", "Black-Label-Society_SHOT-TO-HELL"};
+		String[] insertValues= new String[] {"", "black label society", "black label society-shot to hell",
+				"shot to hell", "BLACK LABEL  SOCIETY", "Black-Label-Society SHOT-TO-HELL"};
 		for (String pre : insertValues) {
 			if (pre.length() > 0)
 				pre= pre + "-";
@@ -137,17 +137,17 @@ public class FilenameParserTest extends TestHelper {
 					if (post.length() > 0)
 						post= "-" + post;
 
-					DirData dd= new DirData("X:\\music\\1. Fresh\\Black_Label_Society-Shot_To_Hell-2006[www.heavytorrents.org]");
-					final String fn1= pre + "01" + mid + "concrete_jungle" + post + ".mp3";
-					final String fn2= pre + "02" + mid + "woteva_biatch" + post + ".mp3";
+					DirData dd= new DirData("X:\\music\\1. Fresh\\Black Label Society-Shot To Hell-2006[www.heavytorrents.org]");
+					final String fn1= pre + "01" + mid + "concrete jungle" + post + ".mp3";
+					final String fn2= pre + "02" + mid + "woteva biatch" + post + ".mp3";
 					dd.files.put(fn1, makeFileData(dd, true));
 					dd.files.put(fn2, makeFileData(dd, true));
 					final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
 					assertEquals(2, r.size());
 					assertTrue(r.containsKey(fn1));
 					assertTrue(r.containsKey(fn2));
-					assertTrackPropertiesFound(fn1, makeTrackProperties("Black_Label_Society", 2006, "Shot_To_Hell", "01", "concrete_jungle"), r.get(fn1));
-					assertTrackPropertiesFound(fn2, makeTrackProperties("Black_Label_Society", 2006, "Shot_To_Hell", "02", "woteva_biatch"), r.get(fn2));
+					assertTrackPropertiesFound(fn1, makeTrackProperties("Black Label Society", 2006, "Shot To Hell", "01", "concrete jungle"), r.get(fn1));
+					assertTrackPropertiesFound(fn2, makeTrackProperties("Black Label Society", 2006, "Shot To Hell", "02", "woteva biatch"), r.get(fn2));
 				}
 			}
 		}
@@ -168,7 +168,7 @@ public class FilenameParserTest extends TestHelper {
 		assertTrackPropertiesFound(fn1, makeTrackProperties("IN FLAMES", null, "Trigger", "01", "Trigger [Single Edit]"), r.get(fn1));
 		assertTrackPropertiesFound(fn2, makeTrackProperties("IN FLAMES", null, "Trigger", "02", "Watch Them Feed"), r.get(fn2));
 	}
-	
+
 	@Test
 	public void testParsingMulti_doesntRemoveWrongAlbumFromFilename() {
 		DirData dd= new DirData("/var/music/IN FLAMES Discografia (www.heavytorrents.org)/IN FLAMES Trigger");
@@ -182,6 +182,62 @@ public class FilenameParserTest extends TestHelper {
 		assertTrue(r.containsKey(fn2));
 		assertTrackPropertiesFound(fn1, makeTrackProperties("IN FLAMES", null, "Trigger", "01", "Trigger [Single Edit]"), r.get(fn1));
 		assertTrackPropertiesFound(fn2, makeTrackProperties("IN FLAMES", null, "Trigger", "02", "Watch Them Feed In Flames"), r.get(fn2));
+	}
+
+	@Test
+	public void testParsingMulti_replacesUnderscoresWithSpaces() {
+		DirData dd= new DirData("/var/music/Virgin_Steele-Visions_of_Eden-2006");
+		final String fn4= "04_virgin_steele-black_light_on_black.mp3";
+		final String fn5= "05_virgin_steele-bonedust.mp3";
+		dd.files.put(fn4, makeFileData(dd, true));
+		dd.files.put(fn5, makeFileData(dd, true));
+		dd.files.put("as.jpg", makeFileData(dd, false));
+		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		assertEquals(2, r.size());
+		assertTrue(r.containsKey(fn4));
+		assertTrue(r.containsKey(fn5));
+		assertTrackPropertiesFound(fn4, makeTrackProperties("Virgin Steele", 2006, "Visions of Eden", "04", "black light on black"), r.get(fn4));
+		assertTrackPropertiesFound(fn5, makeTrackProperties("Virgin Steele", 2006, "Visions of Eden", "05", "bonedust"), r.get(fn5));
+	}
+
+	@Test
+	public void testParsingMulti_doesntAlwaysReplaceUnderscoresWithSpaces() {
+		DirData dd= new DirData("/var/music/Unexpect/(2006) In_A_Flesh_Aquarium");
+		final String fn4= "04.Summoning Scenes.mp3";
+		final String fn5= "05.Silence_011010701.mp3";
+		dd.files.put(fn4, makeFileData(dd, true));
+		dd.files.put(fn5, makeFileData(dd, true));
+		dd.files.put("as.jpg", makeFileData(dd, false));
+		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		assertEquals(2, r.size());
+		assertTrue(r.containsKey(fn4));
+		assertTrue(r.containsKey(fn5));
+		assertTrackPropertiesFound(fn4, makeTrackProperties("Unexpect", 2006, "In_A_Flesh_Aquarium", "04", "Summoning Scenes"), r.get(fn4));
+		assertTrackPropertiesFound(fn5, makeTrackProperties("Unexpect", 2006, "In_A_Flesh_Aquarium", "05", "Silence_011010701"), r.get(fn5));
+	}
+
+	@Test
+	public void testMisc1() {
+		DirData dd= new DirData("X:\\music\\1. Fresh\\Lordi - Discografia [www.emwreloaded.com]\\Lordi - The Monster Show [2005]");
+		final String fn1= "01-lordi_-_theatrical_trailer-qtxmp3.mp3";
+		final String fn2= "02-lordi_-_bring_it_on-qtxmp3.mp3";
+		final String fn3= "03-lordi_-_blood_red_sandman-qtxmp3.mp3";
+		final String fn4= "04-lordi_-_my_heaven_is_your_hell-qtxmp3.mp3";
+		dd.files.put(fn1, makeFileData(dd, true));
+		dd.files.put(fn2, makeFileData(dd, true));
+		dd.files.put(fn3, makeFileData(dd, true));
+		dd.files.put(fn4, makeFileData(dd, true));
+		dd.files.put("hi there.jpg", makeFileData(dd, false));
+		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		assertEquals(4, r.size());
+		assertTrue(r.containsKey(fn1));
+		assertTrue(r.containsKey(fn2));
+		assertTrue(r.containsKey(fn3));
+		assertTrue(r.containsKey(fn4));
+		assertTrackPropertiesFound(fn1, makeTrackProperties("Lordi", 2005, "The Monster Show", "01", "theatrical trailer"), r.get(fn1));
+		assertTrackPropertiesFound(fn2, makeTrackProperties("Lordi", 2005, "The Monster Show", "02", "bring it on"), r.get(fn2));
+		assertTrackPropertiesFound(fn3, makeTrackProperties("Lordi", 2005, "The Monster Show", "03", "blood red sandman"), r.get(fn3));
+		assertTrackPropertiesFound(fn4, makeTrackProperties("Lordi", 2005, "The Monster Show", "04", "my heaven is your hell"), r.get(fn4));
 	}
 
 	// =============================================================================================== //
