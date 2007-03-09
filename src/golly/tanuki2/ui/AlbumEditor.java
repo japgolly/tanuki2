@@ -1,10 +1,13 @@
 package golly.tanuki2.ui;
 
+import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.RankedObject;
 import golly.tanuki2.data.RankedObjectCollection;
+import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
@@ -48,13 +51,15 @@ public class AlbumEditor {
 
 	private final Shell shell;
 	private final DirData dd;
+	private final Engine engine;
 	private final Combo iwArtist, iwYear, iwAlbum;
 	private final Map<String, Text> iwTnMap, iwTrackMap;
 	private final ScrolledComposite trackInfoComposite;
 	private boolean updated= false;
 
-	public AlbumEditor(Shell parent, DirData dd_) {
+	public AlbumEditor(Shell parent, DirData dd_, Engine engine_) {
 		this.dd= dd_;
+		this.engine= engine_;
 		final RankedObjectCollection<AlbumData> allAlbumData= new RankedObjectCollection<AlbumData>();
 
 		// Shell
@@ -174,13 +179,22 @@ public class AlbumEditor {
 			}
 		});
 
-		// Populate
+		// Populate (using existing data)
 		for (RankedObject<AlbumData> adr : allAlbumData) {
 			final AlbumData ad= adr.data;
-			addToCombo(iwArtist, ad.getArtist());
-			addToCombo(iwYear, ad.getYear());
-			addToCombo(iwAlbum, ad.getAlbum());
+			addToCombo(iwArtist, ad.getArtist(), true);
+			addToCombo(iwYear, ad.getYear(), true);
+			addToCombo(iwAlbum, ad.getAlbum(), true);
 		}
+
+		// Populate (using potential data)
+		final Map<String, List<TrackProperties>> trackPropertyMap= engine.readTrackProprties(dd);
+		for (List<TrackProperties> tpList : trackPropertyMap.values())
+			for (TrackProperties tp : tpList) {
+				addToCombo(iwArtist, tp.get(TrackPropertyType.ARTIST), false);
+				addToCombo(iwYear, tp.get(TrackPropertyType.YEAR), false);
+				addToCombo(iwAlbum, tp.get(TrackPropertyType.ALBUM), false);
+			}
 
 		// Resize and position window
 		shell.pack();
@@ -307,17 +321,17 @@ public class AlbumEditor {
 			t.addListener(SWT.Activate, makeSureWidgetIsVisible);
 	}
 
-	private void addToCombo(Combo combo, Integer i) {
+	private void addToCombo(Combo combo, Integer i, boolean select) {
 		if (i == null)
 			return;
-		addToCombo(combo, i.toString());
+		addToCombo(combo, i.toString(), select);
 	}
 
-	private void addToCombo(Combo combo, String str) {
+	private void addToCombo(Combo combo, String str, boolean select) {
 		if (str == null)
 			return;
 		UIHelpers.addUnlessExists(combo, str);
-		if (combo.getText().length() == 0)
+		if (select)
 			combo.setText(str);
 	}
 

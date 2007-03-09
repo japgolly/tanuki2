@@ -56,7 +56,7 @@ public class Engine {
 			else
 				addFile(f);
 		}
-		readTrackProprties();
+		readAndAssignTrackProprties();
 		removeEmptyDirs();
 	}
 
@@ -208,6 +208,33 @@ public class Engine {
 				}
 			}
 		return rankedArtists;
+	}
+
+	/**
+	 * Reads potential values for a directory of tracks.
+	 * 
+	 * @return a map of filenames to list-of-potential-properties.
+	 */
+	public Map<String, List<TrackProperties>> readTrackProprties(DirData dd) {
+		Set<DirData> dirset= new HashSet<DirData>();
+		dirset.add(dd);
+		return readTrackProprties(dirset).get(dd);
+	}
+
+	/**
+	 * Reads potential values for a number of directories of tracks.
+	 * 
+	 * @return a map of filenames to list-of-potential-properties for each directory.
+	 */
+	public Map<DirData, Map<String, List<TrackProperties>>> readTrackProprties(Set<DirData> dirsToProcess) {
+		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= new HashMap<DirData, Map<String, List<TrackProperties>>>();
+		for (DirData dd : dirsToProcess) {
+			final Map<String, List<TrackProperties>> trackPropertyMap= new HashMap<String, List<TrackProperties>>();
+			for (ITrackProprtyReader reader : trackProprtyReaders)
+				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
+			unassignedData.put(dd, trackPropertyMap);
+		}
+		return unassignedData;
 	}
 
 	/**
@@ -377,28 +404,24 @@ public class Engine {
 		return true;
 	}
 
-	protected void readTrackProprties() {
+	protected void readAndAssignTrackProprties() {
 		// Read properties
-		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= new HashMap<DirData, Map<String, List<TrackProperties>>>();
-		for (DirData dd : dirsNeedingTrackProprties) {
+		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= readTrackProprties(dirsNeedingTrackProprties);
 
-			// Read properties from each reader
-			final Map<String, List<TrackProperties>> trackPropertyMap= new HashMap<String, List<TrackProperties>>();
-			for (ITrackProprtyReader reader : trackProprtyReaders)
-				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
-
-			// Remove for files that already have 
-			Set<String> removeList= new HashSet<String>();
+		// Remove for files that already have values
+		final Set<String> removeList= new HashSet<String>();
+		for (DirData dd : unassignedData.keySet()) {
+			final Map<String, List<TrackProperties>> trackPropertyMap= unassignedData.get(dd);
+			// Find out which to delete
 			for (String f : trackPropertyMap.keySet()) {
 				FileData fd= dd.files.get(f);
 				if (fd.isMarkedForDeletion() || !fd.isEmpty())
 					removeList.add(f);
 			}
+			// Delete them
 			for (String f : removeList)
 				trackPropertyMap.remove(f);
-
-			// Keep values
-			unassignedData.put(dd, trackPropertyMap);
+			removeList.clear();
 		}
 
 		// Select and assign

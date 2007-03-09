@@ -336,7 +336,7 @@ public class AppWindow {
 		}
 
 		public boolean openAlbumEditor(DirData dd, Shell shell) {
-			AlbumEditor ae= new AlbumEditor(shell, dd);
+			AlbumEditor ae= new AlbumEditor(shell, dd, engine);
 			ae.show();
 			if (ae.didUpdate()) {
 				onDataUpdated_RefreshNow();

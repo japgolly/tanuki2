@@ -82,7 +82,7 @@ class Engine2 extends Engine {
 	}
 
 	public void readTrackProprties2() {
-		readTrackProprties();
+		readAndAssignTrackProprties();
 	}
 }
 
