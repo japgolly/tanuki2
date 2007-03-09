@@ -265,15 +265,16 @@ public class FilenameParser implements ITrackProprtyReader {
 		return Helpers.join(valueWords, strMakeRegexWithLenientSpacing_sep + "*");
 	}
 
+	private static final String removeValueFromAllFiles_sep= SmartPattern.macros.get("sepSpaceUndscOrDot"); //$NON-NLS-1$
+	private static final Pattern patRemoveValueFromAllFiles_sepAtBeginning= Pattern.compile("^(?:" + removeValueFromAllFiles_sep + ")?"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern patRemoveValueFromAllFiles_sepAtEnd= Pattern.compile("(?:" + removeValueFromAllFiles_sep + ")?$"); //$NON-NLS-1$ //$NON-NLS-2$
 	private static final Pattern patRemoveValueFromAllFiles_crapAtBeginning= Pattern.compile("^ - "); //$NON-NLS-1$
 	private static final Pattern patRemoveValueFromAllFiles_crapAtEnd= Pattern.compile(" - (\\.[^.]+)$"); //$NON-NLS-1$
 
 	@SuppressWarnings("nls")
 	private void removeValueFromAllFiles(Map<String, String> processedFilenameMap, String value) {
 		if (value != null) {
-			final String pre= SmartPattern.macros.get("sepSpaceUndscOrDot");
-			final String post= SmartPattern.macros.get("sepSpaceUndscOrDot");
-			final Pattern patValue= Pattern.compile("(?:" + pre + ")?" + makeRegexWithLenientSpacing(value) + "(?:" + post + ")?", Pattern.CASE_INSENSITIVE);
+			final Pattern patValue= Pattern.compile("(?:" + removeValueFromAllFiles_sep + ")?(" + makeRegexWithLenientSpacing(value) + ")(?:" + removeValueFromAllFiles_sep + ")?", Pattern.CASE_INSENSITIVE);
 			Matcher m;
 			int[] mins= new int[100];
 			int[] maxs= new int[100];
@@ -284,7 +285,7 @@ public class FilenameParser implements ITrackProprtyReader {
 			for (String processedFilename : processedFilenameMap.values()) {
 				m= patValue.matcher(processedFilename);
 				while (m.find()) {
-					final int a= m.start(), b= m.end();
+					final int a= m.start(1), b= m.end(1);
 					boolean added= false;
 					int oc= occuranceCount;
 					while (oc-- > 0) {
@@ -312,7 +313,7 @@ public class FilenameParser implements ITrackProprtyReader {
 					boolean foundInFile= false;
 					m= patValue.matcher(processedFilename);
 					while (m.find())
-						if (m.start() >= mins[oc] && m.end() <= maxs[oc]) {
+						if (m.start(1) >= mins[oc] && m.end(1) <= maxs[oc]) {
 							foundInFile= true;
 							break;
 						}
@@ -333,9 +334,12 @@ public class FilenameParser implements ITrackProprtyReader {
 						String f= processedFilenameMap.get(shortFilename);
 						m= patValue.matcher(f);
 						while (m.find()) {
-							final int a= m.start(), b= m.end();
+							final int a= m.start(1), b= m.end(1);
 							if (a >= min && b <= max) {
-								f= f.substring(0, a) + " - " + f.substring(b);
+								final String pre= patRemoveValueFromAllFiles_sepAtEnd.matcher(f.substring(0, a)).replaceAll("");
+								final String post= patRemoveValueFromAllFiles_sepAtBeginning.matcher(f.substring(b)).replaceAll("");
+								f= pre + " - " + post;
+								m= patValue.matcher(f);
 								break;
 							}
 						}

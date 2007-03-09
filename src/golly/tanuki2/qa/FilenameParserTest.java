@@ -124,33 +124,35 @@ public class FilenameParserTest extends TestHelper {
 		// "X:\\music\\1. Fresh\\Black Label Society-Shot To Hell-2006[www.heavytorrents.org]\\01-shot to hell-concrete jungle.mp3"
 		// etc...
 		String[] insertValues= new String[] {"", "black label society", "black label society-shot to hell",
-				"shot to hell", "BLACK LABEL  SOCIETY", "Black-Label-Society SHOT-TO-HELL"};
-		for (String pre : insertValues) {
-			if (pre.length() > 0)
-				pre= pre + "-";
-			for (String mid : insertValues) {
-				if (mid.length() > 0)
-					mid= "-" + mid + "-";
-				else
-					mid= "-";
-				for (String post : insertValues) {
-					if (post.length() > 0)
-						post= "-" + post;
+				"shot TO   HELL", "Black-Label-Society   SHOT-TO-HELL"};
+		String[] sepTypes= new String[] {"-", "- ", " -", "   -     "};
+		for (String sep : sepTypes)
+			for (String pre : insertValues) {
+				if (pre.length() > 0)
+					pre= pre + sep;
+				for (String mid : insertValues) {
+					if (mid.length() > 0)
+						mid= sep + mid + sep;
+					else
+						mid= sep;
+					for (String post : insertValues) {
+						if (post.length() > 0)
+							post= sep + post;
 
-					DirData dd= new DirData("X:\\music\\1. Fresh\\Black Label Society-Shot To Hell-2006[www.heavytorrents.org]");
-					final String fn1= pre + "01" + mid + "concrete jungle" + post + ".mp3";
-					final String fn2= pre + "02" + mid + "woteva biatch" + post + ".mp3";
-					dd.files.put(fn1, makeFileData(dd, true));
-					dd.files.put(fn2, makeFileData(dd, true));
-					final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
-					assertEquals(2, r.size());
-					assertTrue(r.containsKey(fn1));
-					assertTrue(r.containsKey(fn2));
-					assertTrackPropertiesFound(fn1, makeTrackProperties("Black Label Society", 2006, "Shot To Hell", "01", "concrete jungle"), r.get(fn1));
-					assertTrackPropertiesFound(fn2, makeTrackProperties("Black Label Society", 2006, "Shot To Hell", "02", "woteva biatch"), r.get(fn2));
+						DirData dd= new DirData("X:\\music\\1. Fresh\\Black Label Society-Shot To Hell-2006[www.heavytorrents.org]");
+						final String fn1= pre + "01" + mid + "concrete jungle" + post + ".mp3";
+						final String fn2= pre + "02" + mid + "woteva biatch" + post + ".mp3";
+						dd.files.put(fn1, makeFileData(dd, true));
+						dd.files.put(fn2, makeFileData(dd, true));
+						final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+						assertEquals(2, r.size());
+						assertTrue(r.containsKey(fn1));
+						assertTrue(r.containsKey(fn2));
+						assertTrackPropertiesFound(fn1, makeTrackProperties("Black Label Society", 2006, "Shot To Hell", "01", "concrete jungle"), r.get(fn1));
+						assertTrackPropertiesFound(fn2, makeTrackProperties("Black Label Society", 2006, "Shot To Hell", "02", "woteva biatch"), r.get(fn2));
+					}
 				}
 			}
-		}
 	}
 
 	@Test
@@ -238,6 +240,26 @@ public class FilenameParserTest extends TestHelper {
 		assertTrackPropertiesFound(fn2, makeTrackProperties("Lordi", 2005, "The Monster Show", "02", "bring it on"), r.get(fn2));
 		assertTrackPropertiesFound(fn3, makeTrackProperties("Lordi", 2005, "The Monster Show", "03", "blood red sandman"), r.get(fn3));
 		assertTrackPropertiesFound(fn4, makeTrackProperties("Lordi", 2005, "The Monster Show", "04", "my heaven is your hell"), r.get(fn4));
+	}
+
+	@Test
+	public void testMisc2() {
+		DirData dd= new DirData("D:\\downloads\\bittorrent\\complete\\Into Eternity\\Into Eternity - Selftitled");
+		final String fn1= "Into Eternity - Into Eternity - 01 - Torn.Mp3";
+		final String fn2= "Into Eternity - Into Eternity - 02 - Sorrow.Mp3";
+		final String fn3= "Into Eternity - Into Eternity - 03 - Left Behind.Mp3";
+		dd.files.put(fn1, makeFileData(dd, true));
+		dd.files.put(fn2, makeFileData(dd, true));
+		dd.files.put(fn3, makeFileData(dd, true));
+		dd.files.put("hi there.jpg", makeFileData(dd, false));
+		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		assertEquals(3, r.size());
+		assertTrue(r.containsKey(fn1));
+		assertTrue(r.containsKey(fn2));
+		assertTrue(r.containsKey(fn3));
+		assertTrackPropertiesFound(fn1, makeTrackProperties("Into Eternity", null, "Selftitled", "01", "Torn"), r.get(fn1));
+		assertTrackPropertiesFound(fn2, makeTrackProperties("Into Eternity", null, "Selftitled", "02", "Sorrow"), r.get(fn2));
+		assertTrackPropertiesFound(fn3, makeTrackProperties("Into Eternity", null, "Selftitled", "03", "Left Behind"), r.get(fn3));
 	}
 
 	// =============================================================================================== //
