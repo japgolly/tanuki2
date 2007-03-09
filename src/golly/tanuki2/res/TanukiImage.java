@@ -22,6 +22,7 @@ public enum TanukiImage {
 	PASTE("edit-paste.png"), //
 	REMOVE("list-remove.png"), //
 	TANUKI("tanuki.ico"), //
+	TITLECASE("format-text-bold.png"), //
 	TERMINAL("utilities-terminal.png"), //
 	VOODOO("voodoo.png"), //
 	;

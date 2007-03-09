@@ -71,7 +71,7 @@ public class AlbumEditor {
 		// Utility buttons
 		Composite composite= new Composite(shell, SWT.NONE);
 		composite.setLayoutData(UIHelpers.makeGridData(1, false, SWT.FILL));
-		composite.setLayout(UIHelpers.makeGridLayout(2, true, 0, 6));
+		composite.setLayout(UIHelpers.makeGridLayout(3, true, 0, 6));
 		// button: google
 		Button btnGoogle= new Button(composite, SWT.PUSH);
 		btnGoogle.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
@@ -90,6 +90,16 @@ public class AlbumEditor {
 		btnReadClipboard.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				onReadClipboard();
+			}
+		});
+		// button: title case
+		Button btnTitleCase= new Button(composite, SWT.PUSH);
+		btnTitleCase.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
+		UIHelpers.setButtonText(btnTitleCase, "albumEditor_btn_titleCase"); //$NON-NLS-1$
+		btnTitleCase.setImage(TanukiImage.TITLECASE.get());
+		btnTitleCase.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				onTitleCase();
 			}
 		});
 
@@ -198,7 +208,6 @@ public class AlbumEditor {
 
 		// Resize and position window
 		shell.pack();
-		UIHelpers.setWidth(shell, 380);
 		Rectangle dca= Display.getCurrent().getClientArea();
 		Rectangle shellBounds= shell.getBounds();
 		if (shellBounds.height > dca.height)
@@ -283,6 +292,13 @@ public class AlbumEditor {
 		// TODO
 		System.out.println("unimplemented");
 	}
+	
+	protected void onTitleCase() {
+		makeTitleCase(iwArtist);
+		makeTitleCase(iwAlbum);
+		for (Text t: iwTrackMap.values())
+			makeTitleCase(t);
+	}
 
 	// =============================================================================================== //
 	// = Internal
@@ -346,6 +362,14 @@ public class AlbumEditor {
 			widget.setFocus();
 			return false;
 		}
+	}
+
+	private static void makeTitleCase(Combo w) {
+		w.setText(Helpers.makeTitleCase(w.getText()));
+	}
+
+	private static void makeTitleCase(Text w) {
+		w.setText(Helpers.makeTitleCase(w.getText()));
 	}
 
 	private static String processWidgetText(String text) {
