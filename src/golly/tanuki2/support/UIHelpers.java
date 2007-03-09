@@ -13,6 +13,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
@@ -125,6 +126,16 @@ public class UIHelpers {
 		return makeGridData(colspan, grabhspace, halign, 1, false, GridData.CENTER);
 	}
 
+	public static RowLayout makeRowLayout(int margin, int spacing, boolean pack, boolean wrap, boolean justify) {
+		RowLayout layout= new RowLayout();
+		layout.marginLeft= layout.marginTop= layout.marginRight= layout.marginBottom= margin;
+		layout.spacing= spacing;
+		layout.pack= pack;
+		layout.wrap= wrap;
+		layout.justify= justify;
+		return layout;
+	}
+	
 	public static void selectItem(List list, String name) {
 		int i= list.getItemCount();
 		while (i-- > 0)

@@ -11,6 +11,8 @@ import org.eclipse.swt.widgets.Display;
  */
 @SuppressWarnings("nls")
 public enum TanukiImage {
+	ADD_FILE("add-file.png"), //
+	ADD_FOLDER("add-folder.png"), //
 	COPY("edit-copy.png"), //
 	EDITOR("accessories-text-editor.png"), //
 	EXPLORER("system-file-manager.png"), //

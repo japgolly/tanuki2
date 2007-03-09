@@ -18,6 +18,7 @@ public class Config {
 	public static int appwndX= -1, appwndY= -1, appwndWidth= -1, appwndHeight= -1;
 	public static boolean appwndMaximised= false;
 	public static String targetDir= "";
+	public static String lastAddedDir= null;
 
 	// =============================================================================================== //
 	private static final String FILENAME= "settings.xml";

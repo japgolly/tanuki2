@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
@@ -153,10 +154,38 @@ public class AppWindow {
 
 		// Create controls area
 		Composite composite= new Composite(expandBar, SWT.NONE);
-		composite.setLayout(UIHelpers.makeGridLayout(2, false, 4, 22));
+		composite.setLayout(UIHelpers.makeGridLayout(1, true, 0, 6));
 		composite.setBackground(shell.getBackground());
-		// group
-		Group g= new Group(composite, SWT.NONE);
+
+		// Controls row
+		Composite c2= new Composite(composite, SWT.NONE);
+		c2.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
+		c2.setLayout(UIHelpers.makeRowLayout(0, 24, true, true, false));
+		// btn: add folder
+		Button btnAddFolder= new Button(c2, SWT.PUSH);
+		btnAddFolder.setImage(TanukiImage.ADD_FOLDER.get());
+		UIHelpers.setButtonText(btnAddFolder, "main_btn_addFolder"); //$NON-NLS-1$
+		btnAddFolder.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				onAddFolder();
+			}
+		});
+		// btn: add files
+		Button btnAddFiles= new Button(c2, SWT.PUSH);
+		btnAddFiles.setImage(TanukiImage.ADD_FILE.get());
+		UIHelpers.setButtonText(btnAddFiles, "main_btn_addFiles"); //$NON-NLS-1$
+		btnAddFiles.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				onAddFiles();
+			}
+		});
+
+		// Controls row
+		c2= new Composite(composite, SWT.NONE);
+		c2.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
+		c2.setLayout(UIHelpers.makeGridLayout(2, false, 0, 22));
+		// group: output
+		Group g= new Group(c2, SWT.NONE);
 		g.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
 		g.setLayout(UIHelpers.makeGridLayout(2, false, 0, 8));
 		g.setText(I18n.l("main_group_targetDir")); //$NON-NLS-1$
@@ -174,7 +203,7 @@ public class AppWindow {
 			}
 		});
 		// voodoo button
-		Button b= new Button(composite, SWT.PUSH);
+		Button b= new Button(c2, SWT.PUSH);
 		b.setLayoutData(UIHelpers.makeGridData(1, false, SWT.RIGHT, 1, false, SWT.FILL));
 		b.setImage(TanukiImage.VOODOO.get());
 		UIHelpers.setButtonText(b, "main_btn_voodoo"); //$NON-NLS-1$
@@ -236,6 +265,33 @@ public class AppWindow {
 				}
 			}
 		});
+	}
+
+	protected void onAddFiles() {
+		FileDialog dlg= new FileDialog(shell, SWT.OPEN | SWT.MULTI);
+		if (Config.lastAddedDir != null)
+			dlg.setFilterPath(Config.lastAddedDir);
+		String file= dlg.open();
+		if (file != null) {
+			File f= new File(file);
+			String dir= f.isDirectory() ? f.toString() : f.getParent();
+			Config.lastAddedDir= dir;
+			engine.add(Helpers.map(dlg.getFileNames(), Helpers.addPathElements(dir, ""), "")); //$NON-NLS-1$ //$NON-NLS-2$
+			appUIShared.onDataUpdated_RefreshNow();
+		}
+	}
+
+	protected void onAddFolder() {
+		DirectoryDialog dlg= new DirectoryDialog(shell);
+		if (Config.lastAddedDir != null)
+			dlg.setFilterPath(Config.lastAddedDir);
+		dlg.setMessage(I18n.l("main_txt_selectFolderToAddMsg")); //$NON-NLS-1$
+		String dir= dlg.open();
+		if (dir != null) {
+			Config.lastAddedDir= dir;
+			engine.add(dir);
+			appUIShared.onDataUpdated_RefreshNow();
+		}
 	}
 
 	protected void onFileViewChanged(IFileView fileView) {
