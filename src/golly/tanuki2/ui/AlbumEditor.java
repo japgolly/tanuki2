@@ -213,10 +213,6 @@ public class AlbumEditor {
 		if (shellBounds.height > dca.height)
 			UIHelpers.setHeight(shell, dca.height);
 		UIHelpers.centerInFrontOfParent(Display.getCurrent(), shell, parent.getBounds());
-
-		// other
-		shell.setDefaultButton(btnOk);
-		iwArtist.setFocus();
 	}
 
 	public boolean didUpdate() {
@@ -225,6 +221,11 @@ public class AlbumEditor {
 
 	public void show() {
 		shell.open();
+		
+		// This is a little fix so that the text of iwYear and iwAlbum isn't selected
+		iwAlbum.setFocus();
+		iwYear.setFocus();
+		iwArtist.setFocus();
 
 		Display display= Display.getCurrent();
 		while (!shell.isDisposed())
