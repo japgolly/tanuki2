@@ -47,8 +47,12 @@ public enum TanukiImage {
 
 	public Image get() {
 		if (img == null) {
-			img= new Image(display, TanukiImage.class.getResourceAsStream(filename));
-			UIResourceManager.add(TanukiImage.class.getCanonicalName() + filename, img);
+			final String resID= TanukiImage.class.getCanonicalName() + filename;
+			img= (Image) UIResourceManager.get(resID);
+			if (img == null) {
+				img= new Image(display, TanukiImage.class.getResourceAsStream(filename));
+				UIResourceManager.add(resID, img);
+			}
 		}
 		return img;
 	}
