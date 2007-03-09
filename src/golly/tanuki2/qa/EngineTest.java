@@ -81,6 +81,7 @@ public class EngineTest extends TestHelper {
 		fd8.setMimeImage(TanukiImage.MIME_AUDIO);
 		fd8.setTn(8);
 		fd8.setTrack("Octavarium");
+		fd8.setSize(6);
 		AlbumData ad8= new AlbumData();
 		ad8.setArtist("Dream Theater");
 		ad8.setAlbum("Octavarium");
