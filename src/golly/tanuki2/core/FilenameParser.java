@@ -138,6 +138,10 @@ public class FilenameParser implements ITrackProprtyReader {
 		addPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", albumWithArtist, tnAndTrack);
 		addPattern("[:artist:]<sepSpaceOrUndsc>[:year:]<sepSpaceOrUndsc>[:album:]", tnAndTrack);
 		addPattern("[:artist:]<sep>[:album:](?:<sepSpaceOrUndsc>[:year:])?", tnAndTrack);
+		
+		addPattern("[:artist:]<sepSpaceUndscOrDot>[:year:](?:<sepSpaceUndscOrDot>[:album:])?<sepSpaceOrUndsc>" + tnAndTrack);
+		addPattern("[:artist:](?:<sep>[:album:])?<sepSpaceOrUndsc>" + tnAndTrack);
+		addPattern("[:album:](?:<sep>[:artist:])?<sepSpaceOrUndsc>" + tnAndTrack);
 	}
 
 	public Map<String, List<TrackProperties>> readMultipleTrackProperties(final DirData dd) {

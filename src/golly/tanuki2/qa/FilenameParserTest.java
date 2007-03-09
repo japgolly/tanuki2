@@ -50,7 +50,7 @@ public class FilenameParserTest extends TestHelper {
 	}
 
 	@Test
-	public void testParsingSingle() {
+	public void testParsingSingle_dirAndFilename() {
 		subtestParse(fp, "C:\\2\\Nevermore\\[2004] Enemies of Reality\\18 Who Decides.mp3", "Nevermore", 2004, "Enemies of Reality", "18", "Who Decides");
 		subtestParse(fp, "/home/golly/music/4. Done/Unexpect/2006 - In a Flesh Aquarium/06 - Megalomaniac Trees.mp3", "Unexpect", 2006, "In a Flesh Aquarium", "06", "Megalomaniac Trees");
 		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995. Destroy Erase Improve (320)\\07 - Inside What's Within Behind.mp3", "Meshuggah", 1995, "Destroy Erase Improve", "07", "Inside What's Within Behind");
@@ -65,6 +65,14 @@ public class FilenameParserTest extends TestHelper {
 		subtestParse(fp, "/var/music/IN FLAMES Discografia (www.heavytorrents.org)/IN FLAMES Clayman/02 Pinball Map.mp3", "IN FLAMES", null, "Clayman", "02", "Pinball Map");
 	}
 
+	@Test
+	public void testParsingSingle_filenameOnly() {
+		subtestParse(fp, "/var/music/Dream Theater - Train Of Thought - 01 - As I Am.flac", "Dream Theater", null, "Train Of Thought", "01", "As I Am");
+		subtestParse(fp, "/var/music/Dream Theater - 2003 - Train Of Thought - 01 - As I Am.flac", "Dream Theater", 2003, "Train Of Thought", "01", "As I Am");
+		subtestParse(fp, "/var/music/Dream Theater [2003] Train Of Thought - 01 - As I Am.flac", "Dream Theater", 2003, "Train Of Thought", "01", "As I Am");
+		subtestParse(fp, "/var/music/Dream Theater (2003) Train Of Thought - 01. As I Am.flac", "Dream Theater", 2003, "Train Of Thought", "01", "As I Am");
+	}
+	
 	@Test
 	public void testParsingMulti_commonSuffixInFilesAndDir() {
 		// Test that readMultipleTrackProperties removes common suffix from filenames AND DIR
