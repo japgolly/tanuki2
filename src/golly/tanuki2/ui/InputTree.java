@@ -335,6 +335,8 @@ public class InputTree implements IFileView {
 			ti.setText(1, I18n.l("inputTree_txt_markedForDeletion")); //$NON-NLS-1$
 		else if (fd.isAudio())
 			ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
+		else
+			ti.setText(1, I18n.l("general_txt_sizeInBytes", fd.getSize())); //$NON-NLS-1$
 	}
 
 	private void updateAlbumDirItem(TreeItem parent, DirData dd) {

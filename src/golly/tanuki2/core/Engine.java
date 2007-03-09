@@ -323,6 +323,9 @@ public class Engine {
 			fd.setMimeImage(TanukiImage.MIME_IMAGE);
 		else if (patText.matcher(f.getName()).matches())
 			fd.setMimeImage(TanukiImage.MIME_TEXT);
+		
+		// Get file size
+		fd.setSize(f.length());
 	}
 
 	private void afterAddingFilesToDir(final DirData dd) {

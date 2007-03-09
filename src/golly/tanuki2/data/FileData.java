@@ -14,6 +14,7 @@ public class FileData extends AbstractDataObject {
 	private boolean isAudio= false;
 	private boolean isMarkedForDeletion= false;
 	private TanukiImage mimeImage= null;
+	private long size= 0;
 	private Integer tn= null;
 	private String track= null;
 
@@ -35,6 +36,10 @@ public class FileData extends AbstractDataObject {
 
 	public TanukiImage getMimeImage() {
 		return mimeImage;
+	}
+
+	public long getSize() {
+		return size;
 	}
 
 	public Integer getTn() {
@@ -80,6 +85,10 @@ public class FileData extends AbstractDataObject {
 	public void setMimeImage(TanukiImage mimeImage) {
 		this.mimeImage= mimeImage;
 		dataUpdated();
+	}
+
+	public void setSize(long size) {
+		this.size= size;
 	}
 
 	public void setTn(Integer tn) {
