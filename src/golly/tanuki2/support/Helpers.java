@@ -730,9 +730,12 @@ public final class Helpers {
 		}
 	}
 
-	/**
-	 * Takes a <code>Set</code>, and returns a sorted array.
-	 */
+	public static Integer[] sort(final Set<Integer> data) {
+		Integer[] r= data.toArray(new Integer[data.size()]);
+		Arrays.sort(r);
+		return r;
+	}
+
 	public static String[] sort(final Set<String> data) {
 		String[] r= data.toArray(new String[data.size()]);
 		Arrays.sort(r);
