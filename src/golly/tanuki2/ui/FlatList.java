@@ -69,7 +69,7 @@ public class FlatList implements IFileView {
 		// mi: copy filenames
 		MenuItem miCopyFilenames= new MenuItem(popupMenu, SWT.PUSH);
 		miCopyFilenames.setImage(TanukiImage.COPY.get());
-		miCopyFilenames.setText(I18n.l("flatList_menu_copyFilenames") + "\tCtrl+C"); //$NON-NLS-1$ //$NON-NLS-2$
+		miCopyFilenames.setText(I18n.l("main_contextMenu_copyFilenames") + "\tCtrl+C"); //$NON-NLS-1$ //$NON-NLS-2$
 		miCopyFilenames.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onCopyFilenames();
@@ -78,7 +78,7 @@ public class FlatList implements IFileView {
 		// mi: edit album
 		MenuItem miEditAlbum= new MenuItem(popupMenu, SWT.PUSH);
 		miEditAlbum.setImage(TanukiImage.EDITOR.get());
-		miEditAlbum.setText(I18n.l("flatList_menu_editAlbum")); //$NON-NLS-1$
+		miEditAlbum.setText(I18n.l("main_contextMenu_editAlbum")); //$NON-NLS-1$
 		miEditAlbum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onEdit();
@@ -86,7 +86,7 @@ public class FlatList implements IFileView {
 		});
 		// mi: launch file
 		MenuItem miLaunchFile= new MenuItem(popupMenu, SWT.PUSH);
-		miLaunchFile.setText(I18n.l("flatList_menu_launchFile") + "\tCtrl+L"); //$NON-NLS-1$ //$NON-NLS-2$
+		miLaunchFile.setText(I18n.l("main_contextMenu_launchFile") + "\tCtrl+L"); //$NON-NLS-1$ //$NON-NLS-2$
 		miLaunchFile.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onLaunchFile();
@@ -95,7 +95,7 @@ public class FlatList implements IFileView {
 		// mi: open folder
 		MenuItem miOpenFolder= new MenuItem(popupMenu, SWT.PUSH);
 		miOpenFolder.setImage(TanukiImage.EXPLORER.get());
-		miOpenFolder.setText(I18n.l("flatList_menu_openFolder")); //$NON-NLS-1$
+		miOpenFolder.setText(I18n.l("main_contextMenu_openFolder")); //$NON-NLS-1$
 		miOpenFolder.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onOpenFolder();
@@ -104,7 +104,7 @@ public class FlatList implements IFileView {
 		// mi: open prompt
 		MenuItem miOpenPrompt= new MenuItem(popupMenu, SWT.PUSH);
 		miOpenPrompt.setImage(TanukiImage.TERMINAL.get());
-		miOpenPrompt.setText(I18n.l("flatList_menu_openPrompt")); //$NON-NLS-1$
+		miOpenPrompt.setText(I18n.l("main_contextMenu_openPrompt")); //$NON-NLS-1$
 		miOpenPrompt.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onOpenPrompt();
@@ -113,7 +113,7 @@ public class FlatList implements IFileView {
 		// mi: remove items
 		MenuItem miRemoveItems= new MenuItem(popupMenu, SWT.PUSH);
 		miRemoveItems.setImage(TanukiImage.REMOVE.get());
-		miRemoveItems.setText(I18n.l("flatList_menu_removeItems") + "\tDel"); //$NON-NLS-1$ //$NON-NLS-2$
+		miRemoveItems.setText(I18n.l("main_contextMenu_removeItems") + "\tDel"); //$NON-NLS-1$ //$NON-NLS-2$
 		miRemoveItems.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onDelete();
