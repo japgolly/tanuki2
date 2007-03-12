@@ -1,5 +1,6 @@
 package golly.tanuki2.ui;
 
+import golly.tanuki2.core.ClipboardParser;
 import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
@@ -49,6 +50,7 @@ import org.eclipse.swt.widgets.Text;
 public class AlbumEditor {
 	private static final Pattern patNumeric= Pattern.compile("^\\d+$"); //$NON-NLS-1$
 
+	private final SharedUIResources sharedUIResources;
 	private final Shell shell;
 	private final DirData dd;
 	private final Engine engine;
@@ -57,9 +59,10 @@ public class AlbumEditor {
 	private final ScrolledComposite trackInfoComposite;
 	private boolean updated= false;
 
-	public AlbumEditor(Shell parent, DirData dd_, Engine engine_) {
+	public AlbumEditor(Shell parent, DirData dd_, Engine engine_, SharedUIResources sharedUIResources) {
 		this.dd= dd_;
 		this.engine= engine_;
+		this.sharedUIResources= sharedUIResources;
 		final RankedObjectCollection<AlbumData> allAlbumData= new RankedObjectCollection<AlbumData>();
 
 		// Shell
@@ -145,8 +148,7 @@ public class AlbumEditor {
 				t.setBackground(trackInfoColour);
 				iwTrackMap.put(f, t);
 				t.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
-				if (fd.getTrack() != null)
-					t.setText(fd.getTrack());
+				setText(t, fd.getTrack());
 
 				// Rank album data
 				if (fd.getAlbumData() != null)
@@ -221,7 +223,7 @@ public class AlbumEditor {
 
 	public void show() {
 		shell.open();
-		
+
 		// This is a little fix so that the text of iwYear and iwAlbum isn't selected
 		iwAlbum.setFocus();
 		iwYear.setFocus();
@@ -290,14 +292,26 @@ public class AlbumEditor {
 	}
 
 	protected void onReadClipboard() {
-		// TODO
-		System.out.println("unimplemented");
+		// TODO onReadClipboard(): Add a seperate dialog for this 
+		final ClipboardParser cp= new ClipboardParser();
+		final String clipboardText= cp.getClipboardText(sharedUIResources.clipboard);
+		if (clipboardText == null)
+			UIHelpers.showTanukiWarning(shell, "albumEditor_err_noClipboardData"); //$NON-NLS-1$
+		else {
+			final Map<String, TrackProperties> results= cp.parseAndMatch(dd, clipboardText);
+			for (String filename : results.keySet()) {
+				TrackProperties tp= results.get(filename);
+				setText(iwTnMap.get(filename), tp.get(TrackPropertyType.TN));
+				setText(iwTrackMap.get(filename), tp.get(TrackPropertyType.TRACK));
+			}
+			UIHelpers.showMessageBox(shell, SWT.ICON_INFORMATION, shell.getText(), I18n.l("albumEditor_txt_readClipboardFinished", results.size())); //$NON-NLS-1$
+		}
 	}
-	
+
 	protected void onTitleCase() {
 		makeTitleCase(iwArtist);
 		makeTitleCase(iwAlbum);
-		for (Text t: iwTrackMap.values())
+		for (Text t : iwTrackMap.values())
 			makeTitleCase(t);
 	}
 
@@ -378,5 +392,10 @@ public class AlbumEditor {
 			return null;
 		text= Helpers.unicodeTrim(text);
 		return (text.length() == 0) ? null : text;
+	}
+
+	private static void setText(Text w, String txt) {
+		if (txt != null)
+			w.setText(txt);
 	}
 }

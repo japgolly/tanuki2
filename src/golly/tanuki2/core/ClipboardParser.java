@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+
 /**
  * @author Golly
  * @since 10/03/2007
@@ -25,6 +28,11 @@ public class ClipboardParser {
 	private static final Pattern pTnAndText= Pattern.compile("^(\\d{1,3})[^\\p{javaLetterOrDigit}](.+)$");
 	private static final Pattern pQuotedText= Pattern.compile("^\"(.+)\"$");
 	private static final Pattern pFindNumber= Pattern.compile("(?<!\\p{javaLetterOrDigit})0*?([1-9]\\d*)(?!\\p{javaLetterOrDigit})");
+
+	public String getClipboardText(Clipboard cb) {
+		final TextTransfer transfer= TextTransfer.getInstance();
+		return (String) cb.getContents(transfer);
+	}
 
 	/**
 	 * Parses text and returns a track_number-to-track_name map.
@@ -74,8 +82,8 @@ public class ClipboardParser {
 		final Map<String, TrackProperties> completeMatches= new HashMap<String, TrackProperties>();
 		final Map<Integer, String> clipboardResults= parse(txt);
 
-		matchClipboardResultsUsingTrackName(dd, clipboardResults, completeMatches);
-		matchClipboardResultsUsingTN(dd, clipboardResults, completeMatches);
+		matchClipboardResultsUsingTrackName(dd.files, clipboardResults, completeMatches);
+		matchClipboardResultsUsingTN(dd.files, clipboardResults, completeMatches);
 
 		return completeMatches;
 	}
@@ -108,45 +116,48 @@ public class ClipboardParser {
 		}
 	}
 
-	private void matchClipboardResultsUsingTrackName(DirData dd, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
+	private void matchClipboardResultsUsingTrackName(Map<String, FileData> ddFiles, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
 		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
 		for (Integer tn : clipboardResults.keySet()) {
 			final String nTrack= Helpers.normalizeText(clipboardResults.get(tn));
 			final RankedObjectCollection<String> rankedMatches= new RankedObjectCollection<String>();
-			for (String filename : dd.files.keySet()) {
-				// Compare to filename
-				final String nFilename= Helpers.normalizeText(Helpers.removeFilenameExtension(filename));
-				double rank= -LevenshteinDistance.calculateDistance2(nFilename, nTrack);
-				// Compare to FileData.track
-				final FileData fd= dd.files.get(filename);
-				if (fd.getTrack() != null)
-					rank= Math.max(rank, -LevenshteinDistance.calculateDistance2(Helpers.normalizeText(fd.getTrack()), nTrack));
-				// Store
-				rankedMatches.add(filename, rank);
-			}
+			for (String filename : ddFiles.keySet())
+				if (ddFiles.get(filename).isAudio()) {
+					// Compare to filename
+					final String nFilename= Helpers.normalizeText(Helpers.removeFilenameExtension(filename));
+					double rank= -LevenshteinDistance.calculateDistance2(nFilename, nTrack);
+					// Compare to FileData.track
+					final FileData fd= ddFiles.get(filename);
+					if (fd.getTrack() != null)
+						rank= Math.max(rank, -LevenshteinDistance.calculateDistance2(Helpers.normalizeText(fd.getTrack()), nTrack));
+					// Store
+					rankedMatches.add(filename, rank);
+				}
 			rankedMatchesPerResult.put(tn, rankedMatches);
 		}
 		assignBestResultMatches(clipboardResults, completeMatches, rankedMatchesPerResult);
 	}
 
-	private void matchClipboardResultsUsingTN(DirData dd, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
+	private void matchClipboardResultsUsingTN(Map<String, FileData> ddFiles, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
 		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
-		for (String filename : dd.files.keySet()) {
-			final String filenameNoExt= Helpers.removeFilenameExtension(filename);
-			// Find numbers in filename
-			final Matcher m= pFindNumber.matcher(filenameNoExt);
-			final List<Integer> numbersFound= new ArrayList<Integer>();
-			while (m.find())
-				numbersFound.add(Integer.parseInt(m.group(1)));
-			// Register this filename as potential match for each number found
-			final double numberCount= numbersFound.size();
-			for (Integer i : numbersFound) {
-				RankedObjectCollection<String> x= rankedMatchesPerResult.get(i);
-				if (x == null)
-					rankedMatchesPerResult.put(i, x= new RankedObjectCollection<String>());
-				x.add(filename, 1.0 / numberCount);
+		for (String filename : ddFiles.keySet())
+			if (ddFiles.get(filename).isAudio()) {
+				final String filenameNoExt= Helpers.removeFilenameExtension(filename);
+				// Find numbers in filename
+				final Matcher m= pFindNumber.matcher(filenameNoExt);
+				final List<Integer> numbersFound= new ArrayList<Integer>();
+				while (m.find())
+					numbersFound.add(Integer.parseInt(m.group(1)));
+				// Register this filename as potential match for each number found
+				final double numberCount= numbersFound.size();
+				for (Integer i : numbersFound)
+					if (clipboardResults.containsKey(i)) {
+						RankedObjectCollection<String> x= rankedMatchesPerResult.get(i);
+						if (x == null)
+							rankedMatchesPerResult.put(i, x= new RankedObjectCollection<String>());
+						x.add(filename, 1.0 / numberCount);
+					}
 			}
-		}
 		assignBestResultMatches(clipboardResults, completeMatches, rankedMatchesPerResult);
 	}
 
