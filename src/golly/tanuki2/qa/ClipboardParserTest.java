@@ -161,7 +161,7 @@ public class ClipboardParserTest extends TestHelper {
 	}
 
 	@Test
-	public void testMatchingToFiles1_exactMatch() {
+	public void testMatchingToFiles_exactMatch() {
 		final String f1= "01 - Splintered Visions.mp3";
 		final String f2= "02 - Embraced by Desolation.mp3";
 		final String f3= "03 - 3 Dimensional Aperture.mp3";
@@ -176,7 +176,7 @@ public class ClipboardParserTest extends TestHelper {
 	}
 
 	@Test
-	public void testMatchingToFiles2_exactMatchWithoutTn() {
+	public void testMatchingToFiles_exactMatchWithoutTn() {
 		final String f1= "Splintered Visions.mp3";
 		final String f2= "Embraced by Desolation.mp3";
 		final String f3= "3 Dimensional Aperture.mp3";
@@ -191,7 +191,7 @@ public class ClipboardParserTest extends TestHelper {
 	}
 
 	@Test
-	public void testMatchingToFiles3_mistakesInFilenames() {
+	public void testMatchingToFiles_mistakesInFilenames() {
 		final String f1= "Splintered_Visions.mp3"; // joined together by underscore 
 		final String f2= "Embraced-by-Desolation.mp3"; // joined together by dashes
 		final String f3= "Three Dimensional Aperture.mp3"; // first word is different
@@ -202,6 +202,38 @@ public class ClipboardParserTest extends TestHelper {
 		final String f8= "Buried into Oblivion.mp3"; // in --> into
 		final String f9= "Black Sea of Agony.mp3";
 		final String f10= "Morose Seclusion.mp3";
+		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
+	}
+
+	@Test
+	@Ignore
+	public void testMatchingToFiles_barabara() {
+		final String prefix= "Into Eternity - Buried in Oblivion - ";
+		final String f1= prefix + "Splintered_Visions.mp3"; // joined together by underscore 
+		final String f2= prefix + "Embraced-by-Desolation.mp3"; // joined together by dashes
+		final String f3= prefix + "Three Dimensional Aperture.mp3"; // first word is different
+		final String f4= "04 - Beginning of the.mp3"; // missing words at end
+		final String f5= "05 - Uncertainty.mp3"; // missing words at beginning
+		final String f6= "06 - Spiralling into Depression.mp3"; // double L in sprialling
+		final String f7= prefix + "Isola.mp3"; // word cut short
+		final String f8= prefix + "Buried in Oblivion.mp3";
+		final String f9= "Buried in Oblivion - 09 - Black Sea of Agony.mp3";
+		final String f10= prefix + "Morose Seclusion.mp3";
+		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
+	}
+
+	@Test
+	public void testMatchingToFiles_noNamesInFiles() {
+		final String f1= "01.mp3";
+		final String f2= "02.mp3";
+		final String f3= "03.mp3";
+		final String f4= "Track 4.mp3";
+		final String f5= "Track 05.mp3";
+		final String f6= "4 Track 06.mp3";
+		final String f7= "Track 07.mp3";
+		final String f8= "Track 08.mp3";
+		final String f9= "Track 09.mp3";
+		final String f10= "Track 10.mp3";
 		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
 	}
 

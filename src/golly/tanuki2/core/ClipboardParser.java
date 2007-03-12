@@ -8,7 +8,9 @@ import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.LevenshteinDistance;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,20 +24,26 @@ public class ClipboardParser {
 	private static final Pattern pCrapBeforeTnAndText= Pattern.compile("^\\D*\\s+?(\\d{1,3}[^\\p{javaLetterOrDigit}])");
 	private static final Pattern pTnAndText= Pattern.compile("^(\\d{1,3})[^\\p{javaLetterOrDigit}](.+)$");
 	private static final Pattern pQuotedText= Pattern.compile("^\"(.+)\"$");
-	private static final Pattern pRemoveFileExt= Pattern.compile("\\.[^\\.]*$");
+	private static final Pattern pRemoveFileExt= Pattern.compile("\\.[^\\.]*$"); // TODO move to Helpers
+	private static final Pattern pFindNumber= Pattern.compile("(?<!\\p{javaLetterOrDigit})0*?([1-9]\\d*)(?!\\p{javaLetterOrDigit})");
 
 	// TODO rename all public methods
 
 	public Map<String, TrackProperties> matchToFiles(DirData dd, String txt) {
 		final Map<String, TrackProperties> completeMatches= new HashMap<String, TrackProperties>();
 		final Map<Integer, String> clipboardResults= readTracks(txt);
-		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
 
-		// Get and rank all matches per result
+		matchClipboardResultsUsingTrackName(dd, clipboardResults, completeMatches);
+		matchClipboardResultsUsingTN(dd, clipboardResults, completeMatches);
+
+		return completeMatches;
+	}
+
+	private void matchClipboardResultsUsingTrackName(DirData dd, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
+		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
 		for (Integer tn : clipboardResults.keySet()) {
 			final String nTrack= Helpers.normalizeText(clipboardResults.get(tn));
 			final RankedObjectCollection<String> rankedMatches= new RankedObjectCollection<String>();
-
 			for (String filename : dd.files.keySet()) {
 				// Compare to filename
 				final String nFilename= Helpers.normalizeText(pRemoveFileExt.matcher(filename).replaceFirst(""));
@@ -49,13 +57,37 @@ public class ClipboardParser {
 			}
 			rankedMatchesPerResult.put(tn, rankedMatches);
 		}
+		assignBestResultMatches(clipboardResults, completeMatches, rankedMatchesPerResult);
+	}
 
-		// Assign results
+	private void matchClipboardResultsUsingTN(DirData dd, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
+		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
+		for (String filename : dd.files.keySet()) {
+			final String filenameNoExt= pRemoveFileExt.matcher(filename).replaceFirst("");
+			// Find numbers in filename
+			final Matcher m= pFindNumber.matcher(filenameNoExt);
+			final List<Integer> numbersFound= new ArrayList<Integer>();
+			while (m.find())
+				numbersFound.add(Integer.parseInt(m.group(1)));
+			// Register this filename as potential match for each number found
+			final double numberCount= numbersFound.size();
+			for (Integer i : numbersFound) {
+				RankedObjectCollection<String> x= rankedMatchesPerResult.get(i);
+				if (x == null)
+					rankedMatchesPerResult.put(i, x= new RankedObjectCollection<String>());
+				x.add(filename, 1.0 / numberCount);
+			}
+		}
+		assignBestResultMatches(clipboardResults, completeMatches, rankedMatchesPerResult);
+	}
+
+	private void assignBestResultMatches(final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches, final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult) {
 		while (!rankedMatchesPerResult.isEmpty()) {
+			// Find highest ranking matches
 			final RankedObjectCollection<Integer> highestRanks= new RankedObjectCollection<Integer>();
 			for (Integer tn : rankedMatchesPerResult.keySet()) {
 				final RankedObjectCollection<String> ranks= rankedMatchesPerResult.get(tn);
-				highestRanks.add(tn, ranks.getWinningRank() - (ranks.getWinnerCount() > 1 ? 0.5 : 0));
+				highestRanks.add(tn, ranks.getWinningRank() - (ranks.getWinnerCount() > 1 ? 0.2 : 0));
 			}
 
 			// Assign
@@ -71,8 +103,6 @@ public class ClipboardParser {
 			for (RankedObjectCollection<String> r : rankedMatchesPerResult.values())
 				r.remove(filename);
 		}
-
-		return completeMatches;
 	}
 
 	public Map<Integer, String> readTracks(String txt) {
