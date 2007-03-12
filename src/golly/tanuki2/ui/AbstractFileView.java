@@ -187,11 +187,13 @@ abstract class AbstractFileView implements IFileView {
 	protected abstract void onDelete();
 
 	protected void onDoubleClick() {
-		final FileData fd= getSelectedFileData();
-		if (fd != null && !fd.isAudio())
-			onLaunchFile();
-		else
-			onEdit();
+		if (isSingleSelection()) {
+			final FileData fd= getSelectedFileData();
+			if (fd != null && !fd.isAudio())
+				onLaunchFile();
+			else
+				onEdit();
+		}
 	}
 
 	protected abstract void onEdit();
