@@ -66,7 +66,7 @@ public class AppWindow {
 	private final Shell shell;
 	private final TabFolder tabFolder;
 	private final Text iwTargetDir;
-	private final Button btnTargetDirBrowse;
+	private final Button btnTargetDirBrowse, btnTitleCase;
 	private final Set<IFileView> fileViewsUptodate= new HashSet<IFileView>();
 	private IFileView currentFileView= null;
 
@@ -180,6 +180,10 @@ public class AppWindow {
 				onAddFiles();
 			}
 		});
+		// chk: auto title case
+		btnTitleCase= new Button(c2,SWT.CHECK);
+		UIHelpers.setButtonText(btnTitleCase, "main_btn_autoTitleCase"); //$NON-NLS-1$
+		btnTitleCase.setSelection(Config.autoTitleCase);
 
 		// Controls row
 		c2= new Composite(composite, SWT.NONE);
@@ -261,7 +265,7 @@ public class AppWindow {
 			public void drop(DropTargetEvent event) {
 				if (fileTransfer.isSupportedType(event.currentDataType)) {
 					String[] files= (String[]) event.data;
-					engine.add(files);
+					engine.add(btnTitleCase.getSelection(), files);
 					appUIShared.onDataUpdated_RefreshNow();
 				}
 			}
@@ -277,7 +281,7 @@ public class AppWindow {
 			File f= new File(file);
 			String dir= f.isDirectory() ? f.toString() : f.getParent();
 			Config.lastAddedDir= dir;
-			engine.add(Helpers.map(dlg.getFileNames(), Helpers.addPathElements(dir, ""), "")); //$NON-NLS-1$ //$NON-NLS-2$
+			engine.add(btnTitleCase.getSelection(), Helpers.map(dlg.getFileNames(), Helpers.addPathElements(dir, ""), "")); //$NON-NLS-1$ //$NON-NLS-2$
 			appUIShared.onDataUpdated_RefreshNow();
 		}
 	}
@@ -290,7 +294,7 @@ public class AppWindow {
 		String dir= dlg.open();
 		if (dir != null) {
 			Config.lastAddedDir= dir;
-			engine.add(dir);
+			engine.add(btnTitleCase.getSelection(), dir);
 			appUIShared.onDataUpdated_RefreshNow();
 		}
 	}
@@ -359,6 +363,7 @@ public class AppWindow {
 		Config.appwndWidth= b.width;
 
 		Config.targetDir= iwTargetDir.getText();
+		Config.autoTitleCase= btnTitleCase.getSelection();
 	}
 
 	// =============================================================================================== //

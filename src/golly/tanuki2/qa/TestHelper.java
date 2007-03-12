@@ -72,6 +72,7 @@ class Engine2 extends Engine {
 		super();
 		trackProprtyReaders.clear();
 		trackProprtyReaders.add(tr);
+		autoTitleCase= false;
 	}
 
 	public void addFakeDir(String path, String... filenames) {
@@ -169,7 +170,7 @@ class NoisyMockVoodooProgressMonitor implements IVoodooProgressMonitor {
 	public void starting(int dirCount, int totalFiles) {
 		System.out.println("\nStarting. (" + dirCount + " dirs, " + totalFiles + " files)");
 	}
-	
+
 	public void nextDir(String srcDir, String targetDir, int fileCount) {
 		System.out.println("Next dir: " + srcDir);
 		if (targetDir != null)

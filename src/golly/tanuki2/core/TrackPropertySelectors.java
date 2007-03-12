@@ -124,10 +124,18 @@ class TrackPropertySelectors {
 	private static abstract class AbstractTrackPropertySelector {
 		public abstract void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles);
 
+		private ITextProcessor textProcessor= null;
+
+		public void init(ITextProcessor textProcessor) {
+			this.textProcessor= textProcessor;
+		}
+
 		protected void assignTrackPropertiesToFile(final FileData fd, TrackProperties tp, final RankedObjectCollection<AlbumData> sharedAlbumData) {
 			fd.setTn(tp.get(TrackPropertyType.TN));
-			fd.setTrack(tp.get(TrackPropertyType.TRACK));
+			fd.setTrack(textProcessor.processText(tp.get(TrackPropertyType.TRACK)));
 			final AlbumData ad= sharedAlbumData.increaseRank(tp.toAlbumData(), 1).data;
+			ad.setArtist(textProcessor.processText(ad.getArtist()));
+			ad.setAlbum(textProcessor.processText(ad.getAlbum()));
 			fd.setAlbumData(ad);
 		}
 	}
@@ -139,13 +147,16 @@ class TrackPropertySelectors {
 	public static class Runner {
 		private final Map<DirData, Map<String, List<TrackProperties>>> unassignedData;
 		private final RankedObjectCollection<AlbumData> sharedAlbumData;
+		private final ITextProcessor textProcessor;
 
-		public Runner(final Map<DirData, Map<String, List<TrackProperties>>> unassignedData) {
+		public Runner(final Map<DirData, Map<String, List<TrackProperties>>> unassignedData, ITextProcessor textProcessor) {
 			this.unassignedData= unassignedData;
 			this.sharedAlbumData= new RankedObjectCollection<AlbumData>();
+			this.textProcessor= textProcessor;
 		}
 
 		public void run(AbstractTrackPropertySelector selector) {
+			selector.init(textProcessor);
 			final Set<String> successfulFiles= new HashSet<String>();
 			for (DirData dd : unassignedData.keySet()) {
 				final Map<String, List<TrackProperties>> trackPropertyMap= unassignedData.get(dd);

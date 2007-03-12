@@ -52,8 +52,8 @@ public class EngineTest extends TestHelper {
 		assertTrue(dd.hasAudioContent(true));
 		assertTrue(dd.hasAudioContent(false));
 		engine.remove(addPathElements("A", "a1.mp3"));
-		assertTrue(dd.hasAudioContent(true));
-		assertTrue(dd.hasAudioContent(false));
+		assertFalse(dd.hasAudioContent(true));
+		assertFalse(dd.hasAudioContent(false));
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class EngineTest extends TestHelper {
 		Engine engine= new Engine();
 		final String sourceDir= prepareVoodooTestSourceDir("sample_data2");
 		final String octo= addPathElements(sourceDir, "Dream Theater", "2005 - Octavarium");
-		engine.add(octo);
+		engine.add(false, octo);
 		assertEquals(4, engine.files.size());
 		assertTrue(engine.files.get(addPathElements(octo, "08. Octavarium.mp3")).isComplete(true));
 
@@ -75,7 +75,7 @@ public class EngineTest extends TestHelper {
 		fd5.setTrack("mah mah");
 		final String fd5str= fd5.toString();
 
-		engine.add(addPathElements(octo, "08. Octavarium.mp3"), addPathElements(octo, "del_me.txt"));
+		engine.add(false, addPathElements(octo, "08. Octavarium.mp3"), addPathElements(octo, "del_me.txt"));
 		assertEquals(4, engine.files.size());
 		assertEquals(fd5str, engine.files.get(addPathElements(octo, "05 - Panic Attack.mp3")).toString());
 		FileData fd8= new FileData(engine.dirs.get(octo));
@@ -290,7 +290,7 @@ public class EngineTest extends TestHelper {
 		mtpr.addMockResult(addPathElements(sourceDir, "incomplete", "2", "201"), makeTrackProperties("Incomplete 2", null, "blah", "01", "incomplete dir"));
 		mtpr.addMockResult(addPathElements(sourceDir, "incomplete", "2", "202"), makeTrackProperties("Incomplete 2", null, "blah", "02", "incomplete dir"));
 		mtpr.addMockResult(addPathElements(sourceDir, "other", "remain", "asd"), makeTrackProperties("Children Of Bodom", 2003, "Hate Crew Deathroll", "01", "Angels Don't Kill"));
-		engine.add(sourceDir);
+		engine.add(false, sourceDir);
 		int fileCount= 1 + 7 + 1 + 3 + 5 + 4;
 		assertEquals(fileCount, engine.files.size());
 		engine.files.get(addPathElements(sourceDir, "complete", "blah", "www.heavytorrents.org.txt")).setMarkedForDeletion(true);
@@ -357,7 +357,7 @@ public class EngineTest extends TestHelper {
 		final String octavarium= addPathElements(sourceDir, "Dream Theater", "2005 - Octavarium");
 		mtpr.addMockResult(addPathElements(octavarium, "05 - Panic Attack"), makeTrackProperties("Dream Theater", 2005, "Octavarium", "5", "Panic Attack"));
 		mtpr.addMockResult(addPathElements(octavarium, "08. Octavarium"), makeTrackProperties("Dream Theater", 2005, "Octavarium", "8", "Octavarium"));
-		engine.add(sourceDir);
+		engine.add(false, sourceDir);
 		engine.files.get(addPathElements(octavarium, "del_me.txt")).setMarkedForDeletion(true);
 		assertEquals(4, engine.files.size());
 

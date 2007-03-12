@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * @author Golly
  * @since 16/02/2007
  */
-public class Engine {
+public class Engine implements ITextProcessor {
 	public static boolean PRETEND_MODE= false;
 
 	private final static Pattern patAudio= Pattern.compile("^.+\\.(?:mp3|flac|ape|mp4|m4a|ogg|aac|wmv|wav)$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
@@ -40,6 +40,7 @@ public class Engine {
 	protected final List<ITrackProprtyReader> trackProprtyReaders= new ArrayList<ITrackProprtyReader>();
 	protected final Set<DirData> dirsNeedingTrackProprties= new HashSet<DirData>();
 	private Boolean overwriteAll= null;
+	protected boolean autoTitleCase= true;
 
 	public Engine() {
 		trackProprtyReaders.add(new FilenameParser());
@@ -48,7 +49,8 @@ public class Engine {
 	/**
 	 * Add files, and recursively add contents of folders to the processing list.
 	 */
-	public void add(String... filesAndDirs) {
+	public void add(boolean autoTitleCase, String... filesAndDirs) {
+		this.autoTitleCase= autoTitleCase;
 		for (String filename : filesAndDirs) {
 			File f= new File(filename);
 			if (f.isDirectory())
@@ -210,6 +212,14 @@ public class Engine {
 		return rankedArtists;
 	}
 
+	public String processText(String txt) {
+		if (txt != null) {
+			if (autoTitleCase)
+				txt= Helpers.makeTitleCase(txt);
+		}
+		return txt;
+	}
+
 	/**
 	 * Reads potential values for a directory of tracks.
 	 * 
@@ -323,7 +333,7 @@ public class Engine {
 			fd.setMimeImage(TanukiImage.MIME_IMAGE);
 		else if (patText.matcher(f.getName()).matches())
 			fd.setMimeImage(TanukiImage.MIME_TEXT);
-		
+
 		// Get file size
 		fd.setSize(f.length());
 	}
@@ -428,7 +438,7 @@ public class Engine {
 		}
 
 		// Select and assign
-		TrackPropertySelectors.Runner trackPropertySelector= new TrackPropertySelectors.Runner(unassignedData);
+		TrackPropertySelectors.Runner trackPropertySelector= new TrackPropertySelectors.Runner(unassignedData, this);
 		trackPropertySelector.run(new TrackPropertySelectors.AssignSingleRows());
 		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(getRankedArtists(true), rankUnconfirmedArtists(unassignedData), true));
 		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(getRankedArtists(true), rankUnconfirmedArtists(unassignedData), false));

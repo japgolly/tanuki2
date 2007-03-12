@@ -19,6 +19,7 @@ public class Config {
 	public static boolean appwndMaximised= false;
 	public static String targetDir= "";
 	public static String lastAddedDir= null;
+	public static boolean autoTitleCase= true;
 
 	// =============================================================================================== //
 	private static final String FILENAME= "settings.xml";
