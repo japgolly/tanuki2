@@ -350,6 +350,7 @@ public class InputTree extends AbstractFileView {
 
 	private void updateAlbumDirItem(TreeItem parent, DirData dd) {
 		// Collect data about files
+		// TODO This checks sub-files but not sub-dirs
 		final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
 		boolean allMarkedForDeletion= true;
 		if (dd.files.isEmpty())
