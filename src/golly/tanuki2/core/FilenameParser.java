@@ -122,7 +122,6 @@ public class FilenameParser implements ITrackProprtyReader {
 
 	private static final Pattern patCrapSuffix= Pattern.compile("^[^/]+?([ \\-_\\[({\\.][^/]*?)/(?:[^/]+?\\1/)+$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
 	private static final Pattern patDirSep= Pattern.compile("[\\\\/]"); //$NON-NLS-1$
-	private static final Pattern patRemoveExt= Pattern.compile("\\.[^.]+$"); //$NON-NLS-1$
 
 	private final Set<SmartPattern> patterns= new HashSet<SmartPattern>();
 	private final Set<SmartPattern> dirPatterns= new HashSet<SmartPattern>();
@@ -153,7 +152,7 @@ public class FilenameParser implements ITrackProprtyReader {
 		StringBuilder allFilenames= new StringBuilder();
 		for (String shortFilename : dd.files.keySet())
 			if (dd.files.get(shortFilename).isAudio()) {
-				allFilenames.append(patRemoveExt.matcher(shortFilename).replaceFirst("")); //$NON-NLS-1$
+				allFilenames.append(Helpers.removeFilenameExtension(shortFilename));
 				allFilenames.append('/');
 				processedFilenameMap.put(shortFilename, shortFilename);
 			}

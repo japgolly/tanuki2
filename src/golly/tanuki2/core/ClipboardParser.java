@@ -24,7 +24,6 @@ public class ClipboardParser {
 	private static final Pattern pCrapBeforeTnAndText= Pattern.compile("^\\D*\\s+?(\\d{1,3}[^\\p{javaLetterOrDigit}])");
 	private static final Pattern pTnAndText= Pattern.compile("^(\\d{1,3})[^\\p{javaLetterOrDigit}](.+)$");
 	private static final Pattern pQuotedText= Pattern.compile("^\"(.+)\"$");
-	private static final Pattern pRemoveFileExt= Pattern.compile("\\.[^\\.]*$"); // TODO move to Helpers
 	private static final Pattern pFindNumber= Pattern.compile("(?<!\\p{javaLetterOrDigit})0*?([1-9]\\d*)(?!\\p{javaLetterOrDigit})");
 
 	// TODO rename all public methods
@@ -46,7 +45,7 @@ public class ClipboardParser {
 			final RankedObjectCollection<String> rankedMatches= new RankedObjectCollection<String>();
 			for (String filename : dd.files.keySet()) {
 				// Compare to filename
-				final String nFilename= Helpers.normalizeText(pRemoveFileExt.matcher(filename).replaceFirst(""));
+				final String nFilename= Helpers.normalizeText(Helpers.removeFilenameExtension(filename));
 				double rank= -LevenshteinDistance.calculateDistance2(nFilename, nTrack);
 				// Compare to FileData.track
 				final FileData fd= dd.files.get(filename);
@@ -63,7 +62,7 @@ public class ClipboardParser {
 	private void matchClipboardResultsUsingTN(DirData dd, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
 		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
 		for (String filename : dd.files.keySet()) {
-			final String filenameNoExt= pRemoveFileExt.matcher(filename).replaceFirst("");
+			final String filenameNoExt= Helpers.removeFilenameExtension(filename);
 			// Find numbers in filename
 			final Matcher m= pFindNumber.matcher(filenameNoExt);
 			final List<Integer> numbersFound= new ArrayList<Integer>();

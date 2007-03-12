@@ -662,6 +662,12 @@ public final class Helpers {
 				map.remove(k);
 	}
 
+	private static final Pattern pRemoveFileExt= Pattern.compile("\\.[^.]*$");
+
+	public static String removeFilenameExtension(String filename) {
+		return pRemoveFileExt.matcher(filename).replaceFirst("");
+	}
+
 	/**
 	 * Removes a directory if it's empty, and then its parent directory if that's empty and so on and so forth.
 	 * 
