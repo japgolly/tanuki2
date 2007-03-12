@@ -23,8 +23,6 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -38,17 +36,16 @@ import org.eclipse.swt.widgets.TableItem;
  * @author Golly
  * @since 19/02/2007
  */
-public class FlatList implements IFileView {
+public class FlatList extends AbstractFileView implements IFileView {
 	private static final String EOL= "\r\n"; //$NON-NLS-1$ // TODO win32
 
-	private final SharedUIResources sharedUIResources;
 	private final Table table;
 	private final int INDEX_FILENAME, INDEX_ARTIST, INDEX_YEAR, INDEX_ALBUM, INDEX_TN, INDEX_TRACK;
 	private final MenuItem[] singleSelectionMenuItems, singleAudioSelectionMenuItems;
 	private final AutoResizeColumnsListener autoColumnResizer;
 
 	public FlatList(Composite parent, SharedUIResources sharedUIResources_) {
-		this.sharedUIResources= sharedUIResources_;
+		super(sharedUIResources_);
 
 		// Create table
 		table= new Table(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.CHECK);
@@ -166,17 +163,6 @@ public class FlatList implements IFileView {
 				}
 			}
 		});
-		table.addMouseListener(new MouseAdapter() {
-			public void mouseDoubleClick(MouseEvent e) {
-				final FileData fd= getSelectedData();
-				if (fd != null) {
-					if (fd.isAudio())
-						onEdit();
-					else
-						onLaunchFile();
-				}
-			}
-		});
 		table.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (e.detail == SWT.CHECK)
@@ -185,6 +171,7 @@ public class FlatList implements IFileView {
 		});
 		this.autoColumnResizer= UIHelpers.createAutoResizeColumnsListener(table);
 		table.addListener(SWT.Resize, autoColumnResizer);
+		addCommonFileViewListeners(table);
 	}
 
 	// =============================================================================================== //
@@ -271,15 +258,10 @@ public class FlatList implements IFileView {
 			sharedUIResources.appUIShared.openAlbumEditor(fd.getDirData(), table.getShell());
 	}
 
-	protected void onLaunchFile() {
-		if (table.getSelectionCount() == 1)
-			sharedUIResources.appUIShared.launch(getSelected().getText());
-	}
-
 	protected void onOpenFolder() {
 		// TODO win32
 		try {
-			Runtime.getRuntime().exec("explorer.exe .", null, new File(getSelectedData().getDirData().dir)); //$NON-NLS-1$
+			Runtime.getRuntime().exec("explorer.exe .", null, new File(getSelectedFileData().getDirData().dir)); //$NON-NLS-1$
 		} catch (IOException e) {
 			new TanukiException(e).showErrorDialog();
 		}
@@ -288,7 +270,7 @@ public class FlatList implements IFileView {
 	protected void onOpenPrompt() {
 		// TODO win32
 		try {
-			Runtime.getRuntime().exec("cmd.exe /C start cmd.exe", null, new File(getSelectedData().getDirData().dir)); //$NON-NLS-1$
+			Runtime.getRuntime().exec("cmd.exe /C start cmd.exe", null, new File(getSelectedFileData().getDirData().dir)); //$NON-NLS-1$
 		} catch (IOException e) {
 			new TanukiException(e).showErrorDialog();
 		}
@@ -311,8 +293,20 @@ public class FlatList implements IFileView {
 		return table.getSelection()[0];
 	}
 
-	private FileData getSelectedData() {
+	protected FileData getSelectedFileData() {
 		return getData(getSelected());
+	}
+
+	protected String getSelectedFullFilename() {
+		return getSelected().getText();
+	}
+
+	protected int getSelectionCount() {
+		return table.getSelectionCount();
+	}
+
+	protected boolean isFileSelected() {
+		return true;
 	}
 
 	private void setFileItemColor(final TableItem ti, final FileData fd) {

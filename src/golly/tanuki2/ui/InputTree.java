@@ -22,8 +22,6 @@ import java.util.regex.Pattern;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -35,19 +33,18 @@ import org.eclipse.swt.widgets.TreeItem;
  * @author Golly
  * @since 17/02/2007
  */
-public class InputTree implements IFileView {
+public class InputTree extends AbstractFileView implements IFileView {
 	private static final Pattern pathSeperatorPattern= Pattern.compile("[\\/\\\\]"); //$NON-NLS-1$
 	private static final String albumInfoFmt= "%s / %s / %s"; //$NON-NLS-1$
 	private static final String trackInfoFmt= "   %2s / %s"; //$NON-NLS-1$
 
 	private final Set<String> collapsedDirs= new HashSet<String>();
-	private final SharedUIResources sharedUIResources;
 	private final Tree tree;
 	private final AutoResizeColumnsListener autoColumnResizer;
 	private Map<String, DirData> dirs= null;
 
 	public InputTree(Composite parent, SharedUIResources sharedUIResources_) {
-		this.sharedUIResources= sharedUIResources_;
+		super(sharedUIResources_);
 		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.CHECK);
 		tree.setHeaderVisible(true);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
@@ -86,15 +83,6 @@ public class InputTree implements IFileView {
 				}
 			}
 		});
-		tree.addMouseListener(new MouseAdapter() {
-			public void mouseDoubleClick(MouseEvent e) {
-				final FileData fd= getSelectedFileData();
-				if (fd != null && !fd.isAudio())
-					onLaunchFile();
-				else
-					onEdit();
-			}
-		});
 		tree.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (e.detail == SWT.CHECK)
@@ -103,6 +91,7 @@ public class InputTree implements IFileView {
 		});
 		this.autoColumnResizer= UIHelpers.createAutoResizeColumnsListener(tree);
 		tree.addListener(SWT.Resize, autoColumnResizer);
+		addCommonFileViewListeners(tree);
 	}
 
 	// =============================================================================================== //
@@ -203,18 +192,17 @@ public class InputTree implements IFileView {
 	}
 
 	protected void onEdit() {
-		if (tree.getSelectionCount() != 1)
+		if (!isSingleSelection())
 			return;
 
-		final TreeItem ti= tree.getSelection()[0];
 		DirData dd= null;
 		// If selected item is a file
-		FileData fd= ti.getData() instanceof FileData ? (FileData) ti.getData() : null;
+		FileData fd= getSelectedFileData();
 		if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion())
 			dd= fd.getDirData();
 		else
 			// Or if directory, get the first audio child-item, and use its DirData
-			for (TreeItem i : ti.getItems()) {
+			for (TreeItem i : getSelected().getItems()) {
 				fd= i.getData() instanceof FileData ? (FileData) i.getData() : null;
 				if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
 					dd= fd.getDirData();
@@ -225,12 +213,6 @@ public class InputTree implements IFileView {
 		// Show album editor
 		if (dd != null)
 			sharedUIResources.appUIShared.openAlbumEditor(dd, tree.getShell());
-	}
-
-	protected void onLaunchFile() {
-		if (getSelectedFileData() == null)
-			return;
-		sharedUIResources.appUIShared.launch(getFullFilename(getSelected()));
 	}
 
 	// =============================================================================================== //
@@ -299,16 +281,24 @@ public class InputTree implements IFileView {
 	}
 
 	private TreeItem getSelected() {
-		if (tree.getSelectionCount() != 1)
-			return null;
 		return tree.getSelection()[0];
 	}
 
-	private FileData getSelectedFileData() {
-		if (tree.getSelectionCount() != 1)
-			return null;
-		final TreeItem ti= tree.getSelection()[0];
+	protected FileData getSelectedFileData() {
+		final TreeItem ti= getSelected();
 		return ti.getData() instanceof FileData ? (FileData) ti.getData() : null;
+	}
+
+	protected String getSelectedFullFilename() {
+		return getFullFilename(getSelected());
+	}
+
+	protected int getSelectionCount() {
+		return tree.getSelectionCount();
+	}
+
+	protected boolean isFileSelected() {
+		return getSelectedFileData() != null;
 	}
 
 	private void recordCollapsedTreeItems(TreeItem ti) {
