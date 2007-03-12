@@ -24,7 +24,11 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class ArtistEditor {
 	public static boolean open(Shell parent, Set<DirData> dirdataSet) {
-		return new ArtistEditor(parent, dirdataSet).open();
+		if (dirdataSet.isEmpty()) {
+			UIHelpers.showTanukiWarning(parent, "main_err_noAudioSelectedForArtistEditor"); //$NON-NLS-1$
+			return false;
+		} else
+			return new ArtistEditor(parent, dirdataSet).open();
 	}
 
 	private final Shell shell;

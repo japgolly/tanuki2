@@ -61,6 +61,7 @@ public class FlatList extends AbstractFileView {
 		MenuItem miCopyFilenames= new MenuItem(contextMenu, SWT.PUSH);
 		miCopyFilenames.setImage(TanukiImage.COPY.get());
 		miCopyFilenames.setText(I18n.l("main_contextMenu_copyFilenames") + "\tCtrl+C"); //$NON-NLS-1$ //$NON-NLS-2$
+		selectionRequiredMenuItems.add(miCopyFilenames);
 		miCopyFilenames.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onCopyFilenames();

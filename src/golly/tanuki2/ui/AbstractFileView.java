@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.MenuItem;
 abstract class AbstractFileView implements IFileView {
 	protected final SharedUIResources sharedUIResources;
 	protected Menu contextMenu= null;
+	protected Set<MenuItem> selectionRequiredMenuItems= null;
 	protected Set<MenuItem> singleSelectionMenuItems= null;
 	protected Set<MenuItem> singleAudioSelectionMenuItems= null;
 
@@ -74,6 +75,7 @@ abstract class AbstractFileView implements IFileView {
 	}
 
 	protected void createMenu(Control w) {
+		selectionRequiredMenuItems= new HashSet<MenuItem>();
 		singleSelectionMenuItems= new HashSet<MenuItem>();
 		singleAudioSelectionMenuItems= new HashSet<MenuItem>();
 		contextMenu= new Menu(w);
@@ -93,6 +95,7 @@ abstract class AbstractFileView implements IFileView {
 		MenuItem miEditArtist= new MenuItem(contextMenu, SWT.PUSH);
 		miEditArtist.setImage(TanukiImage.EDITOR.get());
 		miEditArtist.setText(I18n.l("main_contextMenu_editArtist")); //$NON-NLS-1$
+		selectionRequiredMenuItems.add(miEditArtist);
 		miEditArtist.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onEditArtist();
@@ -131,6 +134,7 @@ abstract class AbstractFileView implements IFileView {
 		MenuItem miRemoveItems= new MenuItem(contextMenu, SWT.PUSH);
 		miRemoveItems.setImage(TanukiImage.REMOVE.get());
 		miRemoveItems.setText(I18n.l("main_contextMenu_removeItems") + "\tDel"); //$NON-NLS-1$ //$NON-NLS-2$
+		selectionRequiredMenuItems.add(miRemoveItems);
 		miRemoveItems.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onDelete();
@@ -140,9 +144,12 @@ abstract class AbstractFileView implements IFileView {
 		// add listener
 		contextMenu.addMenuListener(new MenuAdapter() {
 			public void menuShown(MenuEvent e) {
+				final boolean selection= getSelectionCount() > 0;
 				final boolean single= isSingleSelection();
 				final FileData fd= single ? getSelectedFileData() : null;
 				final boolean singleAudio= (fd != null) && fd.isAudio() && !fd.isMarkedForDeletion();
+				for (MenuItem mi : selectionRequiredMenuItems)
+					mi.setEnabled(selection);
 				for (MenuItem mi : singleSelectionMenuItems)
 					mi.setEnabled(single);
 				for (MenuItem mi : singleAudioSelectionMenuItems)
