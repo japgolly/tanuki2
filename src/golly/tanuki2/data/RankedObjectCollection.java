@@ -83,6 +83,10 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 		return count;
 	}
 
+	public Double getWinningRank() {
+		return set.isEmpty() ? null : set.iterator().next().getRank();
+	}
+
 	/**
 	 * Indicates whether or not there is one, single winner.
 	 */
@@ -111,10 +115,18 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 		return set.iterator();
 	}
 
+	public boolean remove(T data) {
+		RankedObject<T> ro= get(data);
+		if (ro == null)
+			return false;
+		else
+			return set.remove(ro);
+	}
+
 	public int size() {
 		return set.size();
 	}
-	
+
 	@Override
 	public String toString() {
 		return set.toString();
