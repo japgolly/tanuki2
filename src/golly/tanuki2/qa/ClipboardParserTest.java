@@ -243,7 +243,7 @@ public class ClipboardParserTest extends TestHelper {
 		for (String f : fAll)
 			makeFileData(dd, f, true);
 		final String txt= "01. Splintered Visions\n02. Embraced By Desolation\n03. 3 Dimensional Aperture\n04. Beginning Of The End\n05. Point Of Uncertainty\n06. Spiraling Into Depression\n07. Isolation\n08. Buried In Oblivion\n09. Black Sea Of Agony\n10. Morose Seclusion";
-		Map<String, TrackProperties> r= cp.matchToFiles(dd, txt);
+		Map<String, TrackProperties> r= cp.parseAndMatch(dd, txt);
 		assertMatchResults(r, f1, 1, "Splintered Visions");
 		assertMatchResults(r, f2, 2, "Embraced By Desolation");
 		assertMatchResults(r, f3, 3, "3 Dimensional Aperture");
@@ -269,7 +269,7 @@ public class ClipboardParserTest extends TestHelper {
 
 	private void subtest(String clipboardTxt) {
 		//		Map<Integer, String> r= cp.readTracks("and there were 5 more\n\n\r\npeople on the 10 number "+clipboardTxt+"\n10 prople died.");
-		Map<Integer, String> r= cp.readTracks(clipboardTxt);
+		Map<Integer, String> r= cp.parse(clipboardTxt);
 		assertEquals(mapToStringLC(getExpected()), mapToStringLC(r));
 
 	}
