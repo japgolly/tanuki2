@@ -26,16 +26,86 @@ public class ClipboardParser {
 	private static final Pattern pQuotedText= Pattern.compile("^\"(.+)\"$");
 	private static final Pattern pFindNumber= Pattern.compile("(?<!\\p{javaLetterOrDigit})0*?([1-9]\\d*)(?!\\p{javaLetterOrDigit})");
 
-	// TODO rename all public methods
+	/**
+	 * Parses text and returns a track_number-to-track_name map.
+	 */
+	public Map<Integer, String> parse(String txt) {
+		final Map<Integer, String> values= new HashMap<Integer, String>();
 
-	public Map<String, TrackProperties> matchToFiles(DirData dd, String txt) {
+		// Extract tn+txt from each line
+		for (String line : txt.split("[\r\n]+")) {
+			line= pCrapBeforeTnAndText.matcher(line).replaceFirst("$1");
+			Matcher m= pTnAndText.matcher(line);
+			if (m.matches())
+				values.put(Integer.parseInt(m.group(1)), m.group(2));
+		}
+
+		// Remove crap from beginnings and ends
+		removeCommonCrap(values, true);
+		removeCommonCrap(values, false);
+
+		// Unquote
+		if (values.size() > 1) {
+			boolean allMatch= true;
+			for (String v : values.values())
+				if (!pQuotedText.matcher(v).matches()) {
+					allMatch= false;
+					break;
+				}
+			if (allMatch)
+				for (Integer k : values.keySet())
+					values.put(k, pQuotedText.matcher(values.get(k)).replaceFirst("$1"));
+		}
+
+		// Clean up
+		for (Integer k : values.keySet())
+			values.put(k, Helpers.unicodeTrim(values.get(k)));
+
+		// Done
+		return values;
+	}
+
+	/**
+	 * Parses text and attempts to match the results to the files in a <code>DirData</code>.
+	 * 
+	 * @return a map of filenames to track properties.
+	 */
+	public Map<String, TrackProperties> parseAndMatch(DirData dd, String txt) {
 		final Map<String, TrackProperties> completeMatches= new HashMap<String, TrackProperties>();
-		final Map<Integer, String> clipboardResults= readTracks(txt);
+		final Map<Integer, String> clipboardResults= parse(txt);
 
 		matchClipboardResultsUsingTrackName(dd, clipboardResults, completeMatches);
 		matchClipboardResultsUsingTN(dd, clipboardResults, completeMatches);
 
 		return completeMatches;
+	}
+
+	// =============================================================================================== //
+	// = Internal
+	// =============================================================================================== //
+
+	private void assignBestResultMatches(final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches, final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult) {
+		while (!rankedMatchesPerResult.isEmpty()) {
+			// Find highest ranking matches
+			final RankedObjectCollection<Integer> highestRanks= new RankedObjectCollection<Integer>();
+			for (Integer tn : rankedMatchesPerResult.keySet()) {
+				final RankedObjectCollection<String> ranks= rankedMatchesPerResult.get(tn);
+				highestRanks.add(tn, ranks.getWinningRank() - (ranks.getWinnerCount() > 1 ? 0.2 : 0));
+			}
+
+			// Assign
+			final Integer tn= highestRanks.getWinner();
+			TrackProperties tp= new TrackProperties();
+			tp.put(TrackPropertyType.TN, tn.toString());
+			tp.put(TrackPropertyType.TRACK, clipboardResults.get(tn));
+			final String filename= rankedMatchesPerResult.get(tn).getWinner();
+			completeMatches.put(filename, tp);
+
+			// Remove
+			rankedMatchesPerResult.remove(tn);
+			for (RankedObjectCollection<String> r : rankedMatchesPerResult.values())
+				r.remove(filename);
+		}
 	}
 
 	private void matchClipboardResultsUsingTrackName(DirData dd, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
@@ -78,66 +148,6 @@ public class ClipboardParser {
 			}
 		}
 		assignBestResultMatches(clipboardResults, completeMatches, rankedMatchesPerResult);
-	}
-
-	private void assignBestResultMatches(final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches, final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult) {
-		while (!rankedMatchesPerResult.isEmpty()) {
-			// Find highest ranking matches
-			final RankedObjectCollection<Integer> highestRanks= new RankedObjectCollection<Integer>();
-			for (Integer tn : rankedMatchesPerResult.keySet()) {
-				final RankedObjectCollection<String> ranks= rankedMatchesPerResult.get(tn);
-				highestRanks.add(tn, ranks.getWinningRank() - (ranks.getWinnerCount() > 1 ? 0.2 : 0));
-			}
-
-			// Assign
-			final Integer tn= highestRanks.getWinner();
-			TrackProperties tp= new TrackProperties();
-			tp.put(TrackPropertyType.TN, tn.toString());
-			tp.put(TrackPropertyType.TRACK, clipboardResults.get(tn));
-			final String filename= rankedMatchesPerResult.get(tn).getWinner();
-			completeMatches.put(filename, tp);
-
-			// Remove
-			rankedMatchesPerResult.remove(tn);
-			for (RankedObjectCollection<String> r : rankedMatchesPerResult.values())
-				r.remove(filename);
-		}
-	}
-
-	public Map<Integer, String> readTracks(String txt) {
-		final Map<Integer, String> values= new HashMap<Integer, String>();
-
-		// Extract tn+txt from each line
-		for (String line : txt.split("[\r\n]+")) {
-			line= pCrapBeforeTnAndText.matcher(line).replaceFirst("$1");
-			Matcher m= pTnAndText.matcher(line);
-			if (m.matches())
-				values.put(Integer.parseInt(m.group(1)), m.group(2));
-		}
-
-		// Remove crap from beginnings and ends
-		removeCommonCrap(values, true);
-		removeCommonCrap(values, false);
-
-		// Unquote
-		if (values.size() > 1) {
-			boolean allMatch= true;
-			for (String v : values.values())
-				if (!pQuotedText.matcher(v).matches()) {
-					allMatch= false;
-					break;
-				}
-			if (allMatch)
-				for (Integer k : values.keySet())
-					values.put(k, pQuotedText.matcher(values.get(k)).replaceFirst("$1"));
-		}
-
-		// Clean up
-		for (Integer k : values.keySet())
-			values.put(k, Helpers.unicodeTrim(values.get(k)));
-
-		// Done
-		return values;
 	}
 
 	@SuppressWarnings("nls")
