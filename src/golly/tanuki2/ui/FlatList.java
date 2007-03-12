@@ -12,7 +12,9 @@ import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -183,6 +185,13 @@ public class FlatList extends AbstractFileView {
 	private int addColumn(String name, int align) {
 		new TableColumn(table, align).setText(I18n.l(name));
 		return table.getColumnCount() - 1;
+	}
+
+	protected Set<DirData> getAllSelectedDirData() {
+		final Set<DirData> r= new HashSet<DirData>();
+		for (TableItem ti : table.getSelection())
+			r.add(getData(ti).getDirData());
+		return r;
 	}
 
 	private FileData getData(TableItem ti) {

@@ -110,7 +110,7 @@ public class AppWindow {
 		tabFolder= new TabFolder(shell, SWT.NONE);
 		// Create tab: input tree
 		TabItem ti= new TabItem(tabFolder, SWT.NONE);
-		inputTree= new InputTree(tabFolder, sharedUIResources);
+		inputTree= new InputTree(tabFolder, sharedUIResources, engine);
 		ti.setControl(inputTree.getWidget());
 		ti.setData(inputTree);
 		ti.setText(I18n.l("main_tab_inputTree")); //$NON-NLS-1$

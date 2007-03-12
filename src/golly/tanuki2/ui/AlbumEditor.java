@@ -173,7 +173,7 @@ public class AlbumEditor {
 		composite.setLayout(UIHelpers.makeGridLayout(2, true, 0, 24));
 		// Button: ok
 		Button btnOk= new Button(composite, SWT.PUSH);
-		UIHelpers.setButtonText(btnOk, "albumEditor_btn_ok"); //$NON-NLS-1$
+		UIHelpers.setButtonText(btnOk, "general_btn_ok"); //$NON-NLS-1$
 		btnOk.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
 		shell.setDefaultButton(btnOk);
 		btnOk.addSelectionListener(new SelectionAdapter() {
@@ -183,7 +183,7 @@ public class AlbumEditor {
 		});
 		// Button: cancel
 		Button btnCancel= new Button(composite, SWT.PUSH);
-		UIHelpers.setButtonText(btnCancel, "albumEditor_btn_cancel"); //$NON-NLS-1$
+		UIHelpers.setButtonText(btnCancel, "general_btn_cancel"); //$NON-NLS-1$
 		btnCancel.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

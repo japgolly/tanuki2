@@ -85,7 +85,7 @@ public class Engine {
 			ProcessingCommands pc= new ProcessingCommands();
 
 			// If the dir has audio content...
-			if (dd.hasAudioContent()) {
+			if (dd.hasAudioContent(false)) {
 				AlbumData ad= null;
 				boolean processThisDir= true;
 				for (FileData fd : ddFiles.values())
@@ -333,7 +333,7 @@ public class Engine {
 		dd.autoSetHasAudioContent();
 
 		// Place in dirsNeedingTrackProprties
-		if (dd.hasAudioContent())
+		if (dd.hasAudioContent(true))
 			dirsNeedingTrackProprties.add(dd);
 	}
 

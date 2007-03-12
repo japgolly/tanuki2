@@ -32,8 +32,15 @@ public final class DirData extends AbstractDataObject {
 		return Helpers.inspectExcept(this, false, "files"); //$NON-NLS-1$
 	}
 
-	public boolean hasAudioContent() {
-		return hasAudioContent;
+	public boolean hasAudioContent(boolean andNotMarkedForDeletion) {
+		if (andNotMarkedForDeletion) {
+			if (hasAudioContent)
+				for (FileData fd : files.values())
+					if (fd.isAudio() && !fd.isMarkedForDeletion())
+						return true;
+			return false;
+		} else
+			return hasAudioContent;
 	}
 
 	public void setHasAudioContent(boolean hasAudioContent) {

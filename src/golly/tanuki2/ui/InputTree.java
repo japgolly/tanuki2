@@ -1,5 +1,6 @@
 package golly.tanuki2.ui;
 
+import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
@@ -40,11 +41,14 @@ public class InputTree extends AbstractFileView {
 
 	private final Set<String> collapsedDirs= new HashSet<String>();
 	private final Tree tree;
+	private final Engine engine;
 	private final AutoResizeColumnsListener autoColumnResizer;
 	private Map<String, DirData> dirs= null;
 
-	public InputTree(Composite parent, SharedUIResources sharedUIResources_) {
+	public InputTree(Composite parent, SharedUIResources sharedUIResources_, Engine engine) {
 		super(sharedUIResources_);
+		this.engine= engine;
+
 		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.CHECK);
 		tree.setHeaderVisible(true);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
@@ -238,7 +242,7 @@ public class InputTree extends AbstractFileView {
 					setFileItemColor(ti, fd);
 				}
 				// Update parent
-				if (dd.hasAudioContent())
+				if (dd.hasAudioContent(false))
 					updateAlbumDirItem(parent, dd);
 			}
 		}
@@ -260,6 +264,25 @@ public class InputTree extends AbstractFileView {
 			else
 				foundNonNull= true;
 		return foundNonNull ? String.format(fmt, args) : ""; //$NON-NLS-1$
+	}
+
+	protected Set<DirData> getAllSelectedDirData() {
+		final Set<DirData> r= new HashSet<DirData>();
+		TreeItem[] parent= tree.getSelection();
+		for (TreeItem ti : parent)
+			getAllSelectedDirData(r, ti);
+		r.remove(null);
+		return r;
+	}
+
+	private void getAllSelectedDirData(final Set<DirData> r, TreeItem ti) {
+		if (ti.getData() instanceof FileData)
+			r.add(((FileData) ti.getData()).getDirData());
+		else {
+			r.add(engine.dirs.get((String) ti.getData()));
+			for (TreeItem c : ti.getItems())
+				getAllSelectedDirData(r, c);
+		}
 	}
 
 	private String getFullFilename(TreeItem ti) {
@@ -369,7 +392,7 @@ public class InputTree extends AbstractFileView {
 		boolean isAlbumDataIncomplete= false;
 		if (allMarkedForDeletion)
 			parent.setText(1, I18n.l("inputTree_txt_markedForDeletion")); //$NON-NLS-1$
-		else if (!dd.hasAudioContent() || albumDataSet.isEmpty())
+		else if (!dd.hasAudioContent(true) || albumDataSet.isEmpty())
 			parent.setText(1, ""); //$NON-NLS-1$
 		else if (albumDataSet.size() == 1) {
 			AlbumData ad= albumDataSet.iterator().next();

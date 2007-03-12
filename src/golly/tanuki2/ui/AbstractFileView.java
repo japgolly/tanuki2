@@ -1,5 +1,6 @@
 package golly.tanuki2.ui;
 
+import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.I18n;
@@ -88,6 +89,15 @@ abstract class AbstractFileView implements IFileView {
 				onEdit();
 			}
 		});
+		// mi: edit artist
+		MenuItem miEditArtist= new MenuItem(contextMenu, SWT.PUSH);
+		miEditArtist.setImage(TanukiImage.EDITOR.get());
+		miEditArtist.setText(I18n.l("main_contextMenu_editArtist")); //$NON-NLS-1$
+		miEditArtist.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				onEditArtist();
+			}
+		});
 		// mi: launch file
 		MenuItem miLaunchFile= new MenuItem(contextMenu, SWT.PUSH);
 		miLaunchFile.setText(I18n.l("main_contextMenu_launchFile") + "\tCtrl+L"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -145,6 +155,17 @@ abstract class AbstractFileView implements IFileView {
 	// = Selection
 	// =============================================================================================== //
 
+	protected Set<DirData> getAllSelectedDirDataWithAudio(boolean andNotMarkedForDeletion) {
+		final Set<DirData> all= getAllSelectedDirData();
+		final Set<DirData> hasAudio= new HashSet<DirData>();
+		for (DirData dd : all)
+			if (dd.hasAudioContent(andNotMarkedForDeletion))
+				hasAudio.add(dd);
+		return hasAudio;
+	}
+
+	protected abstract Set<DirData> getAllSelectedDirData();
+
 	protected abstract int getSelectionCount();
 
 	protected abstract String getSelectedDir();
@@ -174,6 +195,11 @@ abstract class AbstractFileView implements IFileView {
 	}
 
 	protected abstract void onEdit();
+
+	protected void onEditArtist() {
+		if (ArtistEditor.open(getWidget().getShell(), getAllSelectedDirDataWithAudio(true)))
+			sharedUIResources.appUIShared.onDataUpdated_RefreshNow();
+	}
 
 	protected void onLaunchFile() {
 		if (isSingleSelection() && isFileSelected())

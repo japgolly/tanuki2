@@ -46,11 +46,14 @@ public class EngineTest extends TestHelper {
 		engine.files.get(addPathElements("A", "as.txt")).setAudio(false);
 		engine.files.get(addPathElements("A", "as.txt")).setMimeImage(TanukiImage.MIME_TEXT);
 		final DirData dd= engine.dirs.get("A");
-		assertTrue(dd.hasAudioContent());
+		assertTrue(dd.hasAudioContent(true));
+		assertTrue(dd.hasAudioContent(false));
 		engine.remove(addPathElements("A", "a2.mp3"));
-		assertTrue(dd.hasAudioContent());
+		assertTrue(dd.hasAudioContent(true));
+		assertTrue(dd.hasAudioContent(false));
 		engine.remove(addPathElements("A", "a1.mp3"));
-		assertFalse(dd.hasAudioContent());
+		assertTrue(dd.hasAudioContent(true));
+		assertTrue(dd.hasAudioContent(false));
 	}
 
 	@Test
