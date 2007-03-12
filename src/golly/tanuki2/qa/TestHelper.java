@@ -45,6 +45,12 @@ public abstract class TestHelper extends Assert {
 		return fd;
 	}
 
+	protected FileData makeFileData(DirData dd, String filename, boolean isAudio) {
+		FileData fd= makeFileData(dd, isAudio);
+		dd.files.put(filename, fd);
+		return fd;
+	}
+
 	protected TrackProperties makeTrackProperties(String artist, Integer year, String album, String tn, String track) {
 		TrackProperties expected= new TrackProperties();
 		expected.put(ARTIST, artist);

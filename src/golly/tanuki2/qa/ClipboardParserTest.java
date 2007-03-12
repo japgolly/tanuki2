@@ -1,11 +1,15 @@
 package golly.tanuki2.qa;
 
 import golly.tanuki2.core.ClipboardParser;
+import golly.tanuki2.data.DirData;
+import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.support.Helpers;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -15,6 +19,13 @@ import org.junit.Test;
  */
 @SuppressWarnings("nls")
 public class ClipboardParserTest extends TestHelper {
+
+	private ClipboardParser cp;
+
+	@Before
+	public void init() {
+		cp= new ClipboardParser();
+	}
 
 	@Test
 	public void testGood1() {
@@ -149,11 +160,86 @@ public class ClipboardParserTest extends TestHelper {
 		subtest(clipboardTxt);
 	}
 
+	@Test
+	public void testMatchingToFiles1_exactMatch() {
+		final String f1= "01 - Splintered Visions.mp3";
+		final String f2= "02 - Embraced by Desolation.mp3";
+		final String f3= "03 - 3 Dimensional Aperture.mp3";
+		final String f4= "04 - Beginning of the End.mp3";
+		final String f5= "05 - Point of Uncertainty.mp3";
+		final String f6= "06 - Spiraling into Depression.mp3";
+		final String f7= "07 - Isolation.mp3";
+		final String f8= "08 - Buried in Oblivion.mp3";
+		final String f9= "09 - Black Sea of Agony.mp3";
+		final String f10= "10 - Morose Seclusion.mp3";
+		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
+	}
+
+	@Test
+	public void testMatchingToFiles2_exactMatchWithoutTn() {
+		final String f1= "Splintered Visions.mp3";
+		final String f2= "Embraced by Desolation.mp3";
+		final String f3= "3 Dimensional Aperture.mp3";
+		final String f4= "Beginning of the End.mp3";
+		final String f5= "Point of Uncertainty.mp3";
+		final String f6= "Spiraling into Depression.mp3";
+		final String f7= "Isolation.mp3";
+		final String f8= "Buried in Oblivion.mp3";
+		final String f9= "Black Sea of Agony.mp3";
+		final String f10= "Morose Seclusion.mp3";
+		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
+	}
+
+	@Test
+	public void testMatchingToFiles3_mistakesInFilenames() {
+		final String f1= "Splintered_Visions.mp3"; // joined together by underscore 
+		final String f2= "Embraced-by-Desolation.mp3"; // joined together by dashes
+		final String f3= "Three Dimensional Aperture.mp3"; // first word is different
+		final String f4= "Beginning of the.mp3"; // missing words at end
+		final String f5= "Uncertainty.mp3"; // missing words at beginning
+		final String f6= "Spiralling into Depression.mp3"; // double L in sprialling
+		final String f7= "Isola.mp3"; // word cut short
+		final String f8= "Buried into Oblivion.mp3"; // in --> into
+		final String f9= "Black Sea of Agony.mp3";
+		final String f10= "Morose Seclusion.mp3";
+		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
+	}
+
+	private void subtestMatching(String f1, String f2, String f3, String f4, String f5, String f6, String f7, String f8, String f9, String f10) {
+		final String[] fAll= new String[] {f1, f2, f3, f4, f5, f6, f7, f8, f9, f10};
+		DirData dd= new DirData("/var/music");
+		for (String f : fAll)
+			makeFileData(dd, f, true);
+		final String txt= "01. Splintered Visions\n02. Embraced By Desolation\n03. 3 Dimensional Aperture\n04. Beginning Of The End\n05. Point Of Uncertainty\n06. Spiraling Into Depression\n07. Isolation\n08. Buried In Oblivion\n09. Black Sea Of Agony\n10. Morose Seclusion";
+		Map<String, TrackProperties> r= cp.matchToFiles(dd, txt);
+		assertMatchResults(r, f1, 1, "Splintered Visions");
+		assertMatchResults(r, f2, 2, "Embraced By Desolation");
+		assertMatchResults(r, f3, 3, "3 Dimensional Aperture");
+		assertMatchResults(r, f4, 4, "Beginning Of The End");
+		assertMatchResults(r, f5, 5, "Point Of Uncertainty");
+		assertMatchResults(r, f6, 6, "Spiraling Into Depression");
+		assertMatchResults(r, f7, 7, "Isolation");
+		assertMatchResults(r, f8, 8, "Buried In Oblivion");
+		assertMatchResults(r, f9, 9, "Black Sea Of Agony");
+		assertMatchResults(r, f10, 10, "Morose Seclusion");
+	}
+
+	private void assertMatchResults(Map<String, TrackProperties> r, String filename, Integer tn, String track) {
+		TrackProperties tp= r.get(filename);
+		assertNotNull(tp);
+		assertEquals(track, tp.get(TrackPropertyType.TRACK));
+		assertEquals(tn.toString(), tp.get(TrackPropertyType.TN));
+	}
+
+	// =============================================================================================== //
+	// = private
+	// =============================================================================================== //
+
 	private void subtest(String clipboardTxt) {
-		ClipboardParser cp= new ClipboardParser();
 		//		Map<Integer, String> r= cp.readTracks("and there were 5 more\n\n\r\npeople on the 10 number "+clipboardTxt+"\n10 prople died.");
 		Map<Integer, String> r= cp.readTracks(clipboardTxt);
 		assertEquals(mapToStringLC(getExpected()), mapToStringLC(r));
+
 	}
 
 	private Map<Integer, String> getExpected() {
