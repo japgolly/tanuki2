@@ -88,7 +88,11 @@ public class InputTree implements IFileView {
 		});
 		tree.addMouseListener(new MouseAdapter() {
 			public void mouseDoubleClick(MouseEvent e) {
-				onEdit();
+				final FileData fd= getSelectedFileData();
+				if (fd != null && !fd.isAudio())
+					onLaunchFile();
+				else
+					onEdit();
 			}
 		});
 		tree.addSelectionListener(new SelectionAdapter() {
@@ -223,6 +227,12 @@ public class InputTree implements IFileView {
 			sharedUIResources.appUIShared.openAlbumEditor(dd, tree.getShell());
 	}
 
+	protected void onLaunchFile() {
+		if (getSelectedFileData() == null)
+			return;
+		sharedUIResources.appUIShared.launch(getFullFilename(getSelected()));
+	}
+
 	// =============================================================================================== //
 	// = Internal
 	// =============================================================================================== //
@@ -286,6 +296,19 @@ public class InputTree implements IFileView {
 			return Helpers.addPathElements(((FileData) ti.getData()).getDirData().dir, ti.getText());
 		else
 			return (String) ti.getData();
+	}
+
+	private TreeItem getSelected() {
+		if (tree.getSelectionCount() != 1)
+			return null;
+		return tree.getSelection()[0];
+	}
+
+	private FileData getSelectedFileData() {
+		if (tree.getSelectionCount() != 1)
+			return null;
+		final TreeItem ti= tree.getSelection()[0];
+		return ti.getData() instanceof FileData ? (FileData) ti.getData() : null;
 	}
 
 	private void recordCollapsedTreeItems(TreeItem ti) {

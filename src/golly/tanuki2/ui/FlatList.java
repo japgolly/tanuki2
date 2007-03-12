@@ -27,7 +27,6 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -273,10 +272,8 @@ public class FlatList implements IFileView {
 	}
 
 	protected void onLaunchFile() {
-		if (table.getSelectionCount() == 1) {
-			// TODO win32 only? test on other platforms
-			Program.launch(getSelected().getText());
-		}
+		if (table.getSelectionCount() == 1)
+			sharedUIResources.appUIShared.launch(getSelected().getText());
 	}
 
 	protected void onOpenFolder() {
