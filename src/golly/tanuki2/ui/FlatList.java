@@ -7,12 +7,10 @@ import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.AutoResizeColumnsListener;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
-import golly.tanuki2.support.TanukiException;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,12 +19,9 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.MenuAdapter;
-import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -36,12 +31,11 @@ import org.eclipse.swt.widgets.TableItem;
  * @author Golly
  * @since 19/02/2007
  */
-public class FlatList extends AbstractFileView implements IFileView {
+public class FlatList extends AbstractFileView {
 	private static final String EOL= "\r\n"; //$NON-NLS-1$ // TODO win32
 
 	private final Table table;
 	private final int INDEX_FILENAME, INDEX_ARTIST, INDEX_YEAR, INDEX_ALBUM, INDEX_TN, INDEX_TRACK;
-	private final MenuItem[] singleSelectionMenuItems, singleAudioSelectionMenuItems;
 	private final AutoResizeColumnsListener autoColumnResizer;
 
 	public FlatList(Composite parent, SharedUIResources sharedUIResources_) {
@@ -60,10 +54,9 @@ public class FlatList extends AbstractFileView implements IFileView {
 
 		// Create popup menu
 		// TODO Need to give users access to text processors (title case, remove underscores, etc). Prolly best to put it in a context-menu.
-		Menu popupMenu= new Menu(table);
-		table.setMenu(popupMenu);
+		createMenu(table);
 		// mi: copy filenames
-		MenuItem miCopyFilenames= new MenuItem(popupMenu, SWT.PUSH);
+		MenuItem miCopyFilenames= new MenuItem(contextMenu, SWT.PUSH);
 		miCopyFilenames.setImage(TanukiImage.COPY.get());
 		miCopyFilenames.setText(I18n.l("main_contextMenu_copyFilenames") + "\tCtrl+C"); //$NON-NLS-1$ //$NON-NLS-2$
 		miCopyFilenames.addSelectionListener(new SelectionAdapter() {
@@ -71,93 +64,14 @@ public class FlatList extends AbstractFileView implements IFileView {
 				onCopyFilenames();
 			}
 		});
-		// mi: edit album
-		MenuItem miEditAlbum= new MenuItem(popupMenu, SWT.PUSH);
-		miEditAlbum.setImage(TanukiImage.EDITOR.get());
-		miEditAlbum.setText(I18n.l("main_contextMenu_editAlbum")); //$NON-NLS-1$
-		miEditAlbum.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				onEdit();
-			}
-		});
-		// mi: launch file
-		MenuItem miLaunchFile= new MenuItem(popupMenu, SWT.PUSH);
-		miLaunchFile.setText(I18n.l("main_contextMenu_launchFile") + "\tCtrl+L"); //$NON-NLS-1$ //$NON-NLS-2$
-		miLaunchFile.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				onLaunchFile();
-			}
-		});
-		// mi: open folder
-		MenuItem miOpenFolder= new MenuItem(popupMenu, SWT.PUSH);
-		miOpenFolder.setImage(TanukiImage.EXPLORER.get());
-		miOpenFolder.setText(I18n.l("main_contextMenu_openFolder")); //$NON-NLS-1$
-		miOpenFolder.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				onOpenFolder();
-			}
-		});
-		// mi: open prompt
-		MenuItem miOpenPrompt= new MenuItem(popupMenu, SWT.PUSH);
-		miOpenPrompt.setImage(TanukiImage.TERMINAL.get());
-		miOpenPrompt.setText(I18n.l("main_contextMenu_openPrompt")); //$NON-NLS-1$
-		miOpenPrompt.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				onOpenPrompt();
-			}
-		});
-		// mi: remove items
-		MenuItem miRemoveItems= new MenuItem(popupMenu, SWT.PUSH);
-		miRemoveItems.setImage(TanukiImage.REMOVE.get());
-		miRemoveItems.setText(I18n.l("main_contextMenu_removeItems") + "\tDel"); //$NON-NLS-1$ //$NON-NLS-2$
-		miRemoveItems.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				onDelete();
-			}
-		});
-		// popup menu other
-		singleSelectionMenuItems= new MenuItem[] {miLaunchFile, miOpenFolder, miOpenPrompt};
-		singleAudioSelectionMenuItems= new MenuItem[] {miEditAlbum};
-		popupMenu.addMenuListener(new MenuAdapter() {
-			public void menuShown(MenuEvent e) {
-				final boolean single= table.getSelectionCount() == 1;
-				final FileData fd= single ? (FileData) table.getSelection()[0].getData() : null;
-				final boolean singleAudio= single && fd.isAudio() && !fd.isMarkedForDeletion();
-				for (MenuItem mi : singleSelectionMenuItems)
-					mi.setEnabled(single);
-				for (MenuItem mi : singleAudioSelectionMenuItems)
-					mi.setEnabled(singleAudio);
-			}
-		});
 
 		// Add table listeners
 		table.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
-				if (e.stateMask == SWT.NONE) {
-					// DEL
-					if (e.keyCode == SWT.DEL) {
-						onDelete();
-						e.doit= false;
-					}
-					// F5
-					else if (e.keyCode == SWT.F5) {
-						sharedUIResources.appUIShared.refreshFiles(true);
-						e.doit= false;
-					}
-				} else if (e.stateMask == SWT.CTRL) {
-					// CTRL-A
-					if (e.character == 1) {
-						table.selectAll();
-						e.doit= false;
-					}
+				if (e.stateMask == SWT.CTRL) {
 					// CTRL-C
-					else if (e.character == 3) {
+					if (e.character == 3) {
 						onCopyFilenames();
-						e.doit= false;
-					}
-					// CTRL-L
-					else if (e.character == 'L' - 'A' + 1) {
-						onLaunchFile();
 						e.doit= false;
 					}
 				}
@@ -258,22 +172,8 @@ public class FlatList extends AbstractFileView implements IFileView {
 			sharedUIResources.appUIShared.openAlbumEditor(fd.getDirData(), table.getShell());
 	}
 
-	protected void onOpenFolder() {
-		// TODO win32
-		try {
-			Runtime.getRuntime().exec("explorer.exe .", null, new File(getSelectedFileData().getDirData().dir)); //$NON-NLS-1$
-		} catch (IOException e) {
-			new TanukiException(e).showErrorDialog();
-		}
-	}
-
-	protected void onOpenPrompt() {
-		// TODO win32
-		try {
-			Runtime.getRuntime().exec("cmd.exe /C start cmd.exe", null, new File(getSelectedFileData().getDirData().dir)); //$NON-NLS-1$
-		} catch (IOException e) {
-			new TanukiException(e).showErrorDialog();
-		}
+	protected void selectAll() {
+		table.selectAll();
 	}
 
 	// =============================================================================================== //
@@ -291,6 +191,10 @@ public class FlatList extends AbstractFileView implements IFileView {
 
 	private TableItem getSelected() {
 		return table.getSelection()[0];
+	}
+
+	protected String getSelectedDir() {
+		return getSelectedFileData().getDirData().dir;
 	}
 
 	protected FileData getSelectedFileData() {

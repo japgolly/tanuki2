@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.TreeItem;
  * @author Golly
  * @since 17/02/2007
  */
-public class InputTree extends AbstractFileView implements IFileView {
+public class InputTree extends AbstractFileView {
 	private static final Pattern pathSeperatorPattern= Pattern.compile("[\\/\\\\]"); //$NON-NLS-1$
 	private static final String albumInfoFmt= "%s / %s / %s"; //$NON-NLS-1$
 	private static final String trackInfoFmt= "   %2s / %s"; //$NON-NLS-1$
@@ -50,29 +50,14 @@ public class InputTree extends AbstractFileView implements IFileView {
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
 		new TreeColumn(tree, SWT.LEFT).setWidth(600);
 
-		// TODO Add a context menu to InputTree 
+		// TODO Add a context menu to InputTree
+		createMenu(tree);
 
 		tree.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
-				if (e.stateMask == SWT.NONE) {
-					// DEL
-					if (e.keyCode == SWT.DEL) {
-						onDelete();
-						e.doit= false;
-					}
-					// F5
-					else if (e.keyCode == SWT.F5) {
-						sharedUIResources.appUIShared.refreshFiles(true);
-						e.doit= false;
-					}
-				} else if (e.stateMask == SWT.CTRL) {
-					// CTRL A
-					if (e.character == 1) {
-						tree.selectAll();
-						e.doit= false;
-					}
+				if (e.stateMask == SWT.CTRL) {
 					// CTRL +, CTRL -
-					else if (e.character == '+' || e.character == '-') {
+					if (e.character == '+' || e.character == '-') {
 						autoColumnResizer.enabled= autoColumnResizer.disableRedraw= false;
 						tree.setRedraw(false);
 						setExpandedAll(e.character == '+');
@@ -215,6 +200,10 @@ public class InputTree extends AbstractFileView implements IFileView {
 			sharedUIResources.appUIShared.openAlbumEditor(dd, tree.getShell());
 	}
 
+	protected void selectAll() {
+		tree.selectAll();
+	}
+
 	// =============================================================================================== //
 	// = Internal
 	// =============================================================================================== //
@@ -282,6 +271,13 @@ public class InputTree extends AbstractFileView implements IFileView {
 
 	private TreeItem getSelected() {
 		return tree.getSelection()[0];
+	}
+
+	protected String getSelectedDir() {
+		if (isFileSelected())
+			return getSelectedFileData().getDirData().dir;
+		else
+			return (String) getSelected().getData();
 	}
 
 	protected FileData getSelectedFileData() {
