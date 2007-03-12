@@ -27,6 +27,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -83,6 +84,14 @@ public class FlatList implements IFileView {
 				onEdit();
 			}
 		});
+		// mi: launch file
+		MenuItem miLaunchFile= new MenuItem(popupMenu, SWT.PUSH);
+		miLaunchFile.setText(I18n.l("flatList_menu_launchFile") + "\tCtrl+L"); //$NON-NLS-1$ //$NON-NLS-2$
+		miLaunchFile.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				onLaunchFile();
+			}
+		});
 		// mi: open folder
 		MenuItem miOpenFolder= new MenuItem(popupMenu, SWT.PUSH);
 		miOpenFolder.setImage(TanukiImage.EXPLORER.get());
@@ -111,7 +120,7 @@ public class FlatList implements IFileView {
 			}
 		});
 		// popup menu other
-		singleSelectionMenuItems= new MenuItem[] {miOpenFolder, miOpenPrompt};
+		singleSelectionMenuItems= new MenuItem[] {miLaunchFile, miOpenFolder, miOpenPrompt};
 		singleAudioSelectionMenuItems= new MenuItem[] {miEditAlbum};
 		popupMenu.addMenuListener(new MenuAdapter() {
 			public void menuShown(MenuEvent e) {
@@ -150,12 +159,23 @@ public class FlatList implements IFileView {
 						onCopyFilenames();
 						e.doit= false;
 					}
+					// CTRL-L
+					else if (e.character == 'L' - 'A' + 1) {
+						onLaunchFile();
+						e.doit= false;
+					}
 				}
 			}
 		});
 		table.addMouseListener(new MouseAdapter() {
 			public void mouseDoubleClick(MouseEvent e) {
-				onEdit();
+				final FileData fd= getSelectedData();
+				if (fd != null) {
+					if (fd.isAudio())
+						onEdit();
+					else
+						onLaunchFile();
+				}
 			}
 		});
 		table.addSelectionListener(new SelectionAdapter() {
@@ -250,6 +270,13 @@ public class FlatList implements IFileView {
 		final FileData fd= (FileData) ti.getData();
 		if (fd.isAudio() && !fd.isMarkedForDeletion())
 			sharedUIResources.appUIShared.openAlbumEditor(fd.getDirData(), table.getShell());
+	}
+
+	protected void onLaunchFile() {
+		if (table.getSelectionCount() == 1) {
+			// TODO win32 only? test on other platforms
+			Program.launch(getSelected().getText());
+		}
 	}
 
 	protected void onOpenFolder() {
