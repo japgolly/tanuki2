@@ -83,7 +83,7 @@ public class UIHelpers {
 			l.y= dca.y;
 		wnd.setLocation(l);
 	}
-	
+
 	public static void configureProgressBar(ProgressBar bar, int min, int max, int selection) {
 		bar.setMinimum(min);
 		bar.setMaximum(max);
@@ -135,7 +135,7 @@ public class UIHelpers {
 		layout.justify= justify;
 		return layout;
 	}
-	
+
 	public static void selectItem(List list, String name) {
 		int i= list.getItemCount();
 		while (i-- > 0)
@@ -167,7 +167,7 @@ public class UIHelpers {
 
 	public static boolean disableShowMessageBox= false;
 
-	public static void showMessageBox(Shell shell, int iconType, String title, String message) {
+	public static void showMessageBox(Shell shell, final int iconType, final String title, final String message) {
 		if (disableShowMessageBox)
 			return;
 		if (shell == null) {
@@ -192,10 +192,15 @@ public class UIHelpers {
 			}
 		} else {
 			// Show
-			MessageBox m= new MessageBox(shell, iconType);
-			m.setText(title);
-			m.setMessage(message);
-			m.open();
+			final Shell fshell= shell;
+			shell.getDisplay().syncExec(new Runnable() {
+				public void run() {
+					MessageBox m= new MessageBox(fshell, iconType);
+					m.setText(title);
+					m.setMessage(message);
+					m.open();
+				}
+			});
 		}
 	}
 }
