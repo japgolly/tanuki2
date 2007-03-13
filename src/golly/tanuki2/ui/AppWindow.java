@@ -181,7 +181,7 @@ public class AppWindow {
 			}
 		});
 		// chk: auto title case
-		btnTitleCase= new Button(c2,SWT.CHECK);
+		btnTitleCase= new Button(c2, SWT.CHECK);
 		UIHelpers.setButtonText(btnTitleCase, "main_btn_autoTitleCase"); //$NON-NLS-1$
 		btnTitleCase.setSelection(Config.autoTitleCase);
 
@@ -317,7 +317,7 @@ public class AppWindow {
 	}
 
 	protected void onVoodoo() {
-		String targetDir= getCleanedUpTargetDir();
+		final String targetDir= getCleanedUpTargetDir();
 		// Is target dir empty
 		if (targetDir.length() == 0) {
 			UIHelpers.showTanukiError(shell, "main_err_targetDir_empty"); //$NON-NLS-1$
@@ -331,11 +331,23 @@ public class AppWindow {
 		}
 		// Voodoo time
 		else {
+			final VoodooProgressDialog dlg= new VoodooProgressDialog(shell);
+			final Thread t= new Thread(new Runnable() {
+				public void run() {
+					try {
+						engine.doYaVoodoo(targetDir, dlg, null);
+					} catch (Throwable t) {
+						TanukiException e= (t instanceof TanukiException) ? (TanukiException) t : new TanukiException(t);
+						e.showErrorDialog(shell);
+					}
+				}
+			});
+			t.start();
+			dlg.open();
 			try {
-				engine.doYaVoodoo(targetDir, new VoodooProgressDialog(shell), null);
-			} catch (Throwable t) {
-				TanukiException e= (t instanceof TanukiException) ? (TanukiException) t : new TanukiException(t);
-				e.showErrorDialog(shell);
+				t.join(2000);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 			}
 			appUIShared.onDataUpdated_RefreshNow();
 		}
@@ -385,7 +397,7 @@ public class AppWindow {
 			else
 				return sharedUIResources.itemCompleteColours;
 		}
-		
+
 		public void launch(String fullFilename) {
 			// TODO win32 only? test on other platforms
 			Program.launch(fullFilename);

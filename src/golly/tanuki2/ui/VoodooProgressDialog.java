@@ -37,7 +37,7 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	private final Button btnClose;
 	private final TwoColours clrDelete, clrMoveSource, clrMoveTarget, clrDirSource, clrDirTarget, clrRmdir;
 
-	private boolean running= false;
+	private boolean allowClose= false;
 	private int totalFiles, currentFileNumber;
 	private int consoleIndex= 0, consoleLines= 0;
 
@@ -50,7 +50,7 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		shell.setText(parent.getText());
 		shell.addListener(SWT.Close, new Listener() {
 			public void handleEvent(Event event) {
-				if (running)
+				if (!allowClose)
 					event.doit= false;
 			}
 		});
@@ -105,67 +105,98 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	// = Public
 	// =============================================================================================== //
 
+	public void open() {
+		shell.open();
+		while (!shell.isDisposed())
+			if (!display.readAndDispatch())
+				display.sleep();
+	}
+
 	public Shell getShell() {
 		return shell;
 	}
 
-	public void starting(int dirCount, int totalFiles) {
-		if (totalFiles == 0) {
+	public void starting(final int dirCount, final int totalFiles_) {
+		this.totalFiles= totalFiles_;
+		if (totalFiles == 0)
 			UIHelpers.showTanukiError(parent, "voodoo_err_nothingToProcess"); //$NON-NLS-1$
-		} else {
-			running= true;
-			this.totalFiles= totalFiles;
-			currentFileNumber= 0;
-			UIHelpers.configureProgressBar(pbOverall, 0, totalFiles, 0);
-			consoleWriteLn(I18n.l("voodoo_consoletxt_started", dirCount, totalFiles)); //$NON-NLS-1$
-			shell.open();
-		}
+		else
+			display.syncExec(new Runnable() {
+				public void run() {
+					currentFileNumber= 0;
+					UIHelpers.configureProgressBar(pbOverall, 0, totalFiles, 0);
+					consoleWriteLn(I18n.l("voodoo_consoletxt_started", dirCount, totalFiles)); //$NON-NLS-1$
+				}
+			});
 	}
 
-	public void nextDir(String srcDir, String targetDir, int fileCount) {
-		consoleWriteLn();
-		consoleWriteLn(false, "voodoo_consoletxt_dirSource", srcDir, clrDirSource, true); //$NON-NLS-1$
-		if (targetDir != null)
-			consoleWriteLn(true, "voodoo_consoletxt_dirTarget", targetDir, clrDirTarget, true); //$NON-NLS-1$
-		console.setTopIndex(consoleLines);
+	public void nextDir(final String srcDir, final String targetDir, final int fileCount) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				consoleWriteLn();
+				consoleWriteLn(false, "voodoo_consoletxt_dirSource", srcDir, clrDirSource, true); //$NON-NLS-1$
+				if (targetDir != null)
+					consoleWriteLn(true, "voodoo_consoletxt_dirTarget", targetDir, clrDirTarget, true); //$NON-NLS-1$
+				console.setTopIndex(consoleLines);
+			}
+		});
 	}
 
 	public void nextFile() {
-		pbOverall.setSelection(currentFileNumber++);
-		lblOverallP.setText(I18n.l("voodoo_txt_progress", currentFileNumber, totalFiles)); //$NON-NLS-1$
+		display.syncExec(new Runnable() {
+			public void run() {
+				pbOverall.setSelection(currentFileNumber++);
+				lblOverallP.setText(I18n.l("voodoo_txt_progress", currentFileNumber, totalFiles)); //$NON-NLS-1$
+			}
+		});
 	}
 
-	public void deleting(File file) {
-		consoleWriteLn(true, "voodoo_consoletxt_fileDeleting", file.getName(), clrDelete, false); //$NON-NLS-1$
-		console.setTopIndex(consoleLines);
+	public void deleting(final File file) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				consoleWriteLn(true, "voodoo_consoletxt_fileDeleting", file.getName(), clrDelete, false); //$NON-NLS-1$
+				console.setTopIndex(consoleLines);
+			}
+		});
 	}
 
-	public void moving(File source, File target) {
-		consoleWriteLn(true, "voodoo_consoletxt_fileMoving", source.getName(), clrMoveSource, false, target.getName(), clrMoveTarget, false); //$NON-NLS-1$
-		console.setTopIndex(consoleLines);
+	public void moving(final File source, final File target) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				consoleWriteLn(true, "voodoo_consoletxt_fileMoving", source.getName(), clrMoveSource, false, target.getName(), clrMoveTarget, false); //$NON-NLS-1$
+				console.setTopIndex(consoleLines);
+			}
+		});
 	}
 
-	public void rmdirs(List<File> removedDirs) {
-		for (File dir : removedDirs)
-			consoleWriteLn(true, "voodoo_consoletxt_rmdir", dir.toString(), clrRmdir, false); //$NON-NLS-1$
-		console.setTopIndex(consoleLines);
+	public void rmdirs(final List<File> removedDirs) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				for (File dir : removedDirs)
+					consoleWriteLn(true, "voodoo_consoletxt_rmdir", dir.toString(), clrRmdir, false); //$NON-NLS-1$
+				console.setTopIndex(consoleLines);
+			}
+		});
 	}
 
 	public void finished() {
-		if (totalFiles > 0) {
-			pbOverall.setSelection(currentFileNumber);
-			btnClose.setEnabled(true);
-			btnClose.setFocus();
-			shell.setDefaultButton(btnClose);
-			btnClose.setFocus();
-			consoleWriteLn();
-			consoleWriteLn(I18n.l("voodoo_consoletxt_finished")); //$NON-NLS-1$
-			while (!shell.isDisposed())
-				if (!display.readAndDispatch()) {
-					running= false;
-					display.sleep();
+		display.syncExec(new Runnable() {
+			public void run() {
+				if (totalFiles > 0) {
+					pbOverall.setSelection(currentFileNumber);
+					btnClose.setEnabled(true);
+					btnClose.setFocus();
+					shell.setDefaultButton(btnClose);
+					btnClose.setFocus();
+					consoleWriteLn();
+					consoleWriteLn(I18n.l("voodoo_consoletxt_finished")); //$NON-NLS-1$
+					console.setTopIndex(consoleLines);
 				}
-		}
+				allowClose= true;
+				if (totalFiles == 0)
+					shell.close();
+			}
+		});
 	}
 
 	// =============================================================================================== //
