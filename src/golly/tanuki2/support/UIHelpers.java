@@ -30,6 +30,17 @@ import org.eclipse.swt.widgets.Tree;
  * @since 17/02/2007
  */
 public class UIHelpers {
+	public static abstract class RunnableWithShell implements Runnable {
+		public Shell shell= null;
+		public Object ret= null;
+
+		public final void run() {
+			run(shell);
+		}
+
+		public abstract void run(Shell shell);
+	}
+
 	public static class TwoColours {
 		public Color background= null, foreground= null;
 
@@ -136,6 +147,33 @@ public class UIHelpers {
 		return layout;
 	}
 
+	public static void runWithShell(Shell shell, RunnableWithShell runnable) {
+		if (shell == null) {
+			// Get a display
+			final boolean disposeDisplay;
+			Display display= Display.getCurrent();
+			if (display == null) {
+				display= new Display();
+				disposeDisplay= true;
+			} else
+				disposeDisplay= false;
+			try {
+				// Get a shell
+				shell= display.getActiveShell();
+				if (shell == null)
+					shell= new Shell(display);
+				// Call self with shell
+				runWithShell(shell, runnable);
+			} finally {
+				if (disposeDisplay)
+					display.dispose();
+			}
+		} else {
+			runnable.shell= shell;
+			shell.getDisplay().syncExec(runnable);
+		}
+	}
+
 	public static void selectItem(List list, String name) {
 		int i= list.getItemCount();
 		while (i-- > 0)
@@ -157,12 +195,17 @@ public class UIHelpers {
 		control.setSize(width, control.getSize().y);
 	}
 
-	public static void showTanukiError(Shell shell, String i18nStringKey, Object... args) {
-		showMessageBox(shell, SWT.ICON_ERROR, I18n.l("general_error_title"), I18n.l(i18nStringKey, args)); //$NON-NLS-1$
-	}
-
-	public static void showTanukiWarning(Shell shell, String i18nStringKey, Object... args) {
-		showMessageBox(shell, SWT.ICON_WARNING, I18n.l("general_error_title"), I18n.l(i18nStringKey, args)); //$NON-NLS-1$
+	public static boolean showOkCancelBox(Shell shell, final int iconType, final String title, final String message) {
+		final RunnableWithShell r= new RunnableWithShell() {
+			public void run(Shell shell) {
+				MessageBox m= new MessageBox(shell, iconType | SWT.OK | SWT.CANCEL);
+				m.setText(title);
+				m.setMessage(message);
+				ret= (Boolean) (m.open() == SWT.OK);
+			}
+		};
+		runWithShell(shell, r);
+		return (Boolean) r.ret;
 	}
 
 	public static boolean disableShowMessageBox= false;
@@ -170,37 +213,21 @@ public class UIHelpers {
 	public static void showMessageBox(Shell shell, final int iconType, final String title, final String message) {
 		if (disableShowMessageBox)
 			return;
-		if (shell == null) {
-			// Get a display
-			final boolean disposeDisplay;
-			Display display= Display.getCurrent();
-			if (display == null) {
-				display= new Display();
-				disposeDisplay= true;
-			} else
-				disposeDisplay= false;
-			try {
-				// Get a shell
-				shell= display.getActiveShell();
-				if (shell == null)
-					shell= new Shell(display);
-				// Call self with shell
-				showMessageBox(shell, iconType, title, message);
-			} finally {
-				if (disposeDisplay)
-					display.dispose();
+		runWithShell(shell, new RunnableWithShell() {
+			public void run(Shell shell) {
+				MessageBox m= new MessageBox(shell, iconType);
+				m.setText(title);
+				m.setMessage(message);
+				m.open();
 			}
-		} else {
-			// Show
-			final Shell fshell= shell;
-			shell.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					MessageBox m= new MessageBox(fshell, iconType);
-					m.setText(title);
-					m.setMessage(message);
-					m.open();
-				}
-			});
-		}
+		});
+	}
+
+	public static void showTanukiError(Shell shell, String i18nStringKey, Object... args) {
+		showMessageBox(shell, SWT.ICON_ERROR, I18n.l("general_error_title"), I18n.l(i18nStringKey, args)); //$NON-NLS-1$
+	}
+
+	public static void showTanukiWarning(Shell shell, String i18nStringKey, Object... args) {
+		showMessageBox(shell, SWT.ICON_WARNING, I18n.l("general_error_title"), I18n.l(i18nStringKey, args)); //$NON-NLS-1$
 	}
 }
