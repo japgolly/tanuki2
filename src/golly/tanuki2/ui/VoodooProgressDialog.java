@@ -30,20 +30,19 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	private static final String CONSOLE_INDENT= "    "; //$NON-NLS-1$
 
 	private final Display display;
-	private final Shell parent, shell;
+	private final Shell shell;
 	private final StyledText console;
 	private final Label lblOverall1, lblOverallP;
 	private final ProgressBar pbOverall;
 	private final Button btnClose;
 	private final TwoColours clrDelete, clrMoveSource, clrMoveTarget, clrDirSource, clrDirTarget, clrRmdir;
 
-	private boolean allowClose= false;
+	private boolean allowClose= false, cancelled= false;
 	private int totalFiles, currentFileNumber;
 	private int consoleIndex= 0, consoleLines= 0;
 
 	public VoodooProgressDialog(Shell parent) {
 		this.display= parent.getDisplay();
-		this.parent= parent;
 		this.shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE | SWT.MAX);
 		shell.setLayout(UIHelpers.makeGridLayout(1, true, 4, 16));
 		shell.setImage(parent.getImage());
@@ -116,16 +115,25 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		return shell;
 	}
 
+	public boolean isCancelled() {
+		return cancelled;
+	}
+
 	public void starting(final int dirCount, final int totalFiles_) {
 		this.totalFiles= totalFiles_;
 		if (totalFiles == 0)
-			UIHelpers.showTanukiError(parent, "voodoo_err_nothingToProcess"); //$NON-NLS-1$
+			UIHelpers.showTanukiError(shell, "voodoo_err_nothingToProcess"); //$NON-NLS-1$
 		else
 			display.syncExec(new Runnable() {
 				public void run() {
 					currentFileNumber= 0;
 					UIHelpers.configureProgressBar(pbOverall, 0, totalFiles, 0);
 					consoleWriteLn(I18n.l("voodoo_consoletxt_started", dirCount, totalFiles)); //$NON-NLS-1$
+					if (!UIHelpers.showOkCancelBox(shell, SWT.ICON_INFORMATION, I18n.l("general_app_title"), I18n.l("voodoo_txt_confirmMsg", dirCount, totalFiles))) { //$NON-NLS-1$ //$NON-NLS-2$
+						consoleWriteLn();
+						consoleWriteLn(I18n.l("voodoo_consoletxt_cancelled")); //$NON-NLS-1$
+						cancelled= true;
+					}
 				}
 			});
 	}

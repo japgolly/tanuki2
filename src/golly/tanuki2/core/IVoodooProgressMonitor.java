@@ -13,6 +13,8 @@ public interface IVoodooProgressMonitor {
 
 	public abstract Shell getShell();
 
+	public abstract boolean isCancelled();
+	
 	public abstract void starting(int dirCount, int totalFiles);
 
 	public abstract void nextDir(String srcDir, String targetDir, int fileCount);

@@ -154,6 +154,10 @@ class MockVoodooProgressMonitor implements IVoodooProgressMonitor {
 
 	public void starting(int dirCount, int totalFiles) {
 	}
+
+	public boolean isCancelled() {
+		return false;
+	}
 }
 
 /**
@@ -195,5 +199,9 @@ class NoisyMockVoodooProgressMonitor implements IVoodooProgressMonitor {
 
 	public void finished() {
 		System.out.println("Finished");
+	}
+
+	public boolean isCancelled() {
+		return false;
 	}
 }

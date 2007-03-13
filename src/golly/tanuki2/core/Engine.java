@@ -145,51 +145,54 @@ public class Engine implements ITextProcessor {
 		}
 
 		progressDlg.starting(processingList.size(), totalCommands);
+		if (!progressDlg.isCancelled()) {
 
-		// Make target base dir
-		if (!PRETEND_MODE)
-			Helpers.mkdir_p(targetBaseDir);
+			// Make target base dir
+			if (!PRETEND_MODE)
+				Helpers.mkdir_p(targetBaseDir);
 
-		// Start processing
-		final Set<String> removeList= new HashSet<String>();
-		try {
-			for (final String srcDir : Helpers.sort(processingList.keySet())) {
-				final ProcessingCommands pc= processingList.get(srcDir);
+			// Start processing
+			final Set<String> removeList= new HashSet<String>();
+			try {
+				for (final String srcDir : Helpers.sort(processingList.keySet())) {
+					final ProcessingCommands pc= processingList.get(srcDir);
 
-				progressDlg.nextDir(srcDir, pc.targetDirectory, pc.getCommandCount());
+					progressDlg.nextDir(srcDir, pc.targetDirectory, pc.getCommandCount());
 
-				// Move files
-				if (!pc.moves.isEmpty()) {
-					if (!PRETEND_MODE)
-						Helpers.mkdir_p(pc.targetDirectory);
-					for (String sourceFilename : Helpers.sort(pc.moves.keySet())) {
-						final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
-						progressDlg.nextFile();
-						if (moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename))))
-							removeList.add(sourceFullFilename);
+					// Move files
+					if (!pc.moves.isEmpty()) {
+						if (!PRETEND_MODE)
+							Helpers.mkdir_p(pc.targetDirectory);
+						for (String sourceFilename : Helpers.sort(pc.moves.keySet())) {
+							final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
+							progressDlg.nextFile();
+							if (moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename))))
+								removeList.add(sourceFullFilename);
+						}
 					}
-				}
 
-				// Delete files
-				for (String f : Helpers.sort(pc.deletions)) {
-					final String sourceFullFilename= addPathElements(srcDir, f);
-					progressDlg.nextFile();
-					deleteFile(progressDlg, sourceFullFilename);
-					removeList.add(sourceFullFilename);
-				}
+					// Delete files
+					for (String f : Helpers.sort(pc.deletions)) {
+						final String sourceFullFilename= addPathElements(srcDir, f);
+						progressDlg.nextFile();
+						deleteFile(progressDlg, sourceFullFilename);
+						removeList.add(sourceFullFilename);
+					}
 
-				// remove empty dirs from HD
-				List<File> removedDirs= new ArrayList<File>();
-				if (!PRETEND_MODE)
-					Helpers.rmdirPath(new File(srcDir), removedDirs);
-				progressDlg.rmdirs(removedDirs);
+					// remove empty dirs from HD
+					List<File> removedDirs= new ArrayList<File>();
+					if (!PRETEND_MODE)
+						Helpers.rmdirPath(new File(srcDir), removedDirs);
+					progressDlg.rmdirs(removedDirs);
+				}
+			} finally {
+				// Remove processed files
+				for (String f : removeList)
+					remove(f);
+				removeEmptyDirs();
 			}
-		} finally {
-			// Remove processed files
-			for (String f : removeList)
-				remove(f);
-			removeEmptyDirs();
-		}
+
+		} // end if (!progressDlg.isCancelled())
 
 		System.gc();
 		progressDlg.finished();
