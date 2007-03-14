@@ -61,7 +61,7 @@ public class AppWindow {
 	private final Engine engine;
 	private final ExpandBar expandBar;
 	private final FileTransfer fileTransfer;
-	private final IFileView inputTree, flatList;
+	private final IFileView inputTree, flatList, outputTree;
 	private final SharedUIResources sharedUIResources;
 	private final Shell shell;
 	private final TabFolder tabFolder;
@@ -120,6 +120,12 @@ public class AppWindow {
 		ti.setControl(flatList.getWidget());
 		ti.setData(flatList);
 		ti.setText(I18n.l("main_tab_flatList")); //$NON-NLS-1$
+		// Create tab: input tree
+		ti= new TabItem(tabFolder, SWT.NONE);
+		outputTree= new OutputTree(tabFolder, sharedUIResources, engine);
+		ti.setControl(outputTree.getWidget());
+		ti.setData(outputTree);
+		ti.setText(I18n.l("main_tab_outputTree")); //$NON-NLS-1$
 		// Tab folder again
 		makeDropTarget(tabFolder);
 		tabFolder.addSelectionListener(new SelectionAdapter() {

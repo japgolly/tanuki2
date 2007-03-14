@@ -34,6 +34,7 @@ abstract class AbstractFileView implements IFileView {
 	protected Set<MenuItem> selectionRequiredMenuItems= null;
 	protected Set<MenuItem> singleSelectionMenuItems= null;
 	protected Set<MenuItem> singleAudioSelectionMenuItems= null;
+	protected Set<MenuItem> singleFileSelectionMenuItems= null;
 
 	public AbstractFileView(SharedUIResources sharedUIResources) {
 		this.sharedUIResources= sharedUIResources;
@@ -78,24 +79,23 @@ abstract class AbstractFileView implements IFileView {
 		selectionRequiredMenuItems= new HashSet<MenuItem>();
 		singleSelectionMenuItems= new HashSet<MenuItem>();
 		singleAudioSelectionMenuItems= new HashSet<MenuItem>();
+		singleFileSelectionMenuItems= new HashSet<MenuItem>();
 		contextMenu= new Menu(w);
 		w.setMenu(contextMenu);
 
 		// mi: edit album
-		MenuItem miEditAlbum= new MenuItem(contextMenu, SWT.PUSH);
+		final MenuItem miEditAlbum= new MenuItem(contextMenu, SWT.PUSH);
 		miEditAlbum.setImage(TanukiImage.EDITOR.get());
 		miEditAlbum.setText(I18n.l("main_contextMenu_editAlbum")); //$NON-NLS-1$
-		singleAudioSelectionMenuItems.add(miEditAlbum);
 		miEditAlbum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onEdit();
 			}
 		});
 		// mi: edit artist
-		MenuItem miEditArtist= new MenuItem(contextMenu, SWT.PUSH);
+		final MenuItem miEditArtist= new MenuItem(contextMenu, SWT.PUSH);
 		miEditArtist.setImage(TanukiImage.EDITOR.get());
 		miEditArtist.setText(I18n.l("main_contextMenu_editArtist")); //$NON-NLS-1$
-		selectionRequiredMenuItems.add(miEditArtist);
 		miEditArtist.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onEditArtist();
@@ -104,7 +104,7 @@ abstract class AbstractFileView implements IFileView {
 		// mi: launch file
 		MenuItem miLaunchFile= new MenuItem(contextMenu, SWT.PUSH);
 		miLaunchFile.setText(I18n.l("main_contextMenu_launchFile") + "\tCtrl+L"); //$NON-NLS-1$ //$NON-NLS-2$
-		singleSelectionMenuItems.add(miLaunchFile);
+		singleFileSelectionMenuItems.add(miLaunchFile);
 		miLaunchFile.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				onLaunchFile();
@@ -147,13 +147,20 @@ abstract class AbstractFileView implements IFileView {
 				final boolean selection= getSelectionCount() > 0;
 				final boolean single= isSingleSelection();
 				final FileData fd= single ? getSelectedFileData() : null;
+				final boolean singleFile= (fd != null);
 				final boolean singleAudio= (fd != null) && fd.isAudio() && !fd.isMarkedForDeletion();
+				// Generic cases
 				for (MenuItem mi : selectionRequiredMenuItems)
 					mi.setEnabled(selection);
 				for (MenuItem mi : singleSelectionMenuItems)
 					mi.setEnabled(single);
+				for (MenuItem mi : singleFileSelectionMenuItems)
+					mi.setEnabled(singleFile);
 				for (MenuItem mi : singleAudioSelectionMenuItems)
 					mi.setEnabled(singleAudio);
+				// Special cases
+				miEditAlbum.setEnabled(onEdit_getDirData() != null);
+				miEditArtist.setEnabled(!getAllSelectedDirDataWithAudio(true).isEmpty());
 			}
 		});
 	}
@@ -161,6 +168,8 @@ abstract class AbstractFileView implements IFileView {
 	// =============================================================================================== //
 	// = Selection
 	// =============================================================================================== //
+
+	protected abstract Set<DirData> getAllSelectedDirData();
 
 	protected Set<DirData> getAllSelectedDirDataWithAudio(boolean andNotMarkedForDeletion) {
 		final Set<DirData> all= getAllSelectedDirData();
@@ -170,8 +179,6 @@ abstract class AbstractFileView implements IFileView {
 				hasAudio.add(dd);
 		return hasAudio;
 	}
-
-	protected abstract Set<DirData> getAllSelectedDirData();
 
 	protected abstract int getSelectionCount();
 
@@ -188,7 +195,7 @@ abstract class AbstractFileView implements IFileView {
 	}
 
 	// =============================================================================================== //
-	// = Events
+	// = Events + related
 	// =============================================================================================== //
 
 	protected abstract void onDelete();
@@ -203,7 +210,15 @@ abstract class AbstractFileView implements IFileView {
 		}
 	}
 
-	protected abstract void onEdit();
+	protected final void onEdit() {
+		if (isSingleSelection()) {
+			final DirData dd= onEdit_getDirData();
+			if (dd != null)
+				sharedUIResources.appUIShared.openAlbumEditor(dd, getWidget().getShell());
+		}
+	}
+
+	protected abstract DirData onEdit_getDirData();
 
 	protected void onEditArtist() {
 		if (ArtistEditor.open(getWidget().getShell(), getAllSelectedDirDataWithAudio(true)))
@@ -216,24 +231,34 @@ abstract class AbstractFileView implements IFileView {
 	}
 
 	protected void onOpenFolder() {
-		if (isSingleSelection())
-			// TODO win32
-			try {
-				Runtime.getRuntime().exec("explorer.exe .", null, new File(getSelectedDir())); //$NON-NLS-1$
-			} catch (IOException e) {
-				new TanukiException(e).showErrorDialog();
-			}
+		if (isSingleSelection()) {
+			final String dir= getSelectedDir();
+			if (dir != null)
+				// TODO win32
+				try {
+					Runtime.getRuntime().exec("explorer.exe .", null, new File(dir)); //$NON-NLS-1$
+				} catch (IOException e) {
+					new TanukiException(e).showErrorDialog();
+				}
+		}
 	}
 
 	protected void onOpenPrompt() {
-		if (isSingleSelection())
-			// TODO win32
-			try {
-				Runtime.getRuntime().exec("cmd.exe /C start cmd.exe", null, new File(getSelectedDir())); //$NON-NLS-1$
-			} catch (IOException e) {
-				new TanukiException(e).showErrorDialog();
-			}
+		if (isSingleSelection()) {
+			final String dir= getSelectedDir();
+			if (dir != null)
+				// TODO win32
+				try {
+					Runtime.getRuntime().exec("cmd.exe /C start cmd.exe", null, new File(dir)); //$NON-NLS-1$
+				} catch (IOException e) {
+					new TanukiException(e).showErrorDialog();
+				}
+		}
 	}
+
+	// =============================================================================================== //
+	// = Other
+	// =============================================================================================== //
 
 	protected abstract void selectAll();
 }

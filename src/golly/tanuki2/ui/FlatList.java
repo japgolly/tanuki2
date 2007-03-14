@@ -165,14 +165,12 @@ public class FlatList extends AbstractFileView {
 		sharedUIResources.appUIShared.removeFiles(files);
 	}
 
-	protected void onEdit() {
-		if (table.getSelectionCount() != 1)
-			return;
-
-		final TableItem ti= table.getSelection()[0];
-		final FileData fd= (FileData) ti.getData();
+	protected DirData onEdit_getDirData() {
+		final FileData fd= getSelectedFileData();
 		if (fd.isAudio() && !fd.isMarkedForDeletion())
-			sharedUIResources.appUIShared.openAlbumEditor(fd.getDirData(), table.getShell());
+			return fd.getDirData();
+		else
+			return null;
 	}
 
 	protected void selectAll() {

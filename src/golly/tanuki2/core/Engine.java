@@ -28,6 +28,17 @@ import java.util.regex.Pattern;
  * @since 16/02/2007
  */
 public class Engine implements ITextProcessor {
+	public static class ProcessingCommands {
+		public String sourceDirectory= null;
+		public String targetDirectory= null;
+		public Set<String> deletions= new HashSet<String>();
+		public Map<String, String> moves= new HashMap<String, String>();
+
+		public int getCommandCount() {
+			return deletions.size() + moves.size();
+		}
+	}
+
 	public static boolean PRETEND_MODE= false;
 
 	private final static Pattern patAudio= Pattern.compile("^.+\\.(?:mp3|flac|ape|mp4|m4a|ogg|aac|wmv|wav)$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
@@ -62,25 +73,12 @@ public class Engine implements ITextProcessor {
 		removeEmptyDirs();
 	}
 
-	/**
-	 * Performs the crazy-ass voodoo magic that this whole app is about, mon.
-	 * <ul>
-	 * <li>Renames files with complete file and album data</li>
-	 * <li>Deletes files marks for deletion</li>
-	 * <li>Removes empty directories</li>
-	 * </ul>
-	 */
-	public void doYaVoodoo(final String targetBaseDir, final IVoodooProgressMonitor progressDlg, Boolean overwriteAll) throws IOException {
-		this.overwriteAll= overwriteAll;
+	public Map<String, ProcessingCommands> createProcessingList(final String targetBaseDir) {
 		// TODO output formats shouldn't be hard-coded
 		final String targetDirFormat= "[:artist:]\\[:year:] - [:album:]"; //$NON-NLS-1$
 		final String targetAudioFileFormat= "[:tn:] - [:track:]"; //$NON-NLS-1$
 
-		// TODO: Check for missing files (ie files in memory but no longer on hd)
-
-		// Make processing list
 		final Map<String, ProcessingCommands> processingList= new HashMap<String, ProcessingCommands>();
-		int totalCommands= 0;
 		for (final String srcDir : dirs.keySet()) {
 			final DirData dd= dirs.get(srcDir);
 			final Map<String, FileData> ddFiles= dd.files;
@@ -108,6 +106,7 @@ public class Engine implements ITextProcessor {
 				if (ad == null || !ad.isComplete())
 					processThisDir= false;
 
+				// Process this dir
 				if (processThisDir) {
 					pc.targetDirectory= addPathElements(targetBaseDir, formatFilename(targetDirFormat, ad));
 					for (String f : ddFiles.keySet()) {
@@ -139,10 +138,31 @@ public class Engine implements ITextProcessor {
 
 			// Add to processing list
 			if (pc.getCommandCount() != 0) {
+				pc.sourceDirectory= srcDir;
 				processingList.put(srcDir, pc);
-				totalCommands+= pc.getCommandCount();
 			}
 		}
+		return processingList;
+	}
+
+	/**
+	 * Performs the crazy-ass voodoo magic that this whole app is about, mon.
+	 * <ul>
+	 * <li>Renames files with complete file and album data</li>
+	 * <li>Deletes files marks for deletion</li>
+	 * <li>Removes empty directories</li>
+	 * </ul>
+	 */
+	public void doYaVoodoo(final String targetBaseDir, final IVoodooProgressMonitor progressDlg, Boolean overwriteAll) throws IOException {
+		this.overwriteAll= overwriteAll;
+
+		// TODO: Check for missing files (ie files in memory but no longer on hd)
+
+		// Make processing list
+		final Map<String, ProcessingCommands> processingList= createProcessingList(targetBaseDir);
+		int totalCommands= 0;
+		for (ProcessingCommands pc : processingList.values())
+			totalCommands+= pc.getCommandCount();
 
 		progressDlg.starting(processingList.size(), totalCommands);
 		if (!progressDlg.isCancelled()) {
@@ -292,16 +312,6 @@ public class Engine implements ITextProcessor {
 	// =============================================================================================== //
 	// = Internal
 	// =============================================================================================== //
-
-	private static class ProcessingCommands {
-		public String targetDirectory= null;
-		public Set<String> deletions= new HashSet<String>();
-		public Map<String, String> moves= new HashMap<String, String>();
-
-		public int getCommandCount() {
-			return deletions.size() + moves.size();
-		}
-	}
 
 	private void addFolder(File sourceFolder) {
 		final DirData dd= getOrCreateDirData(sourceFolder.getAbsolutePath());

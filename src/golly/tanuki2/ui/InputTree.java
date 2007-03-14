@@ -5,10 +5,8 @@ import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
-import golly.tanuki2.support.AutoResizeColumnsListener;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
-import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
@@ -18,15 +16,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -34,199 +28,54 @@ import org.eclipse.swt.widgets.TreeItem;
  * @author Golly
  * @since 17/02/2007
  */
-public class InputTree extends AbstractFileView {
-	private static final Pattern pathSeperatorPattern= Pattern.compile("[\\/\\\\]"); //$NON-NLS-1$
+public class InputTree extends AbstractTreeBasedFileView {
 	private static final String albumInfoFmt= "%s / %s / %s"; //$NON-NLS-1$
 	private static final String trackInfoFmt= "   %2s / %s"; //$NON-NLS-1$
 
+	/**
+	 * Creates a string that contains info about album or track data. The resulting string will appear beside the
+	 * file/dir in the tree.
+	 * 
+	 * @param fmt The i18n key of the format string.
+	 * @param args The info fields to use as args.
+	 */
+	private static String formatInfo(String fmt, Object... args) {
+		boolean foundNonNull= false;
+		int i= args.length;
+		while (i-- > 0)
+			if (args[i] == null)
+				args[i]= I18n.l("inputTree_txt_nullInfoValue"); //$NON-NLS-1$
+			else
+				foundNonNull= true;
+		return foundNonNull ? String.format(fmt, args) : ""; //$NON-NLS-1$
+	}
+
 	private final Set<String> collapsedDirs= new HashSet<String>();
-	private final Tree tree;
-	private final Engine engine;
-	private final AutoResizeColumnsListener autoColumnResizer;
 	private Map<String, DirData> dirs= null;
 
-	public InputTree(Composite parent, SharedUIResources sharedUIResources_, Engine engine) {
-		super(sharedUIResources_);
+	private final Engine engine;
+
+	public InputTree(Composite parent, SharedUIResources sharedUIResources, Engine engine) {
+		super(parent, sharedUIResources, SWT.FULL_SELECTION | SWT.MULTI | SWT.CHECK);
 		this.engine= engine;
 
-		tree= new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.CHECK);
-		tree.setHeaderVisible(true);
-		new TreeColumn(tree, SWT.LEFT).setWidth(600);
-		new TreeColumn(tree, SWT.LEFT).setWidth(600);
+		new TreeColumn(tree, SWT.LEFT);
+		new TreeColumn(tree, SWT.LEFT);
 
-		// TODO Add a context menu to InputTree
-		createMenu(tree);
-
-		tree.addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
-				if (e.stateMask == SWT.CTRL) {
-					// CTRL +, CTRL -
-					if (e.character == '+' || e.character == '-') {
-						autoColumnResizer.enabled= autoColumnResizer.disableRedraw= false;
-						tree.setRedraw(false);
-						setExpandedAll(e.character == '+');
-						tree.setRedraw(true);
-						autoColumnResizer.enabled= autoColumnResizer.disableRedraw= true;
-						e.doit= false;
-					}
-				}
-			}
-		});
 		tree.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (e.detail == SWT.CHECK)
 					onCheck(e);
 			}
 		});
-		this.autoColumnResizer= UIHelpers.createAutoResizeColumnsListener(tree);
-		tree.addListener(SWT.Resize, autoColumnResizer);
-		addCommonFileViewListeners(tree);
 	}
 
 	// =============================================================================================== //
-	// = Public
+	// = Required due to interface / superclass
 	// =============================================================================================== //
 
-	public AutoResizeColumnsListener getAutoResizeColumnsListener() {
-		return autoColumnResizer;
-	}
-
-	public Tree getWidget() {
-		return tree;
-	}
-
-	@SuppressWarnings("unchecked")
-	public void refreshFiles(Map<String, DirData> dirs) {
-		this.dirs= dirs;
-
-		// Remember which dirs are collapsed
-		collapsedDirs.clear();
-		for (TreeItem i : tree.getItems())
-			recordCollapsedTreeItems(i);
-
-		// Remember current selection
-		int i= tree.getSelectionCount();
-		String[] selected= new String[i];
-		TreeItem[] currentlySelectedTreeItems= tree.getSelection();
-		while (i-- > 0)
-			selected[i]= getFullFilename(currentlySelectedTreeItems[i]);
-
-		// Create a virtual representation of the tree
-		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree= new HashMap<String, OptimisibleDirTreeNode>();
-		for (String dir : dirs.keySet()) {
-			Map<String, OptimisibleDirTreeNode> t= unoptimisedDirTree;
-			OptimisibleDirTreeNode latestNode= null;
-			for (String dirElement : pathSeperatorPattern.split(dir)) {
-				latestNode= t.get(dirElement);
-				if (latestNode == null) {
-					latestNode= new OptimisibleDirTreeNode();
-					t.put(dirElement, latestNode);
-				}
-				t= latestNode.children;
-			}
-			if (latestNode != null && !dirs.get(dir).files.isEmpty())
-				latestNode.hasFiles= true;
-		}
-		final Map<String, Map> optimisedDirTree= Helpers.optimiseDirTree(unoptimisedDirTree);
-
-		// Populate the tree widget
-		tree.removeAll();
-		for (String dir : Helpers.sort(optimisedDirTree.keySet())) {
-			TreeItem ti= new TreeItem(tree, SWT.NONE);
-			ti.setChecked(true);
-			ti.setData(dir);
-			ti.setText(dir);
-			ti.setImage(TanukiImage.FOLDER.get());
-			addChildren(ti, optimisedDirTree.get(dir), dir);
-		}
-
-		// Expand items and re-select previously selected
-		List<TreeItem> newSelectedTreeItems= new ArrayList<TreeItem>();
-		for (TreeItem ti : tree.getItems())
-			restorePreviousTreeItemState(ti, selected, newSelectedTreeItems);
-		if (tree.getItemCount() > 0)
-			tree.showItem(tree.getItem(0));
-		if (!newSelectedTreeItems.isEmpty()) {
-			tree.setSelection(newSelectedTreeItems.toArray(new TreeItem[newSelectedTreeItems.size()]));
-			tree.showSelection();
-		}
-	}
-
-	// =============================================================================================== //
-	// = Events
-	// =============================================================================================== //
-
-	protected void onCheck(SelectionEvent e) {
-		final TreeItem ti= (TreeItem) e.item;
-		if (ti.getData() instanceof FileData) {
-			final FileData fd= (FileData) ti.getData();
-			fd.setMarkedForDeletion(!ti.getChecked());
-			setFileItemInfoText(ti, fd);
-			setFileItemColor(ti, fd);
-			updateAlbumDirItem(ti.getParentItem(), fd.getDirData());
-			sharedUIResources.appUIShared.onDataUpdated(true);
-		} else {
-			// TODO onCheck() on a dir should update children
-			ti.setChecked(true);
-			e.doit= false;
-		}
-	}
-
-	protected void onDelete() {
-		String[] files= new String[tree.getSelectionCount()];
-		int i= 0;
-		for (TreeItem ti : tree.getSelection())
-			files[i++]= getFullFilename(ti);
-		sharedUIResources.appUIShared.removeFiles(files);
-	}
-
-	protected void onEdit() {
-		if (!isSingleSelection())
-			return;
-
-		DirData dd= null;
-		// If selected item is a file
-		FileData fd= getSelectedFileData();
-		if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion())
-			dd= fd.getDirData();
-		else
-			// Or if directory, get the first audio child-item, and use its DirData
-			for (TreeItem i : getSelected().getItems()) {
-				fd= i.getData() instanceof FileData ? (FileData) i.getData() : null;
-				if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
-					dd= fd.getDirData();
-					break;
-				}
-			}
-
-		// Show album editor
-		if (dd != null)
-			sharedUIResources.appUIShared.openAlbumEditor(dd, tree.getShell());
-	}
-
-	protected void selectAll() {
-		tree.selectAll();
-	}
-
-	// =============================================================================================== //
-	// = Internal
-	// =============================================================================================== //
-
-	@SuppressWarnings("unchecked")
-	private void addChildren(TreeItem parent, Map<String, Map> children, String path) {
-		// Add directories
-		if (children != null)
-			for (String dir : Helpers.sort(children.keySet())) {
-				final String fullDir= Helpers.addPathElements(path, dir);
-				TreeItem ti= new TreeItem(parent, SWT.NONE);
-				ti.setChecked(true);
-				ti.setData(fullDir);
-				ti.setImage(TanukiImage.FOLDER.get());
-				ti.setText(0, dir);
-				addChildren(ti, children.get(dir), fullDir);
-			}
-
-		// Add files
+	@Override
+	protected void addFilesToTree(TreeItem parent, String path) {
 		final DirData dd= dirs.get(path);
 		if (dd != null) {
 			final Map<String, FileData> files= dd.files;
@@ -248,34 +97,8 @@ public class InputTree extends AbstractFileView {
 		}
 	}
 
-	/**
-	 * Creates a string that contains info about album or track data. The resulting string will appear beside the
-	 * file/dir in the tree.
-	 * 
-	 * @param fmt The i18n key of the format string.
-	 * @param args The info fields to use as args.
-	 */
-	private static String formatInfo(String fmt, Object... args) {
-		boolean foundNonNull= false;
-		int i= args.length;
-		while (i-- > 0)
-			if (args[i] == null)
-				args[i]= I18n.l("inputTree_txt_nullInfoValue"); //$NON-NLS-1$
-			else
-				foundNonNull= true;
-		return foundNonNull ? String.format(fmt, args) : ""; //$NON-NLS-1$
-	}
-
-	protected Set<DirData> getAllSelectedDirData() {
-		final Set<DirData> r= new HashSet<DirData>();
-		TreeItem[] parent= tree.getSelection();
-		for (TreeItem ti : parent)
-			getAllSelectedDirData(r, ti);
-		r.remove(null);
-		return r;
-	}
-
-	private void getAllSelectedDirData(final Set<DirData> r, TreeItem ti) {
+	@Override
+	protected void getAllSelectedDirData(final Set<DirData> r, TreeItem ti) {
 		if (ti.getData() instanceof FileData)
 			r.add(((FileData) ti.getData()).getDirData());
 		else {
@@ -285,17 +108,12 @@ public class InputTree extends AbstractFileView {
 		}
 	}
 
-	private String getFullFilename(TreeItem ti) {
-		if (ti.getData() instanceof FileData)
-			return Helpers.addPathElements(((FileData) ti.getData()).getDirData().dir, ti.getText());
-		else
-			return (String) ti.getData();
+	@Override
+	protected Object getDataForDirTreeItem(final String fullDir) {
+		return fullDir;
 	}
 
-	private TreeItem getSelected() {
-		return tree.getSelection()[0];
-	}
-
+	@Override
 	protected String getSelectedDir() {
 		if (isFileSelected())
 			return getSelectedFileData().getDirData().dir;
@@ -303,21 +121,112 @@ public class InputTree extends AbstractFileView {
 			return (String) getSelected().getData();
 	}
 
+	@Override
 	protected FileData getSelectedFileData() {
 		final TreeItem ti= getSelected();
 		return ti.getData() instanceof FileData ? (FileData) ti.getData() : null;
 	}
 
+	@Override
 	protected String getSelectedFullFilename() {
 		return getFullFilename(getSelected());
 	}
 
-	protected int getSelectionCount() {
-		return tree.getSelectionCount();
+	@Override
+	protected void onDelete() {
+		String[] files= new String[tree.getSelectionCount()];
+		int i= 0;
+		for (TreeItem ti : tree.getSelection())
+			files[i++]= getFullFilename(ti);
+		sharedUIResources.appUIShared.removeFiles(files);
 	}
 
-	protected boolean isFileSelected() {
-		return getSelectedFileData() != null;
+	@Override
+	protected DirData onEdit_getDirData() {
+		// If selected item is a file
+		FileData fd= getSelectedFileData();
+		if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion())
+			return fd.getDirData();
+		else
+			// Or if directory, get the first audio child-item, and use its DirData
+			for (TreeItem i : getSelected().getItems()) {
+				fd= i.getData() instanceof FileData ? (FileData) i.getData() : null;
+				if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion())
+					return fd.getDirData();
+			}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void refreshFiles(Map<String, DirData> dirs) {
+		this.dirs= dirs;
+
+		// Remember which dirs are collapsed
+		collapsedDirs.clear();
+		for (TreeItem i : tree.getItems())
+			recordCollapsedTreeItems(i);
+
+		// Remember current selection
+		int i= tree.getSelectionCount();
+		String[] selected= new String[i];
+		TreeItem[] currentlySelectedTreeItems= tree.getSelection();
+		while (i-- > 0)
+			selected[i]= getFullFilename(currentlySelectedTreeItems[i]);
+
+		// Create a virtual representation of the tree
+		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree= new HashMap<String, OptimisibleDirTreeNode>();
+		for (String dir : dirs.keySet())
+			Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree, dir, !dirs.get(dir).files.isEmpty());
+		final Map<String, Map> optimisedDirTree= Helpers.optimiseDirTree(unoptimisedDirTree);
+
+		// Populate the tree
+		tree.removeAll();
+		for (String dir : Helpers.sort(optimisedDirTree.keySet())) {
+			TreeItem ti= new TreeItem(tree, SWT.NONE);
+			ti.setChecked(true);
+			ti.setData(getDataForDirTreeItem(dir));
+			ti.setText(dir);
+			ti.setImage(TanukiImage.FOLDER.get());
+			addDirToTree(ti, optimisedDirTree.get(dir), dir);
+		}
+
+		// Expand items and re-select previously selected
+		List<TreeItem> newSelectedTreeItems= new ArrayList<TreeItem>();
+		for (TreeItem ti : tree.getItems())
+			restorePreviousTreeItemState(ti, selected, newSelectedTreeItems);
+		if (tree.getItemCount() > 0)
+			tree.showItem(tree.getItem(0));
+		if (!newSelectedTreeItems.isEmpty()) {
+			tree.setSelection(newSelectedTreeItems.toArray(new TreeItem[newSelectedTreeItems.size()]));
+			tree.showSelection();
+		}
+	}
+
+	// =============================================================================================== //
+	// = Internal
+	// =============================================================================================== //
+
+	private String getFullFilename(TreeItem ti) {
+		if (ti.getData() instanceof FileData)
+			return Helpers.addPathElements(((FileData) ti.getData()).getDirData().dir, ti.getText());
+		else
+			return (String) ti.getData();
+	}
+
+	private void onCheck(SelectionEvent e) {
+		final TreeItem ti= (TreeItem) e.item;
+		if (ti.getData() instanceof FileData) {
+			final FileData fd= (FileData) ti.getData();
+			fd.setMarkedForDeletion(!ti.getChecked());
+			setFileItemInfoText(ti, fd);
+			setFileItemColor(ti, fd);
+			updateAlbumDirItem(ti.getParentItem(), fd.getDirData());
+			sharedUIResources.appUIShared.onDataUpdated(true);
+		} else {
+			// TODO InputTree.onCheck() on a dir should update children
+			ti.setChecked(true);
+			e.doit= false;
+		}
 	}
 
 	private void recordCollapsedTreeItems(TreeItem ti) {
@@ -339,26 +248,6 @@ public class InputTree extends AbstractFileView {
 			ti.setExpanded(!collapsedDirs.contains((String) ti.getData()));
 			for (TreeItem i : ti.getItems())
 				restorePreviousTreeItemState(i, filenamesToSelect, newSelectedTreeItems);
-		}
-	}
-
-	private void setExpanded(TreeItem ti, boolean expanded) {
-		ti.setExpanded(expanded);
-		for (TreeItem i : ti.getItems())
-			setExpanded(i, expanded);
-	}
-
-	private void setExpandedAll(boolean expanded) {
-		for (TreeItem i : tree.getItems())
-			setExpanded(i, expanded);
-		tree.showSelection();
-	}
-
-	private void setFileItemColor(final TreeItem ti, final FileData fd) {
-		final TwoColours c= sharedUIResources.appUIShared.getFileItemColours(fd, false);
-		if (c != null) {
-			ti.setBackground(c.background);
-			ti.setForeground(c.foreground);
 		}
 	}
 
@@ -414,6 +303,5 @@ public class InputTree extends AbstractFileView {
 		parent.setChecked(!allMarkedForDeletion);
 		parent.setBackground(c.background);
 		parent.setForeground(c.foreground);
-
 	}
 }
