@@ -42,16 +42,16 @@ public class FilenameParser implements ITrackProprtyReader {
 
 		static {
 			trackPropertyPatterns.put(TrackPropertyType.ARTIST, "([^\\\\/\\[\\](){}.]+?)");
-			trackPropertyPatterns.put(TrackPropertyType.YEAR, possiblyEnclosed("(\\d{4})"));
+			trackPropertyPatterns.put(TrackPropertyType.YEAR, possiblyEnclosed("((?:1[7-9]|20)\\d{2})"));
 			trackPropertyPatterns.put(TrackPropertyType.ALBUM, "([^\\\\/]+?)");
-			trackPropertyPatterns.put(TrackPropertyType.TN, possiblyEnclosed("(\\d{1,3})"));
+			trackPropertyPatterns.put(TrackPropertyType.TN, possiblyEnclosed("(0*(?:1\\d{2}|\\d{1,2}))"));
 			trackPropertyPatterns.put(TrackPropertyType.TRACK, "([^\\\\/]+?)");
 			macros.put("sep", " *- *");
 			macros.put("sepOrSpace", Helpers.regexOr(macros.get("sep"), " +"));
 			macros.put("sepSpaceOrUndsc", Helpers.regexOr(macros.get("sep"), "[ _]+"));
 			macros.put("sepSpaceUndscOrDot", Helpers.regexOr(macros.get("sep"), "[ _]+", "\\. *"));
 			macros.put("website", possiblyEnclosed("(?:[a-z0-9_-]+\\.)+(?:com|org|net)(?:\\.[a-z]{2,3})?"));
-			String bitrate= "(?:96|112|128|160|192|224|256|320|vbr(?: ?(?:hq|[0-9]+))?)" + "(?: ?(?:k|kbps))?";
+			String bitrate= "(?:96|112|128|160|192|224|256|320|vbr(?: ?(?:hq|[0-9]+))?)" + "(?: *(?:k|kbps))?";
 			macros.put("bitrate", possiblyEnclosed(bitrate + "(?:" + macros.get("sepOrSpace") + bitrate + ")?"));
 			macros.put("dirCrap", "(?: *" + Helpers.regexOr(macros.get("website"), macros.get("bitrate")) + ")*");
 			macros.put("album_andor_artist", Helpers.regexOr("[:artist:](?:<sepOrSpace>[:album:])?", "[:album:](?:<sepOrSpace>[:artist:])?"));
