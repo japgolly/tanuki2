@@ -29,7 +29,9 @@ public final class Helpers {
 	}
 
 	public static String addPathElements(final String path, final String... elements) {
-		StringBuilder sb= new StringBuilder(path);
+		StringBuilder sb= new StringBuilder();
+		if (path != null)
+			sb.append(path);
 		for (String e : elements) {
 			if (sb.length() != 0)
 				sb.append(File.separatorChar);
@@ -735,14 +737,20 @@ public final class Helpers {
 			Thread.currentThread().interrupt();
 		}
 	}
+	
+	private static final Pattern pathSeperatorPattern= Pattern.compile("[\\/\\\\]"); //$NON-NLS-1$
+	
+	public static String[] splitDir(final String dir) {
+		return pathSeperatorPattern.split(dir);
+	}
 
-	public static Integer[] sort(final Set<Integer> data) {
+	public static Integer[] sort(final Collection<Integer> data) {
 		Integer[] r= data.toArray(new Integer[data.size()]);
 		Arrays.sort(r);
 		return r;
 	}
 
-	public static String[] sort(final Set<String> data) {
+	public static String[] sort(final Collection<String> data) {
 		String[] r= data.toArray(new String[data.size()]);
 		Arrays.sort(r);
 		return r;
@@ -757,5 +765,22 @@ public final class Helpers {
 	 */
 	public static String unicodeTrim(String text) {
 		return ptnUnicodeTrim.matcher(text).replaceAll("");
+	}
+
+
+	public static OptimisibleDirTreeNode addDirToUnoptimisedDirTree(final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree, String dir, boolean hasFiles) {
+		Map<String, OptimisibleDirTreeNode> t= unoptimisedDirTree;
+		OptimisibleDirTreeNode latestNode= null;
+		for (String dirElement : splitDir(dir)) {
+			latestNode= t.get(dirElement);
+			if (latestNode == null) {
+				latestNode= new OptimisibleDirTreeNode();
+				t.put(dirElement, latestNode);
+			}
+			t= latestNode.children;
+		}
+		if (latestNode != null && hasFiles)
+			latestNode.hasFiles= true;
+		return latestNode;
 	}
 }
