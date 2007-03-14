@@ -28,6 +28,56 @@ public final class Helpers {
 		public boolean hasFiles= false;
 	}
 
+	public static final String whitespaceChars= "\u0020\u3000\n\r\u0009\u000b\u000c\u001c\u001d\u001e\u001f\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2008\u2009\u200a\u200b\u2028\u2029\u205f";
+	private static final String KATAKANA_FULL= "アイウエオァィゥェォカキクケコサシスセソタチツッテトナニヌネノハヒフヘホマミムメモヤユヨャュョラリルレロワヲンー゛゜";
+	private static final String KATAKANA_HALF= "ｱｲｳｴｵｧｨｩｪｫｶｷｸｹｺｻｼｽｾｿﾀﾁﾂｯﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖｬｭｮﾗﾘﾙﾚﾛﾜｦﾝｰﾞﾟ";
+	private static final String KATAKANA_TENTEN= "カキクケコサシスセソタチツテトハヒフヘホ";
+	private static final Pattern pGetFileExtention= Pattern.compile("^(?:.+[\\\\/])*[^\\\\/]+\\.([^\\\\/.]*)$");
+	private static final Pattern pMakeFilenameSafe_naughtyChars= Pattern.compile("[\\\\/:*?<>|]");
+	private static final Pattern pPathSeperator= Pattern.compile("[\\/\\\\]"); //$NON-NLS-1$
+	private static final Pattern pRemoveFileExt= Pattern.compile("\\.[^.]*$");
+	private static final Pattern pRomanNumeral= Pattern.compile("^(?:M{0,3})(?:D?C{0,3}|C[DM])(?:L?X{0,3}|X[LC])(?:V?I{0,3}|I[VX])$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern pTitleCase_b= Pattern.compile("\\b");
+	private static final Pattern pTitleCase_hasw= Pattern.compile(".*\\w.*");
+	private static final Pattern pTitleCase_icap= Pattern.compile("^['\"\\(\\[']*(\\w).*");
+	private static final Pattern pTitleCase_prepost= Pattern.compile("^(\\W*)(.*?)(\\W*)$");
+	private static final Pattern pUnicodeTrim= Pattern.compile("^[" + whitespaceChars + "]+|[" + whitespaceChars + "]+$");
+	private static final Set<String> setTitleCase_articles, setTitleCase_coordinatingConjunctions,
+			setTitleCase_commonPrepositions, setTitleCase_exceptions;
+
+	static {
+		final String[] saARTICLES= new String[] {"a", "an", "the"};
+		final String[] saCOORDINATING_CONJUNCTIONS= new String[] {"and", "but", "for", "nor", "or", "so", "yet"};
+		final String[] saCOMMON_PREPOSITIONS= new String[] {"about", "beneath", "in", "regarding", "above", "beside",
+				"inside", "round", "across", "between", "into", "since", "after", "beyond", "like", "through",
+				"against", "by", "near", "to", "among", "concerning", "of", "toward", "around", "despite", "off",
+				"under", "as", "down", "on", "unlike", "at", "during", "out", "until", "before", "except", "outside",
+				"up", "behind", "for", "over", "upon", "below", "from", "past", "with"};
+		setTitleCase_articles= arrayToSet(saARTICLES);
+		setTitleCase_coordinatingConjunctions= arrayToSet(saCOORDINATING_CONJUNCTIONS);
+		setTitleCase_commonPrepositions= arrayToSet(saCOMMON_PREPOSITIONS);
+		setTitleCase_exceptions= new HashSet<String>();
+		setTitleCase_exceptions.addAll(setTitleCase_articles);
+		setTitleCase_exceptions.addAll(setTitleCase_coordinatingConjunctions);
+		setTitleCase_exceptions.addAll(setTitleCase_commonPrepositions);
+	}
+
+	public static OptimisibleDirTreeNode addDirToUnoptimisedDirTree(final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree, String dir, boolean hasFiles) {
+		Map<String, OptimisibleDirTreeNode> t= unoptimisedDirTree;
+		OptimisibleDirTreeNode latestNode= null;
+		for (String dirElement : splitDir(dir)) {
+			latestNode= t.get(dirElement);
+			if (latestNode == null) {
+				latestNode= new OptimisibleDirTreeNode();
+				t.put(dirElement, latestNode);
+			}
+			t= latestNode.children;
+		}
+		if (latestNode != null && hasFiles)
+			latestNode.hasFiles= true;
+		return latestNode;
+	}
+
 	public static String addPathElements(final String path, final String... elements) {
 		StringBuilder sb= new StringBuilder();
 		if (path != null)
@@ -78,13 +128,6 @@ public final class Helpers {
 	}
 
 	/**
-	 * @see #cp_r(File, File, boolean, Set)
-	 */
-	public static void cp_r(File srcDir, File destDir, boolean overwrite, String... exceptions) throws IOException {
-		cp_r(srcDir, destDir, overwrite, arrayToSet(exceptions));
-	}
-
-	/**
 	 * Recursively copies the contents of a whole directory to another directory.<br>
 	 * If the target directory does not already exist it will be created.
 	 * 
@@ -101,6 +144,13 @@ public final class Helpers {
 				else if (f.isDirectory())
 					cp_r(f, new File(destDirPrefix + f.getName()), overwrite, exceptions);
 			}
+	}
+
+	/**
+	 * @see #cp_r(File, File, boolean, Set)
+	 */
+	public static void cp_r(File srcDir, File destDir, boolean overwrite, String... exceptions) throws IOException {
+		cp_r(srcDir, destDir, overwrite, arrayToSet(exceptions));
 	}
 
 	/**
@@ -132,8 +182,6 @@ public final class Helpers {
 		}
 		return fields;
 	}
-
-	private static final Pattern pGetFileExtention= Pattern.compile("^(?:.+[\\\\/])*[^\\\\/]+\\.([^\\\\/.]*)$");
 
 	public static String getFileExtention(String filename, boolean returnDotToo) {
 		final Matcher m= pGetFileExtention.matcher(filename);
@@ -167,13 +215,6 @@ public final class Helpers {
 	@SuppressWarnings("nls")
 	public static String inspect(final Object obj, boolean includeObjectId) {
 		return inspect(obj, includeObjectId, obj.getClass().getDeclaredFields());
-	}
-
-	/**
-	 * @see #inspect(Object, boolean, Field...)
-	 */
-	public static String inspect(final Object obj, boolean includeObjectId, String... fieldNames) {
-		return inspect(obj, includeObjectId, getFields(obj, fieldNames));
 	}
 
 	/**
@@ -237,6 +278,13 @@ public final class Helpers {
 	}
 
 	/**
+	 * @see #inspect(Object, boolean, Field...)
+	 */
+	public static String inspect(final Object obj, boolean includeObjectId, String... fieldNames) {
+		return inspect(obj, includeObjectId, getFields(obj, fieldNames));
+	}
+
+	/**
 	 * Same as {@link #inspect(Object, boolean, Field...)} except instead of specifying which instance variables to
 	 * inspect, all instance variables are inspected except for those passed as arguments here.
 	 * 
@@ -250,13 +298,11 @@ public final class Helpers {
 		return inspect(obj, includeObjectId, fields.toArray(new Field[fields.size()]));
 	}
 
-	public static final Pattern pROMAL_NUMERAL= Pattern.compile("^(?:M{0,3})(?:D?C{0,3}|C[DM])(?:L?X{0,3}|X[LC])(?:V?I{0,3}|I[VX])$", Pattern.CASE_INSENSITIVE);
-
 	/**
 	 * Returns <code>true</code> if a given string is a valid roman numeral.
 	 */
 	public static boolean isRomanNumeral(String text) {
-		return pROMAL_NUMERAL.matcher(text).matches();
+		return pRomanNumeral.matcher(text).matches();
 	}
 
 	/**
@@ -272,45 +318,20 @@ public final class Helpers {
 		return sb.toString();
 	}
 
-	private static final Pattern pMAKEFILENAMESAFE_NAUGHTY_CHARS= Pattern.compile("[\\\\/:*?<>|]");
-
 	/**
 	 * Replaces all file-system-unsafe characters with safe alternatives.
 	 */
 	public static String makeFilenameSafe(String filename) {
 		// TODO makeFilenameSafe is win32 specific
 		filename= filename.replace("\"", "''");
-		return pMAKEFILENAMESAFE_NAUGHTY_CHARS.matcher(filename).replaceAll("_");
-	}
-
-	private static final Pattern pTITLECASE_B= Pattern.compile("\\b");
-	private static final Pattern pTITLECASE_HASW= Pattern.compile(".*\\w.*");
-	private static final Pattern pTITLECASE_ICAP= Pattern.compile("^['\"\\(\\[']*(\\w).*");
-	private static final Pattern pTITLECASE_PREPOST= Pattern.compile("^(\\W*)(.*?)(\\W*)$");
-	private static final Set<String> ARTICLES, COORDINATING_CONJUNCTIONS, COMMON_PREPOSITIONS;
-	private static final Set<String> TITLECASE_EXCEPTIONS;
-	static {
-		final String[] saARTICLES= new String[] {"a", "an", "the"};
-		final String[] saCOORDINATING_CONJUNCTIONS= new String[] {"and", "but", "for", "nor", "or", "so", "yet"};
-		final String[] saCOMMON_PREPOSITIONS= new String[] {"about", "beneath", "in", "regarding", "above", "beside",
-				"inside", "round", "across", "between", "into", "since", "after", "beyond", "like", "through",
-				"against", "by", "near", "to", "among", "concerning", "of", "toward", "around", "despite", "off",
-				"under", "as", "down", "on", "unlike", "at", "during", "out", "until", "before", "except", "outside",
-				"up", "behind", "for", "over", "upon", "below", "from", "past", "with"};
-		ARTICLES= arrayToSet(saARTICLES);
-		COORDINATING_CONJUNCTIONS= arrayToSet(saCOORDINATING_CONJUNCTIONS);
-		COMMON_PREPOSITIONS= arrayToSet(saCOMMON_PREPOSITIONS);
-		TITLECASE_EXCEPTIONS= new HashSet<String>();
-		TITLECASE_EXCEPTIONS.addAll(ARTICLES);
-		TITLECASE_EXCEPTIONS.addAll(COORDINATING_CONJUNCTIONS);
-		TITLECASE_EXCEPTIONS.addAll(COMMON_PREPOSITIONS);
+		return pMakeFilenameSafe_naughtyChars.matcher(filename).replaceAll("_");
 	}
 
 	public static String makeTitleCase(String text) {
-		final Matcher m= pTITLECASE_PREPOST.matcher(text);
+		final Matcher m= pTitleCase_prepost.matcher(text);
 		if (!m.matches())
 			return text;
-		String[] b= pTITLECASE_B.split(m.group(2).toLowerCase());
+		String[] b= pTitleCase_b.split(m.group(2).toLowerCase());
 		if (b[0].length() == 0) {
 			String[] b2= new String[b.length - 1];
 			System.arraycopy(b, 1, b2, 0, b.length - 1);
@@ -326,7 +347,7 @@ public final class Helpers {
 				t[i]= w.toUpperCase();
 			else if (i == 0 || i == lastIndex)
 				t[i]= makeTitleCase_iCap(w);
-			else if (TITLECASE_EXCEPTIONS.contains(w) || ((i > 1) && "'".equals(b[i - 1]) && pTITLECASE_HASW.matcher(b[i - 2]).matches()))
+			else if (setTitleCase_exceptions.contains(w) || ((i > 1) && "'".equals(b[i - 1]) && pTitleCase_hasw.matcher(b[i - 2]).matches()))
 				t[i]= w;
 			else
 				t[i]= makeTitleCase_iCap(w);
@@ -335,7 +356,7 @@ public final class Helpers {
 	}
 
 	private static String makeTitleCase_iCap(String w) {
-		final Matcher m= pTITLECASE_ICAP.matcher(w);
+		final Matcher m= pTitleCase_icap.matcher(w);
 		if (m.matches()) {
 			char[] chars= w.toCharArray();
 			chars[m.start(1)]= Character.toUpperCase(chars[m.start(1)]);
@@ -448,10 +469,6 @@ public final class Helpers {
 	public static final String normalizeText(final String input) {
 		return normalizeText(input, null);
 	}
-
-	private static final String KATAKANA_HALF= "ｱｲｳｴｵｧｨｩｪｫｶｷｸｹｺｻｼｽｾｿﾀﾁﾂｯﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖｬｭｮﾗﾘﾙﾚﾛﾜｦﾝｰﾞﾟ";
-	private static final String KATAKANA_FULL= "アイウエオァィゥェォカキクケコサシスセソタチツッテトナニヌネノハヒフヘホマミムメモヤユヨャュョラリルレロワヲンー゛゜";
-	private static final String KATAKANA_TENTEN= "カキクケコサシスセソタチツテトハヒフヘホ";
 
 	/**
 	 * Performs the following conversions:
@@ -664,49 +681,8 @@ public final class Helpers {
 				map.remove(k);
 	}
 
-	private static final Pattern pRemoveFileExt= Pattern.compile("\\.[^.]*$");
-
 	public static String removeFilenameExtension(String filename) {
 		return pRemoveFileExt.matcher(filename).replaceFirst("");
-	}
-
-	/**
-	 * Removes a directory if it's empty, and then its parent directory if that's empty and so on and so forth.
-	 * 
-	 * @throws IOException if for some reason an empty directory fails to be removed.
-	 */
-	public static void rmdirPath(File path, List<File> removedFiles) throws IOException {
-		if (path.isDirectory() && path.list().length == 0) {
-			if (!path.delete())
-				throw new IOException("rmdir failed. (\"" + path + "\")");
-			if (removedFiles != null)
-				removedFiles.add(path);
-
-			final File parent= path.getParentFile();
-			if (parent != null)
-				rmdirPath(parent, removedFiles);
-		}
-	}
-
-	/**
-	 * @see #rmdirPath(File, List)
-	 */
-	public static void rmdirPath(File path) throws IOException {
-		rmdirPath(path, null);
-	}
-
-	/**
-	 * @see #rmdirPath(File, List)
-	 */
-	public static void rmdirPath(String path) throws IOException {
-		rmdirPath(new File(path));
-	}
-
-	/**
-	 * @see #rmdirPath(File, List)
-	 */
-	public static void rmdirPath(String path, List<File> removedFiles) throws IOException {
-		rmdirPath(new File(path), null);
 	}
 
 	/**
@@ -730,18 +706,51 @@ public final class Helpers {
 		rm_rf(new File(dir));
 	}
 
+	/**
+	 * @see #rmdirPath(File, List)
+	 */
+	public static void rmdirPath(File path) throws IOException {
+		rmdirPath(path, null);
+	}
+
+	/**
+	 * Removes a directory if it's empty, and then its parent directory if that's empty and so on and so forth.
+	 * 
+	 * @throws IOException if for some reason an empty directory fails to be removed.
+	 */
+	public static void rmdirPath(File path, List<File> removedFiles) throws IOException {
+		if (path.isDirectory() && path.list().length == 0) {
+			if (!path.delete())
+				throw new IOException("rmdir failed. (\"" + path + "\")");
+			if (removedFiles != null)
+				removedFiles.add(path);
+
+			final File parent= path.getParentFile();
+			if (parent != null)
+				rmdirPath(parent, removedFiles);
+		}
+	}
+
+	/**
+	 * @see #rmdirPath(File, List)
+	 */
+	public static void rmdirPath(String path) throws IOException {
+		rmdirPath(new File(path));
+	}
+
+	/**
+	 * @see #rmdirPath(File, List)
+	 */
+	public static void rmdirPath(String path, List<File> removedFiles) throws IOException {
+		rmdirPath(new File(path), null);
+	}
+
 	public static void sleep(long time) {
 		try {
 			Thread.sleep(time);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
-	}
-	
-	private static final Pattern pathSeperatorPattern= Pattern.compile("[\\/\\\\]"); //$NON-NLS-1$
-	
-	public static String[] splitDir(final String dir) {
-		return pathSeperatorPattern.split(dir);
 	}
 
 	public static Integer[] sort(final Collection<Integer> data) {
@@ -756,31 +765,15 @@ public final class Helpers {
 		return r;
 	}
 
-	public static final String whitespaceChars= "\u0020\u3000\n\r\u0009\u000b\u000c\u001c\u001d\u001e\u001f\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2008\u2009\u200a\u200b\u2028\u2029\u205f";
-	private static final Pattern ptnUnicodeTrim= Pattern.compile("^[" + whitespaceChars + "]+|[" + whitespaceChars + "]+$");
+	public static String[] splitDir(final String dir) {
+		return pPathSeperator.split(dir);
+	}
 
 	/**
 	 * Removes whitespace from the beginning and end of a string.<br>
 	 * Unicode-aware.
 	 */
 	public static String unicodeTrim(String text) {
-		return ptnUnicodeTrim.matcher(text).replaceAll("");
-	}
-
-
-	public static OptimisibleDirTreeNode addDirToUnoptimisedDirTree(final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree, String dir, boolean hasFiles) {
-		Map<String, OptimisibleDirTreeNode> t= unoptimisedDirTree;
-		OptimisibleDirTreeNode latestNode= null;
-		for (String dirElement : splitDir(dir)) {
-			latestNode= t.get(dirElement);
-			if (latestNode == null) {
-				latestNode= new OptimisibleDirTreeNode();
-				t.put(dirElement, latestNode);
-			}
-			t= latestNode.children;
-		}
-		if (latestNode != null && hasFiles)
-			latestNode.hasFiles= true;
-		return latestNode;
+		return pUnicodeTrim.matcher(text).replaceAll("");
 	}
 }
