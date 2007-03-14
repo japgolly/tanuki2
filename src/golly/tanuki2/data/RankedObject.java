@@ -36,8 +36,12 @@ public class RankedObject<T> extends AbstractDataObject implements Comparable<Ra
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
-		if (obj instanceof RankedObject)
-			return data.equals(((RankedObject) obj).data);
+		if (obj instanceof RankedObject) {
+			if (data == null)
+				return ((RankedObject) obj).data == null;
+			else
+				return data.equals(((RankedObject) obj).data);
+		}
 		return data.equals(obj);
 	}
 
