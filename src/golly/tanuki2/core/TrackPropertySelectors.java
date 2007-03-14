@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Golly
@@ -48,6 +50,7 @@ class TrackPropertySelectors {
 	 * Rank each album property individually, then use that to rank each result.
 	 */
 	public static class RankEachAlbumPropertyThenRankResults extends AbstractTrackPropertySelector {
+		private static final Pattern pUnlikely= Pattern.compile(" - |128|160|192|224|256|320|vbr|kbps|www\\.|\\.(?:com|org|net)", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
 
 		private final RankedObjectCollection<String> rankedConfirmedArtists;
 		private final RankedObjectCollection<String> rankedUnconfirmedArtists;
@@ -104,15 +107,32 @@ class TrackPropertySelectors {
 				}
 				// If more than one winner and not on first pass..
 				else if (!firstPass && rankedTPs.getWinnerCount() > 1) {
-					// select any of the winners
+					// Out of the winners, penalise the rank of strings with unlikely substrings in them
+					for (RankedObject<TrackProperties> i : rankedTPs.getWinners()) {
+						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.ARTIST));
+						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.ALBUM));
+						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.TRACK));
+					}
+					rankedTPs.sort();
+					// select one of the winners
 					TrackProperties winner= rankedTPs.iterator().next().data;
 					assignTrackPropertiesToFile(ddFiles.get(filename), winner, sharedAlbumData);
 					successfulFiles.add(filename);
 					// and increase the rank of all album properties found in the winner
 					for (TrackPropertyType propType : TrackPropertyType.albumTypes)
-						if (winner.get(propType) != null)
-							rankedIndividualAlbumProperties.get(propType).increaseRank(winner.get(propType), 0.0001);
+						if (winner.get(propType) != null) {
+							final String x= Helpers.normalizeText(winner.get(propType));
+							rankedIndividualAlbumProperties.get(propType).increaseRank(x, 0.0001);
+						}
 				}
+			}
+		}
+
+		private void penaliseUnlikelySubstrings(RankedObject<TrackProperties> i, String a) {
+			if (a != null) {
+				final Matcher m= pUnlikely.matcher(a);
+				while (m.find())
+					i.increaseRank(-0.0001);
 			}
 		}
 	}

@@ -30,28 +30,29 @@ import org.junit.Test;
  */
 @SuppressWarnings("nls")
 public class EngineTest extends TestHelper {
-	private Engine2 engine;
+	private Engine engine;
+	private Engine2 engine2;
 	private MockTrackProprtyReader mtpr;
 	private TrackProperties noprop= makeTrackProperties(null, null, null, null, null);
 
 	@Before
 	public void setup() {
 		mtpr= new MockTrackProprtyReader();
-		engine= new Engine2(mtpr);
+		engine= engine2= new Engine2(mtpr);
 	}
 
 	@Test
 	public void makeSureRemoveUpdatesTheHasAudioProperty() {
-		engine.addFakeDir("A", "a1.mp3", "a2.mp3", "as.txt");
-		engine.files.get(addPathElements("A", "as.txt")).setAudio(false);
-		engine.files.get(addPathElements("A", "as.txt")).setMimeImage(TanukiImage.MIME_TEXT);
-		final DirData dd= engine.dirs.get("A");
+		engine2.addFakeDir("A", "a1.mp3", "a2.mp3", "as.txt");
+		engine2.files.get(addPathElements("A", "as.txt")).setAudio(false);
+		engine2.files.get(addPathElements("A", "as.txt")).setMimeImage(TanukiImage.MIME_TEXT);
+		final DirData dd= engine2.dirs.get("A");
 		assertTrue(dd.hasAudioContent(true));
 		assertTrue(dd.hasAudioContent(false));
-		engine.remove(addPathElements("A", "a2.mp3"));
+		engine2.remove(addPathElements("A", "a2.mp3"));
 		assertTrue(dd.hasAudioContent(true));
 		assertTrue(dd.hasAudioContent(false));
-		engine.remove(addPathElements("A", "a1.mp3"));
+		engine2.remove(addPathElements("A", "a1.mp3"));
 		assertFalse(dd.hasAudioContent(true));
 		assertFalse(dd.hasAudioContent(false));
 	}
@@ -104,7 +105,7 @@ public class EngineTest extends TestHelper {
 		mtpr.addMockResult("A/a1", a1= makeTrackProperties("Metallica", 2006, "A", "1", "A One"));
 		mtpr.addMockResult("A/a2", a2= makeTrackProperties("Metallica", 2006, "A", "2", "A Two"));
 		mtpr.addMockResult("A/a3", a3= makeTrackProperties("Metallica", 2006, "A", "3", "A Three"));
-		engine.readTrackProprties2();
+		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", a1);
 		assertEngineTrackProperties("A/a2", a2);
 		assertEngineTrackProperties("A/a3", a3);
@@ -122,7 +123,7 @@ public class EngineTest extends TestHelper {
 		mtpr.addMockResult("A/a2", a2= makeTrackProperties("Metallica", 2006, "A", "2", "A Two")); // should win - same album info as other tracks
 		mtpr.addMockResult("A/a2", makeTrackProperties("Zetallica", 2006, "A", "2", "A Two @bad")); // should lose
 		mtpr.addMockResult("A/a3", a3= makeTrackProperties("Metallica", 2006, "A", "3", "A Three"));
-		engine.readTrackProprties2();
+		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", a1);
 		assertEngineTrackProperties("A/a2", a2);
 		assertEngineTrackProperties("A/a3", a3);
@@ -144,7 +145,7 @@ public class EngineTest extends TestHelper {
 		mtpr.addMockResult("B/b1", b1= makeTrackProperties("Metallica", 1997, "B", "1", "B One @good"));
 		mtpr.addMockResult("B/b2", b2= makeTrackProperties("Metallica", 1997, "B", "2", "B Two @good"));
 		mtpr.addMockResult("B/b3", b3= makeTrackProperties("Metallica", 1997, "B", "3", "B Three @good"));
-		engine.readTrackProprties2();
+		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", a1);
 		assertEngineTrackProperties("A/a2", a2);
 		assertEngineTrackProperties("A/a3", a3);
@@ -172,7 +173,7 @@ public class EngineTest extends TestHelper {
 		mtpr.addMockResult("B/b1", b1= makeTrackProperties("Metallica", 1997, "B", "1", "B One @good"));
 		mtpr.addMockResult("B/b2", b2= makeTrackProperties("Metallica", 1997, "B", "2", "B Two @good"));
 		mtpr.addMockResult("B/b3", b3= makeTrackProperties("Metallica", 1997, "B", "3", "B Three @good"));
-		engine.readTrackProprties2();
+		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", a1);
 		assertEngineTrackProperties("A/a2", a2);
 		assertEngineTrackProperties("A/a3", a3);
@@ -211,7 +212,7 @@ public class EngineTest extends TestHelper {
 		mtpr.addMockResult("A/a2", makeTrackProperties("Crap", 2006, "A", "2", "A Two @bad"));
 		mtpr.addMockResult("A/a3", makeTrackProperties("WayOff", 1980, null, "3", "A Three"));
 		mtpr.addMockResult("A/a3", a3= makeTrackProperties("WhatCanYouDo", 2006, "FakeAlbum", "3", "A Three"));
-		engine.readTrackProprties2();
+		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", a1);
 		assertEngineTrackProperties("A/a2", a2);
 		assertEngineTrackProperties("A/a3", a3);
@@ -230,16 +231,16 @@ public class EngineTest extends TestHelper {
 		mtpr.addMockResult("A/a2", a2b= makeTrackProperties("Nirvana", 1994, "B", "8", "B Two"));
 		mtpr.addMockResult("A/a3", a3b= makeTrackProperties("Nirvana", 1994, "B", "9", "B Three"));
 		mtpr.addMockResult("A/a3", a3a= makeTrackProperties("METALLICA", 2006, "A", "3", "A Three"));
-		engine.readTrackProprties2();
+		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", a1a, a1b);
 		assertEngineTrackProperties("A/a2", a2a, a2b);
 		assertEngineTrackProperties("A/a3", a3a, a3b);
 		assertEngineTrackProperties("C/c1", noprop);
 		assertEngineTrackProperties("C/c2", noprop);
 		assertEngineTrackProperties("C/c3", noprop);
-		AlbumData ad1= engine.files.get("A\\a1.mp3").getAlbumData();
-		AlbumData ad2= engine.files.get("A\\a2.mp3").getAlbumData();
-		AlbumData ad3= engine.files.get("A\\a3.mp3").getAlbumData();
+		AlbumData ad1= engine2.files.get("A\\a1.mp3").getAlbumData();
+		AlbumData ad2= engine2.files.get("A\\a2.mp3").getAlbumData();
+		AlbumData ad3= engine2.files.get("A\\a3.mp3").getAlbumData();
 		assertEquals(ad1, ad2);
 		assertEquals(ad1, ad3);
 	}
@@ -250,11 +251,49 @@ public class EngineTest extends TestHelper {
 		TrackProperties a1;
 		mtpr.addMockResult("A/a1", makeTrackProperties("Bullshit", null, "No year", "2", "A Two @bad"));
 		mtpr.addMockResult("A/a1", a1= makeTrackProperties("asd", 2006, "qwe", "2", "A Two @bad"));
-		engine.readTrackProprties2();
+		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", a1);
 	}
 
 	// TODO Add more TrackProperty selection tests: check for matches from different sources
+
+	@Test
+	public void testTPSelectionMisc1() {
+		DirData dd= new DirData(ensureCorrectDirSeperators("X:\\music\\1. Fresh\\Hawaii - The Natives Are Restless (1985) 320 Kbps"));
+		final String fn1= "Hawaii - 01 - Call Of The Wild - The Natives Are Restless.mp3";
+		final String fn2= "Hawaii - 02 - Turn It Louder - The Natives Are Restless.mp3";
+		final String fn3= "Hawaii - 03 - V.P.H.B. - The Natives Are Restless.mp3";
+		final String fn4= "Hawaii - 04 - Beg For Mercy - The Natives Are Restless.mp3";
+		final String fn5= "Hawaii - 05 - Unfinished Business - The Natives Are Restless.mp3";
+		final String fn6= "Hawaii - 06 - Proud To Be Loud - The Natives Are Restless.mp3";
+		final String fn7= "Hawaii - 07 - Lies - The Natives Are Restless.mp3";
+		final String fn8= "Hawaii - 08 - Omichan No Uta - The Natives Are Restless.mp3";
+		final String fn9= "Hawaii - 09 - Dynamite - The Natives Are Restless.mp3";
+		final String[] fnAll= new String[] {fn1, fn2, fn3, fn4, fn5, fn6, fn7, fn8, fn9};
+		for (String f : fnAll)
+			makeFileData(dd, f, true);
+		dd.files.put("Hawaii - 00 - The Natives Are Restless.nfo", makeFileData(dd, false));
+		dd.files.put("Hawaii - The Natives Are Restless.jpg", makeFileData(dd, false));
+
+		Engine3 engine3= new Engine3();
+		engine= engine3;
+		engine3.dirs.put(dd.dir, dd);
+		for (String f : fnAll)
+			engine3.files.put(addPathElements(dd.dir, f), dd.files.get(f));
+		engine3.addDirNeedingTrackProprties(dd);
+		engine3.readAndAssignTrackProprties2();
+		System.out.flush();
+
+		assertEngineTrackProperties(addPathElements(dd.dir, fn1), makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "1", "Call Of The Wild"));
+		assertEngineTrackProperties(addPathElements(dd.dir, fn2), makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "2", "Turn It Louder"));
+		assertEngineTrackProperties(addPathElements(dd.dir, fn3), makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "3", "V.P.H.B."));
+		assertEngineTrackProperties(addPathElements(dd.dir, fn4), makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "4", "Beg For Mercy"));
+		assertEngineTrackProperties(addPathElements(dd.dir, fn5), makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "5", "Unfinished Business"));
+		assertEngineTrackProperties(addPathElements(dd.dir, fn6), makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "6", "Proud To Be Loud"));
+		assertEngineTrackProperties(addPathElements(dd.dir, fn7), makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "7", "Lies"));
+		assertEngineTrackProperties(addPathElements(dd.dir, fn8), makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "8", "Omichan No Uta"));
+		assertEngineTrackProperties(addPathElements(dd.dir, fn9), makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "9", "Dynamite"));
+	}
 
 	// =============================================================================================== //
 	// = Voodoo tests
@@ -290,23 +329,23 @@ public class EngineTest extends TestHelper {
 		mtpr.addMockResult(addPathElements(sourceDir, "incomplete", "2", "201"), makeTrackProperties("Incomplete 2", null, "blah", "01", "incomplete dir"));
 		mtpr.addMockResult(addPathElements(sourceDir, "incomplete", "2", "202"), makeTrackProperties("Incomplete 2", null, "blah", "02", "incomplete dir"));
 		mtpr.addMockResult(addPathElements(sourceDir, "other", "remain", "asd"), makeTrackProperties("Children Of Bodom", 2003, "Hate Crew Deathroll", "01", "Angels Don't Kill"));
-		engine.add(false, sourceDir);
+		engine2.add(false, sourceDir);
 		int fileCount= 1 + 7 + 1 + 3 + 5 + 4;
-		assertEquals(fileCount, engine.files.size());
-		engine.files.get(addPathElements(sourceDir, "complete", "blah", "www.heavytorrents.org.txt")).setMarkedForDeletion(true);
-		engine.files.get(addPathElements(sourceDir, "complete", "blah", "VICL-35940.jpg")).setMarkedForDeletion(true);
-		engine.files.get(addPathElements(sourceDir, "incomplete", "1", "crap.txt")).setMarkedForDeletion(true);
-		engine.files.get(addPathElements(sourceDir, "incomplete", "2", "crap.txt")).setMarkedForDeletion(true);
-		engine.files.get(addPathElements(sourceDir, "other", "del_all", "byebye.jpg")).setMarkedForDeletion(true);
-		engine.files.get(addPathElements(sourceDir, "other", "remain", "delme.txt")).setMarkedForDeletion(true);
-		engine.remove(addPathElements(sourceDir, "other", "remain", "remain.mp3"));
+		assertEquals(fileCount, engine2.files.size());
+		engine2.files.get(addPathElements(sourceDir, "complete", "blah", "www.heavytorrents.org.txt")).setMarkedForDeletion(true);
+		engine2.files.get(addPathElements(sourceDir, "complete", "blah", "VICL-35940.jpg")).setMarkedForDeletion(true);
+		engine2.files.get(addPathElements(sourceDir, "incomplete", "1", "crap.txt")).setMarkedForDeletion(true);
+		engine2.files.get(addPathElements(sourceDir, "incomplete", "2", "crap.txt")).setMarkedForDeletion(true);
+		engine2.files.get(addPathElements(sourceDir, "other", "del_all", "byebye.jpg")).setMarkedForDeletion(true);
+		engine2.files.get(addPathElements(sourceDir, "other", "remain", "delme.txt")).setMarkedForDeletion(true);
+		engine2.remove(addPathElements(sourceDir, "other", "remain", "remain.mp3"));
 		fileCount--;
-		assertEquals(fileCount, engine.files.size());
-		assertFalse(engine.files.get(addPathElements(sourceDir, "incomplete", "1", "01.mp3")).isComplete(true));
-		assertTrue(engine.files.get(addPathElements(sourceDir, "incomplete", "1", "02.mp3")).isComplete(true));
-		assertFalse(engine.files.get(addPathElements(sourceDir, "incomplete", "2", "201.mp3")).isComplete(true));
+		assertEquals(fileCount, engine2.files.size());
+		assertFalse(engine2.files.get(addPathElements(sourceDir, "incomplete", "1", "01.mp3")).isComplete(true));
+		assertTrue(engine2.files.get(addPathElements(sourceDir, "incomplete", "1", "02.mp3")).isComplete(true));
+		assertFalse(engine2.files.get(addPathElements(sourceDir, "incomplete", "2", "201.mp3")).isComplete(true));
 
-		engine.doYaVoodoo(targetDir, new MockVoodooProgressMonitor(), overwriteAll);
+		engine2.doYaVoodoo(targetDir, new MockVoodooProgressMonitor(), overwriteAll);
 
 		// Test target dir
 		assertDirContents(targetDir, "Children Of Bodom");
@@ -325,12 +364,12 @@ public class EngineTest extends TestHelper {
 		assertEquals(oldFilesRemain ? "o2!" : "ARTIST:  AC-DC", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(tdir, "autotag.txt"))), "UTF-8")).readLine());
 
 		// Test engine.dirs + engine.files
-		assertEquals(1 + 5 + 4 + (oldFilesRemain ? 2 : 0), engine.files.size());
-		assertEquals(3 + (oldFilesRemain ? 1 : 0), engine.dirs.size());
-		assertTrue(engine.dirs.containsKey(sourceDir));
-		assertTrue(engine.dirs.containsKey(addPathElements(sourceDir, "incomplete", "1")));
-		assertTrue(engine.files.containsKey(addPathElements(sourceDir, "asd.txt")));
-		assertEquals(oldFilesRemain, engine.dirs.containsKey(addPathElements(sourceDir, "complete", "blah")));
+		assertEquals(1 + 5 + 4 + (oldFilesRemain ? 2 : 0), engine2.files.size());
+		assertEquals(3 + (oldFilesRemain ? 1 : 0), engine2.dirs.size());
+		assertTrue(engine2.dirs.containsKey(sourceDir));
+		assertTrue(engine2.dirs.containsKey(addPathElements(sourceDir, "incomplete", "1")));
+		assertTrue(engine2.files.containsKey(addPathElements(sourceDir, "asd.txt")));
+		assertEquals(oldFilesRemain, engine2.dirs.containsKey(addPathElements(sourceDir, "complete", "blah")));
 
 		// Test source dir
 		assertDirContents(sourceDir, "asd.txt", "incomplete", "other", oldFilesRemain ? "complete" : null);
@@ -357,19 +396,19 @@ public class EngineTest extends TestHelper {
 		final String octavarium= addPathElements(sourceDir, "Dream Theater", "2005 - Octavarium");
 		mtpr.addMockResult(addPathElements(octavarium, "05 - Panic Attack"), makeTrackProperties("Dream Theater", 2005, "Octavarium", "5", "Panic Attack"));
 		mtpr.addMockResult(addPathElements(octavarium, "08. Octavarium"), makeTrackProperties("Dream Theater", 2005, "Octavarium", "8", "Octavarium"));
-		engine.add(false, sourceDir);
-		engine.files.get(addPathElements(octavarium, "del_me.txt")).setMarkedForDeletion(true);
-		assertEquals(4, engine.files.size());
+		engine2.add(false, sourceDir);
+		engine2.files.get(addPathElements(octavarium, "del_me.txt")).setMarkedForDeletion(true);
+		assertEquals(4, engine2.files.size());
 
-		engine.doYaVoodoo(sourceDir, new MockVoodooProgressMonitor(), null);
+		engine2.doYaVoodoo(sourceDir, new MockVoodooProgressMonitor(), null);
 
 		assertDirContents(sourceDir, "Dream Theater");
 		assertDirContents(addPathElements(sourceDir, "Dream Theater"), "2005 - Octavarium");
 		assertDirContents(octavarium, "05 - Panic Attack.mp3", "08 - Octavarium.mp3", "00-dream_theater-octavarium-2005.nfo");
 		assertEquals("5 monkeys", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(octavarium, "05 - Panic Attack.mp3"))), "ASCII")).readLine());
 		assertEquals("8 octo", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(octavarium, "08 - Octavarium.mp3"))), "ASCII")).readLine());
-		assertEquals(0, engine.files.size());
-		assertEquals(0, engine.dirs.size());
+		assertEquals(0, engine2.files.size());
+		assertEquals(0, engine2.dirs.size());
 	}
 
 	// =============================================================================================== //
@@ -377,9 +416,9 @@ public class EngineTest extends TestHelper {
 	// =============================================================================================== //
 
 	private void addFakeDirsToEngine() {
-		engine.addFakeDir("A", "a1.mp3", "a2.mp3", "a3.mp3");
-		engine.addFakeDir("B", "b1.mp3", "b2.mp3", "b3.mp3");
-		engine.addFakeDir("C", "c1.mp3", "c2.mp3", "c3.mp3");
+		engine2.addFakeDir("A", "a1.mp3", "a2.mp3", "a3.mp3");
+		engine2.addFakeDir("B", "b1.mp3", "b2.mp3", "b3.mp3");
+		engine2.addFakeDir("C", "c1.mp3", "c2.mp3", "c3.mp3");
 	}
 
 	private void assertDirContents(String dir, String... expectedFiles) {
@@ -402,7 +441,7 @@ public class EngineTest extends TestHelper {
 	}
 
 	private void assertEngineTrackProperties(String filename, TrackProperties expected1, TrackProperties expected2) {
-		filename= ensureCorrectDirSeperators(filename) + ".mp3"; //$NON-NLS-1$
+		filename= ensureCorrectDirSeperators(Helpers.removeFilenameExtension(filename)) + ".mp3"; //$NON-NLS-1$
 		FileData fd= engine.files.get(filename);
 		if (fd == null) {
 			System.err.println("assertEngineTrackProperties failed: key not found: " + filename);

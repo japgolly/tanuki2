@@ -95,6 +95,24 @@ class Engine2 extends Engine {
 
 /**
  * @author Golly
+ * @since 13/03/2007
+ */
+class Engine3 extends Engine {
+	public Engine3() {
+		autoTitleCase= false;
+	}
+
+	public void addDirNeedingTrackProprties(DirData dd) {
+		dirsNeedingTrackProprties.add(dd);
+	}
+
+	public void readAndAssignTrackProprties2() {
+		readAndAssignTrackProprties();
+	}
+}
+
+/**
+ * @author Golly
  * @since 24/02/2007
  */
 class MockTrackProprtyReader extends TestHelper implements ITrackProprtyReader {

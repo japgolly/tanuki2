@@ -72,7 +72,7 @@ public class FilenameParserTest extends TestHelper {
 		subtestParse(fp, "/var/music/Dream Theater [2003] Train Of Thought - 01 - As I Am.flac", "Dream Theater", 2003, "Train Of Thought", "01", "As I Am");
 		subtestParse(fp, "/var/music/Dream Theater (2003) Train Of Thought - 01. As I Am.flac", "Dream Theater", 2003, "Train Of Thought", "01", "As I Am");
 	}
-	
+
 	@Test
 	public void testParsingMulti_commonSuffixInFilesAndDir() {
 		// Test that readMultipleTrackProperties removes common suffix from filenames AND DIR
@@ -268,6 +268,38 @@ public class FilenameParserTest extends TestHelper {
 		assertTrackPropertiesFound(fn1, makeTrackProperties("Into Eternity", null, "Selftitled", "01", "Torn"), r.get(fn1));
 		assertTrackPropertiesFound(fn2, makeTrackProperties("Into Eternity", null, "Selftitled", "02", "Sorrow"), r.get(fn2));
 		assertTrackPropertiesFound(fn3, makeTrackProperties("Into Eternity", null, "Selftitled", "03", "Left Behind"), r.get(fn3));
+	}
+
+	@Test
+	public void testMisc3() {
+		DirData dd= new DirData("X:\\music\\1. Fresh\\Hawaii - The Natives Are Restless (1985) 320 Kbps");
+		final String fn1= "Hawaii - 01 - Call Of The Wild - The Natives Are Restless.mp3";
+		final String fn2= "Hawaii - 02 - Turn It Louder - The Natives Are Restless.mp3";
+		final String fn3= "Hawaii - 03 - V.P.H.B. - The Natives Are Restless.mp3";
+		final String fn4= "Hawaii - 04 - Beg For Mercy - The Natives Are Restless.mp3";
+		final String fn5= "Hawaii - 05 - Unfinished Business - The Natives Are Restless.mp3";
+		final String fn6= "Hawaii - 06 - Proud To Be Loud - The Natives Are Restless.mp3";
+		final String fn7= "Hawaii - 07 - Lies - The Natives Are Restless.mp3";
+		final String fn8= "Hawaii - 08 - Omichan No Uta - The Natives Are Restless.mp3";
+		final String fn9= "Hawaii - 09 - Dynamite - The Natives Are Restless.mp3";
+		final String[] fnAll= new String[] {fn1, fn2, fn3, fn4, fn5, fn6, fn7, fn8, fn9};
+		for (String f : fnAll)
+			dd.files.put(f, makeFileData(dd, true));
+		dd.files.put("Hawaii - 00 - The Natives Are Restless.nfo", makeFileData(dd, false));
+		dd.files.put("Hawaii - The Natives Are Restless.jpg", makeFileData(dd, false));
+		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		assertEquals(9, r.size());
+		for (String f : fnAll)
+			assertTrue(r.containsKey(f));
+		assertTrackPropertiesFound(fn1, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "01", "Call Of The Wild"), r.get(fn1));
+		assertTrackPropertiesFound(fn2, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "02", "Turn It Louder"), r.get(fn2));
+		assertTrackPropertiesFound(fn3, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "03", "V.P.H.B."), r.get(fn3));
+		assertTrackPropertiesFound(fn4, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "04", "Beg For Mercy"), r.get(fn4));
+		assertTrackPropertiesFound(fn5, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "05", "Unfinished Business"), r.get(fn5));
+		assertTrackPropertiesFound(fn6, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "06", "Proud To Be Loud"), r.get(fn6));
+		assertTrackPropertiesFound(fn7, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "07", "Lies"), r.get(fn7));
+		assertTrackPropertiesFound(fn8, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "08", "Omichan No Uta"), r.get(fn8));
+		assertTrackPropertiesFound(fn9, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "09", "Dynamite"), r.get(fn9));
 	}
 
 	// =============================================================================================== //
