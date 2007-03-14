@@ -42,8 +42,7 @@ public class TrackProperties extends HashMap<TrackPropertyType, String> {
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof TrackProperties))
 			return false;
-		TrackProperties o2= (TrackProperties) obj;
-		return toString().equals(o2.toString());
+		return super.equals(obj);
 	}
 
 	public AlbumData toAlbumData() {
