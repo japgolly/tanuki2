@@ -1,17 +1,24 @@
 package golly.tanuki2.data;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.List;
 
 /**
  * This is a collection of objects and their respective rank values.
+ * <p>
+ * The collection will constantly be sorted by rank (highest to lowest) however if you change the rank of a
+ * <code>RankedObject</code> directly using its {@link RankedObject#increaseRank(double)} method instead of using this
+ * class's {@link #increaseRank(Object, double)} method, then you will need to call {@link #sort()} to resort the
+ * collection.
+ * <p>
  * 
  * @author Golly
  * @since 24/02/2007
  */
 public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
-	private final SortedSet<RankedObject<T>> set= new TreeSet<RankedObject<T>>();
+	private final List<RankedObject<T>> collection= new ArrayList<RankedObject<T>>();
 
 	/**
 	 * Adds a new object to the collection. It is your responsibility to check whether or not the object already exists
@@ -19,29 +26,33 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 	 */
 	public RankedObject<T> add(T data, double rank) {
 		RankedObject<T> r= new RankedObject<T>(data, rank);
-		set.add(r);
+		collection.add(r);
+		sort();
 		return r;
 	}
 
 	public void clear() {
-		set.clear();
+		collection.clear();
 	}
 
 	public boolean contains(RankedObject<T> o) {
-		return set.contains(o);
+		return collection.contains(o);
 	}
 
 	public boolean contains(T o) {
-		for (RankedObject<T> i : this)
-			if (i.data.equals(o))
-				return true;
-		return false;
+		return get(o) != null;
 	}
 
 	public RankedObject<T> get(T o) {
-		for (RankedObject<T> i : this)
-			if (i.data.equals(o))
-				return i;
+		if (o == null) {
+			for (RankedObject<T> i : this)
+				if (i.data == null)
+					return i;
+		} else {
+			for (RankedObject<T> i : this)
+				if (o.equals(i.data))
+					return i;
+		}
 		return null;
 	}
 
@@ -55,23 +66,23 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 	 * <code>null</code> will be returned.
 	 */
 	public T getWinner() {
-		return set.isEmpty() ? null : set.iterator().next().data;
+		return collection.isEmpty() ? null : iterator().next().data;
 	}
 
 	/**
 	 * Determines the highest rank and returns the number of objects that have that rank.
 	 */
 	public int getWinnerCount() {
-		if (set.isEmpty())
+		if (collection.isEmpty())
 			return 0;
 
-		if (set.size() == 1)
+		if (collection.size() == 1)
 			return 1;
 
 		boolean first= true;
 		double highest= 0;
 		int count= 1;
-		for (RankedObject<T> ro : set)
+		for (RankedObject<T> ro : collection)
 			if (first) {
 				first= false;
 				highest= ro.getRank();
@@ -83,8 +94,20 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 		return count;
 	}
 
+	@SuppressWarnings("unchecked")
+	public RankedObject<T>[] getWinners() {
+		int i= getWinnerCount();
+		RankedObject<T>[] winners= new RankedObject[i];
+		for (RankedObject<T> ro : collection) {
+			winners[--i]= ro;
+			if (i == 0)
+				break;
+		}
+		return winners;
+	}
+
 	public Double getWinningRank() {
-		return set.isEmpty() ? null : set.iterator().next().getRank();
+		return collection.isEmpty() ? null : iterator().next().getRank();
 	}
 
 	/**
@@ -96,39 +119,48 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 
 	/**
 	 * Increases the rank of an object in the collection by a given amount. If the collection doesn't already contain
-	 * the opbject, then it is added and given the specified rank.
+	 * the object, then it is added and given the specified rank.
 	 */
 	public RankedObject<T> increaseRank(final T data, double incRank) {
-		for (RankedObject<T> i : this)
-			if (i.data.equals(data)) {
-				i.increaseRank(incRank);
-				return i;
-			}
-		return add(data, incRank);
+		final RankedObject<T> ro= get(data);
+		if (ro == null)
+			return add(data, incRank);
+		else {
+			ro.increaseRank(incRank);
+			sort();
+			return ro;
+		}
 	}
 
 	public boolean isEmpty() {
-		return set.isEmpty();
+		return collection.isEmpty();
 	}
 
 	public Iterator<RankedObject<T>> iterator() {
-		return set.iterator();
+		return collection.iterator();
 	}
 
 	public boolean remove(T data) {
 		RankedObject<T> ro= get(data);
 		if (ro == null)
 			return false;
-		else
-			return set.remove(ro);
+		else {
+			collection.remove(ro);
+			sort();
+			return true;
+		}
 	}
 
 	public int size() {
-		return set.size();
+		return collection.size();
+	}
+
+	public void sort() {
+		Collections.sort(collection);
 	}
 
 	@Override
 	public String toString() {
-		return set.toString();
+		return collection.toString();
 	}
 }
