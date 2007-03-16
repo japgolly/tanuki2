@@ -8,6 +8,7 @@ import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
+import golly.tanuki2.support.Config;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.ui.YesNoToAllBox;
@@ -74,9 +75,8 @@ public class Engine implements ITextProcessor {
 	}
 
 	public Map<String, ProcessingCommands> createProcessingList(final String targetBaseDir) {
-		// TODO output formats shouldn't be hard-coded
-		final String targetDirFormat= "[:artist:]\\[:year:] - [:album:]"; //$NON-NLS-1$
-		final String targetAudioFileFormat= "[:tn:] - [:track:]"; //$NON-NLS-1$
+		final String targetDirFormat= Config.targetDirFormat;
+		final String targetAudioFileFormat= Config.targetAudioFileFormat;
 
 		final Map<String, ProcessingCommands> processingList= new HashMap<String, ProcessingCommands>();
 		for (final String srcDir : dirs.keySet()) {
