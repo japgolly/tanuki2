@@ -319,7 +319,7 @@ public class EngineTest extends TestHelper {
 		String sourceDir= prepareVoodooTestSourceDir("sample_data");
 		String targetDir= prepareVoodooTestTargetDir();
 		if (overwriteAll != null) {
-			createFile(addPathElements(targetDir, "Children Of Bodom", "2005 - Are You Dead Yet_", "01 - Living Dead Beat.mp3"), "overwrite1");
+			createFile(addPathElements(targetDir, "Children Of Bodom", "2005 - Are You Dead Yet_", "01. Living Dead Beat.mp3"), "overwrite1");
 			createFile(addPathElements(targetDir, "Children Of Bodom", "2005 - Are You Dead Yet_", "autotag.txt"), "o2!");
 		}
 		mtpr.addMockResult(addPathElements(sourceDir, "complete", "blah", "01"), makeTrackProperties("Children Of Bodom", 2005, "Are You Dead Yet?", "1", "Living Dead Beat"));
@@ -352,15 +352,15 @@ public class EngineTest extends TestHelper {
 		String tdir= addPathElements(targetDir, "Children Of Bodom");
 		assertDirContents(tdir, "2003 - Hate Crew Deathroll", "2005 - Are You Dead Yet_");
 		// Children Of Bodom/2003 - Hate Crew Deathroll
-		assertDirContents(addPathElements(tdir, "2003 - Hate Crew Deathroll"), "01 - Angels Don't Kill.mp3");
+		assertDirContents(addPathElements(tdir, "2003 - Hate Crew Deathroll"), "01. Angels Don't Kill.mp3");
 		// Children Of Bodom/2005 - Are You Dead Yet_
 		tdir= addPathElements(tdir, "2005 - Are You Dead Yet_");
-		assertDirContents(tdir, "01 - Living Dead Beat.mp3", "02 - Are You Dead Yet_.mp3", "14 - Needled 24_7.mp3", "autotag.txt", "cover.jpg");
-		assertEquals(oldFilesRemain ? 10L : 1187L, new File(addPathElements(tdir, "01 - Living Dead Beat.mp3")).length());
-		assertEquals(2L, new File(addPathElements(tdir, "02 - Are You Dead Yet_.mp3")).length());
-		assertEquals(6L, new File(addPathElements(tdir, "14 - Needled 24_7.mp3")).length());
+		assertDirContents(tdir, "01. Living Dead Beat.mp3", "02. Are You Dead Yet_.mp3", "14. Needled 24_7.mp3", "autotag.txt", "cover.jpg");
+		assertEquals(oldFilesRemain ? 10L : 1187L, new File(addPathElements(tdir, "01. Living Dead Beat.mp3")).length());
+		assertEquals(2L, new File(addPathElements(tdir, "02. Are You Dead Yet_.mp3")).length());
+		assertEquals(6L, new File(addPathElements(tdir, "14. Needled 24_7.mp3")).length());
 		assertEquals(oldFilesRemain ? 3L : 81L, new File(addPathElements(tdir, "autotag.txt")).length());
-		assertEquals("14ness", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(tdir, "14 - Needled 24_7.mp3"))), "ASCII")).readLine());
+		assertEquals("14ness", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(tdir, "14. Needled 24_7.mp3"))), "ASCII")).readLine());
 		assertEquals(oldFilesRemain ? "o2!" : "ARTIST:  AC-DC", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(tdir, "autotag.txt"))), "UTF-8")).readLine());
 
 		// Test engine.dirs + engine.files
@@ -404,9 +404,9 @@ public class EngineTest extends TestHelper {
 
 		assertDirContents(sourceDir, "Dream Theater");
 		assertDirContents(addPathElements(sourceDir, "Dream Theater"), "2005 - Octavarium");
-		assertDirContents(octavarium, "05 - Panic Attack.mp3", "08 - Octavarium.mp3", "00-dream_theater-octavarium-2005.nfo");
-		assertEquals("5 monkeys", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(octavarium, "05 - Panic Attack.mp3"))), "ASCII")).readLine());
-		assertEquals("8 octo", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(octavarium, "08 - Octavarium.mp3"))), "ASCII")).readLine());
+		assertDirContents(octavarium, "05. Panic Attack.mp3", "08. Octavarium.mp3", "00-dream_theater-octavarium-2005.nfo");
+		assertEquals("5 monkeys", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(octavarium, "05. Panic Attack.mp3"))), "ASCII")).readLine());
+		assertEquals("8 octo", new BufferedReader(new InputStreamReader(new FileInputStream(new File(addPathElements(octavarium, "08. Octavarium.mp3"))), "ASCII")).readLine());
 		assertEquals(0, engine2.files.size());
 		assertEquals(0, engine2.dirs.size());
 	}
