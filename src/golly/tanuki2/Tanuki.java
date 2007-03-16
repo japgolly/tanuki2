@@ -17,9 +17,9 @@ import org.eclipse.swt.widgets.Display;
  * @author Golly
  * @since 16/02/2007
  */
-public class Startup {
+public class Tanuki {
 	public static void main(String[] args) {
-		new Startup().run();
+		new Tanuki().run();
 	}
 
 	public void run() {
@@ -34,8 +34,6 @@ public class Startup {
 			display= new Display();
 			TanukiImage.setDisplay(display);
 			engine= new Engine();
-			engine.add("X:\\music\\1. Fresh\\IN FLAMES Discografia (www.heavytorrents.org)");// DELME
-			Engine.PRETEND_MODE= true;
 			new AppWindow(display, engine).show();
 
 		} catch (Throwable t) {
