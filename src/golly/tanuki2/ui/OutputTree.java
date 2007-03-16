@@ -4,11 +4,9 @@ import golly.tanuki2.core.Engine;
 import golly.tanuki2.core.Engine.ProcessingCommands;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
-import golly.tanuki2.support.UIHelpers.TwoColours;
 import golly.tanuki2.ui.OutputTree.TreeItemInfo.Type;
 
 import java.util.HashMap;
@@ -28,6 +26,8 @@ public class OutputTree extends AbstractTreeBasedFileView {
 	private final Map<String, TreeItemInfo> content= new HashMap<String, TreeItemInfo>();
 	private final Engine engine;
 	private Map<String, ProcessingCommands> processingList= null;
+	private final Set<String> addedFiles= new HashSet<String>();
+	private final Set<String> incompleteDirs= new HashSet<String>();
 
 	public OutputTree(Composite parent, SharedUIResources sharedUIResources, Engine engine) {
 		super(parent, sharedUIResources, SWT.FULL_SELECTION | SWT.MULTI);
@@ -40,7 +40,7 @@ public class OutputTree extends AbstractTreeBasedFileView {
 
 	public static final class TreeItemInfo {
 		public static enum Type {
-			DELETION, MOVED
+			DELETION, INCOMPLETE, MOVED
 		};
 
 		public final FileData fd;
@@ -91,6 +91,7 @@ public class OutputTree extends AbstractTreeBasedFileView {
 							}
 						final FileData fd= srcDirFiles.get(sourceFilename);
 						createFileTreeItem(parent, targetFilename, new TreeItemInfo(Type.MOVED, fd, sourceFilename));
+						addedFiles.add(Helpers.addPathElements(info.pc.sourceDirectory, sourceFilename));
 					}
 				}
 			}
@@ -103,9 +104,18 @@ public class OutputTree extends AbstractTreeBasedFileView {
 					for (final String filename : Helpers.sort(deletions)) {
 						final FileData fd= srcDirFiles.get(filename);
 						createFileTreeItem(parent, filename, new TreeItemInfo(Type.DELETION, fd, filename));
+						addedFiles.add(Helpers.addPathElements(info.pc.sourceDirectory, filename));
 					}
 				}
 			}
+
+			// Incomplete
+			else if (info.type == Type.INCOMPLETE) {
+				final Map<String, FileData> files= engine.dirs.get(info.pc.sourceDirectory).files;
+				for (final String filename : Helpers.sort(files.keySet()))
+					createFileTreeItem(parent, filename, new TreeItemInfo(Type.INCOMPLETE, files.get(filename), filename));
+			}
+
 		}
 	}
 
@@ -186,8 +196,10 @@ public class OutputTree extends AbstractTreeBasedFileView {
 		// TODO OutputTree doesn't yet handle incomplete content
 		processingList= engine.createProcessingList(null);
 		content.clear();
+		addedFiles.clear();
+		incompleteDirs.clear();
 
-		// Create a virtual representation of the tree
+		// Add all content that will be processed
 		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree= new HashMap<String, OptimisibleDirTreeNode>();
 		final String rootTxtDeletion= I18n.l("outputTree_txt_rootDeletion"); //$NON-NLS-1$
 		final String rootTxtTargetDir= I18n.l("outputTree_txt_rootTargetDir"); //$NON-NLS-1$
@@ -206,26 +218,34 @@ public class OutputTree extends AbstractTreeBasedFileView {
 		for (String rootElement : unoptimisedDirTree.keySet())
 			Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree, rootElement, true);
 		final Map<String, Map> optimisedDirTree= Helpers.optimiseDirTree(unoptimisedDirTree);
-
-		// Populate the tree
 		tree.removeAll();
-		for (String dir : Helpers.sort(optimisedDirTree.keySet())) {
-			TreeItem ti= new TreeItem(tree, SWT.NONE);
-			ti.setData(getDataForDirTreeItem(dir));
-			ti.setText(dir);
-			ti.setImage(TanukiImage.FOLDER.get());
-			addDirToTree(ti, optimisedDirTree.get(dir), dir);
-		}
+		populateTree(optimisedDirTree);
+
+		// Add incomplete content
+		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree2= new HashMap<String, OptimisibleDirTreeNode>();
+		final String rootTxtIncomplete= I18n.l("outputTree_txt_rootIncomplete"); //$NON-NLS-1$
+		for (String filename : engine.files.keySet())
+			if (!addedFiles.contains(filename)) {
+				final String dir= engine.files.get(filename).getDirData().dir;
+				if (!incompleteDirs.contains(dir)) {
+					final String localPath= Helpers.addPathElements(rootTxtIncomplete, dir);
+					Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree2, localPath, true);
+					final ProcessingCommands pc= new ProcessingCommands();
+					pc.sourceDirectory= dir;
+					content.put(localPath, new TreeItemInfo(Type.INCOMPLETE, pc));
+				}
+			}
+		for (String rootElement : unoptimisedDirTree2.keySet())
+			Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree2, rootElement, true);
+		final Map<String, Map> optimisedDirTree2= Helpers.optimiseDirTree(unoptimisedDirTree2);
+		populateTree(optimisedDirTree2);
 
 		// Update style of root notes
 		for (TreeItem ti : tree.getItems())
-			if (rootTxtDeletion.equals(ti.getText())) {
-				final TwoColours tc= sharedUIResources.deletionColours;
-				if (tc != null) {
-					ti.setBackground(tc.background);
-					ti.setForeground(tc.foreground);
-				}
-			}
+			if (rootTxtDeletion.equals(ti.getText()))
+				setTreeItemColor(ti, sharedUIResources.deletionColours);
+			else if (rootTxtIncomplete.equals(ti.getText()))
+				setTreeItemColor(ti, sharedUIResources.itemIncompleteColours);
 
 		// TODO Should I bother recording and restoring collapsed items?
 		setExpandedAll(true);

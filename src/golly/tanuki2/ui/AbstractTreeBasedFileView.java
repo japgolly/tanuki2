@@ -104,6 +104,17 @@ public abstract class AbstractTreeBasedFileView extends AbstractFileView {
 		return getSelectedFileData() != null;
 	}
 
+	@SuppressWarnings("unchecked")
+	protected void populateTree(final Map<String, Map> optimisedDirTree) {
+		for (String dir : Helpers.sort(optimisedDirTree.keySet())) {
+			TreeItem ti= new TreeItem(tree, SWT.NONE);
+			ti.setData(getDataForDirTreeItem(dir));
+			ti.setText(dir);
+			ti.setImage(TanukiImage.FOLDER.get());
+			addDirToTree(ti, optimisedDirTree.get(dir), dir);
+		}
+	}
+
 	protected void selectAll() {
 		tree.selectAll();
 	}
@@ -121,7 +132,10 @@ public abstract class AbstractTreeBasedFileView extends AbstractFileView {
 	}
 
 	protected void setFileItemColor(final TreeItem ti, final FileData fd) {
-		final TwoColours c= sharedUIResources.appUIShared.getFileItemColours(fd, false);
+		setTreeItemColor(ti, sharedUIResources.appUIShared.getFileItemColours(fd, false));
+	}
+
+	protected void setTreeItemColor(final TreeItem ti, final TwoColours c) {
 		if (c != null) {
 			ti.setBackground(c.background);
 			ti.setForeground(c.foreground);

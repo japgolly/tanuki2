@@ -4,7 +4,6 @@ import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
@@ -181,14 +180,7 @@ public class InputTree extends AbstractTreeBasedFileView {
 
 		// Populate the tree
 		tree.removeAll();
-		for (String dir : Helpers.sort(optimisedDirTree.keySet())) {
-			TreeItem ti= new TreeItem(tree, SWT.NONE);
-			ti.setChecked(true);
-			ti.setData(getDataForDirTreeItem(dir));
-			ti.setText(dir);
-			ti.setImage(TanukiImage.FOLDER.get());
-			addDirToTree(ti, optimisedDirTree.get(dir), dir);
-		}
+		populateTree(optimisedDirTree);
 
 		// Expand items and re-select previously selected
 		List<TreeItem> newSelectedTreeItems= new ArrayList<TreeItem>();
