@@ -193,7 +193,6 @@ public class OutputTree extends AbstractTreeBasedFileView {
 
 	@SuppressWarnings("unchecked")
 	public void refreshFiles(Map<String, DirData> dirs) {
-		// TODO OutputTree doesn't yet handle incomplete content
 		processingList= engine.createProcessingList(null);
 		content.clear();
 		addedFiles.clear();
