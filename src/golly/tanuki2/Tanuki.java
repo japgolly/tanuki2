@@ -18,6 +18,8 @@ import org.eclipse.swt.widgets.Display;
  * @since 16/02/2007
  */
 public class Tanuki {
+	public static final String VERSION= "2 Alpha"; //$NON-NLS-1$
+
 	public static void main(String[] args) {
 		new Tanuki().run();
 	}

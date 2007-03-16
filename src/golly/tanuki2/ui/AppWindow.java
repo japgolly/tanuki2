@@ -42,6 +42,8 @@ import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
@@ -104,7 +106,36 @@ public class AppWindow {
 			}
 		});
 
-		// TODO: Add a menu with at least exit, preferences, about
+		// Create window menu
+		Menu bar= new Menu(shell, SWT.BAR);
+		shell.setMenuBar(bar);
+		// File
+		MenuItem fileMenuItem= new MenuItem(bar, SWT.CASCADE);
+		fileMenuItem.setText(I18n.l("main_menu_file")); //$NON-NLS-1$
+		Menu fileMenu= new Menu(shell, SWT.DROP_DOWN);
+		fileMenuItem.setMenu(fileMenu);
+		// TODO Add preferences page
+		// File | Exit
+		MenuItem miFileExit= new MenuItem(fileMenu, SWT.PUSH);
+		miFileExit.setText(I18n.l("main_menu_fileExit")); //$NON-NLS-1$
+		miFileExit.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				shell.close();
+			}
+		});
+		// Help
+		MenuItem helpMenuItem= new MenuItem(bar, SWT.CASCADE);
+		helpMenuItem.setText(I18n.l("main_menu_help")); //$NON-NLS-1$
+		Menu helpMenu= new Menu(shell, SWT.DROP_DOWN);
+		helpMenuItem.setMenu(helpMenu);
+		// Help | About
+		MenuItem miHelpAbout= new MenuItem(helpMenu, SWT.PUSH);
+		miHelpAbout.setText(I18n.l("main_menu_helpAbout")); //$NON-NLS-1$
+		miHelpAbout.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				new AboutDialog(shell).show();
+			}
+		});
 
 		// Create tab folder
 		tabFolder= new TabFolder(shell, SWT.NONE);
