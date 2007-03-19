@@ -214,7 +214,7 @@ public final class Helpers {
 	 */
 	@SuppressWarnings("nls")
 	public static String inspect(final Object obj, boolean includeObjectId) {
-		return inspect(obj, includeObjectId, obj.getClass().getDeclaredFields());
+		return inspect(obj, includeObjectId, obj == null ? null : obj.getClass().getDeclaredFields());
 	}
 
 	/**
@@ -281,7 +281,7 @@ public final class Helpers {
 	 * @see #inspect(Object, boolean, Field...)
 	 */
 	public static String inspect(final Object obj, boolean includeObjectId, String... fieldNames) {
-		return inspect(obj, includeObjectId, getFields(obj, fieldNames));
+		return inspect(obj, includeObjectId, obj == null ? null : getFields(obj, fieldNames));
 	}
 
 	/**
@@ -291,6 +291,9 @@ public final class Helpers {
 	 * @see #inspect(Object, boolean, Field...)
 	 */
 	public static String inspectExcept(final Object obj, boolean includeObjectId, String... fieldNames) {
+		if (obj == null)
+			return inspect(null, includeObjectId);
+		
 		Set<Field> fields= new HashSet<Field>();
 		for (Field f : obj.getClass().getDeclaredFields())
 			if (!contains(fieldNames, f.getName()))
