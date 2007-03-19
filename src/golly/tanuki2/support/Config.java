@@ -20,7 +20,7 @@ public class Config {
 	public static String targetDir= "";
 	public static String lastAddedDir= null;
 	public static boolean autoTitleCase= true;
-	public static String targetDirFormat= "[:artist:]\\[:year:] - [:album:]";
+	public static String targetDirFormat= Helpers.ensureCorrectDirSeperators("[:artist:]/[:year:] - [:album:]");
 	public static String targetAudioFileFormat= "[:tn:]. [:track:]";
 
 
