@@ -6,6 +6,7 @@ import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.UIResourceManager;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
 import golly.tanuki2.ui.OutputTree.TreeItemInfo.Type;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -240,11 +242,16 @@ public class OutputTree extends AbstractTreeBasedFileView {
 		populateTree(optimisedDirTree2);
 
 		// Update style of root notes
-		for (TreeItem ti : tree.getItems())
+		Font rootItemFont= null;
+		for (TreeItem ti : tree.getItems()) {
+			if (rootItemFont == null)
+				rootItemFont= UIResourceManager.getFont("outputTree_font_italic", ti.getFont(), SWT.ITALIC); //$NON-NLS-1$
+			ti.setFont(rootItemFont);
 			if (rootTxtDeletion.equals(ti.getText()))
 				setTreeItemColor(ti, sharedUIResources.deletionColours);
 			else if (rootTxtIncomplete.equals(ti.getText()))
 				setTreeItemColor(ti, sharedUIResources.itemIncompleteColours);
+		}
 
 		// TODO Should I bother recording and restoring collapsed items?
 		setExpandedAll(true);
