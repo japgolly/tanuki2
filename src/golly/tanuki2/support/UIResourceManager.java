@@ -3,6 +3,7 @@ package golly.tanuki2.support;
 import java.util.HashMap;
 
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Resource;
 import org.eclipse.swt.widgets.Display;
 
@@ -30,6 +31,15 @@ public final class UIResourceManager {
 
 	public static Color getColorGrey(String id, int i) {
 		return getColor(id, i, i, i);
+	}
+
+	public static Font getFont(String id, Font baseFont, int style) {
+		Font f= (Font) get(id);
+		if (f == null) {
+			f= UIHelpers.createFont(baseFont, style);
+			add(id, f);
+		}
+		return f;
 	}
 
 	public static synchronized void disposeAll() {
