@@ -114,7 +114,17 @@ public class AppWindow {
 		fileMenuItem.setText(I18n.l("main_menu_file")); //$NON-NLS-1$
 		Menu fileMenu= new Menu(shell, SWT.DROP_DOWN);
 		fileMenuItem.setMenu(fileMenu);
-		// TODO Add preferences page
+		// File | Config
+		MenuItem miFileConfig= new MenuItem(fileMenu, SWT.PUSH);
+		miFileConfig.setText(I18n.l("main_menu_fileConfig")); //$NON-NLS-1$
+		miFileConfig.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				if (new ConfigDialog(shell).show()) {
+					fileViewsUptodate.remove(outputTree);
+					appUIShared.refreshFiles(false);
+				}
+			}
+		});
 		// File | Exit
 		MenuItem miFileExit= new MenuItem(fileMenu, SWT.PUSH);
 		miFileExit.setText(I18n.l("main_menu_fileExit")); //$NON-NLS-1$
