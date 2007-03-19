@@ -23,7 +23,6 @@ public class Config {
 	public static String targetDirFormat= Helpers.ensureCorrectDirSeperators("[:artist:]/[:year:] - [:album:]");
 	public static String targetAudioFileFormat= "[:tn:]. [:track:]";
 
-
 	// =============================================================================================== //
 	private static final String FILENAME= "settings.xml";
 	private static final String SETTINGS_DESC= "Tanuki2 Settings";
