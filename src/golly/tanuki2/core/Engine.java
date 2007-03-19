@@ -74,9 +74,11 @@ public class Engine implements ITextProcessor {
 		removeEmptyDirs();
 	}
 
-	public Map<String, ProcessingCommands> createProcessingList(final String targetBaseDir) {
-		final String targetDirFormat= Config.targetDirFormat;
-		final String targetAudioFileFormat= Config.targetAudioFileFormat;
+	public Map<String, ProcessingCommands> createProcessingList(String targetBaseDir) {
+		if (targetBaseDir != null)
+			targetBaseDir= Helpers.ensureCorrectDirSeperators(targetBaseDir);
+		final String targetDirFormat= Helpers.ensureCorrectDirSeperators(Config.targetDirFormat);
+		final String targetAudioFileFormat= Helpers.ensureCorrectDirSeperators(Config.targetAudioFileFormat);
 
 		final Map<String, ProcessingCommands> processingList= new HashMap<String, ProcessingCommands>();
 		for (final String srcDir : dirs.keySet()) {
