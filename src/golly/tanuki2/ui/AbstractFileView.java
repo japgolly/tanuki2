@@ -4,9 +4,9 @@ import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.OSSpecific;
 import golly.tanuki2.support.TanukiException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -239,9 +239,8 @@ abstract class AbstractFileView implements IFileView {
 		if (isSingleSelection()) {
 			final String dir= getSelectedDir();
 			if (dir != null)
-				// TODO win32
 				try {
-					Runtime.getRuntime().exec("explorer.exe .", null, new File(dir)); //$NON-NLS-1$
+					OSSpecific.openFolder(dir);
 				} catch (IOException e) {
 					new TanukiException(e).showErrorDialog();
 				}
@@ -252,9 +251,8 @@ abstract class AbstractFileView implements IFileView {
 		if (isSingleSelection()) {
 			final String dir= getSelectedDir();
 			if (dir != null)
-				// TODO win32
 				try {
-					Runtime.getRuntime().exec("cmd.exe /C start cmd.exe", null, new File(dir)); //$NON-NLS-1$
+					OSSpecific.openPrompt(dir);
 				} catch (IOException e) {
 					new TanukiException(e).showErrorDialog();
 				}

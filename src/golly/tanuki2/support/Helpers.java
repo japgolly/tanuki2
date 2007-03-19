@@ -33,7 +33,6 @@ public final class Helpers {
 	private static final String KATAKANA_HALF= "ｱｲｳｴｵｧｨｩｪｫｶｷｸｹｺｻｼｽｾｿﾀﾁﾂｯﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖｬｭｮﾗﾘﾙﾚﾛﾜｦﾝｰﾞﾟ";
 	private static final String KATAKANA_TENTEN= "カキクケコサシスセソタチツテトハヒフヘホ";
 	private static final Pattern pGetFileExtention= Pattern.compile("^(?:.+[\\\\/])*[^\\\\/]+\\.([^\\\\/.]*)$");
-	private static final Pattern pMakeFilenameSafe_naughtyChars= Pattern.compile("[\\\\/:*?<>|]");
 	private static final Pattern pPathSeperator= Pattern.compile("[\\/\\\\]"); //$NON-NLS-1$
 	private static final Pattern pRemoveFileExt= Pattern.compile("\\.[^.]*$");
 	private static final Pattern pRomanNumeral= Pattern.compile("^(?:M{0,3})(?:D?C{0,3}|C[DM])(?:L?X{0,3}|X[LC])(?:V?I{0,3}|I[VX])$", Pattern.CASE_INSENSITIVE);
@@ -319,15 +318,6 @@ public final class Helpers {
 			sb.append(a);
 		}
 		return sb.toString();
-	}
-
-	/**
-	 * Replaces all file-system-unsafe characters with safe alternatives.
-	 */
-	public static String makeFilenameSafe(String filename) {
-		// TODO makeFilenameSafe is win32 specific
-		filename= filename.replace("\"", "''");
-		return pMakeFilenameSafe_naughtyChars.matcher(filename).replaceAll("_");
 	}
 
 	public static String makeTitleCase(String text) {

@@ -11,6 +11,7 @@ import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Config;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.OSSpecific;
 import golly.tanuki2.ui.YesNoToAllBox;
 
 import java.io.File;
@@ -379,16 +380,16 @@ public class Engine implements ITextProcessor {
 	}
 
 	private String formatFilename(String fmt, AlbumData ad) {
-		fmt= fmt.replace("[:artist:]", Helpers.makeFilenameSafe(ad.getArtist())); //$NON-NLS-1$
+		fmt= fmt.replace("[:artist:]", OSSpecific.makeFilenameSafe(ad.getArtist())); //$NON-NLS-1$
 		fmt= fmt.replace("[:year:]", ad.getYear().toString()); //$NON-NLS-1$
-		fmt= fmt.replace("[:album:]", Helpers.makeFilenameSafe(ad.getAlbum())); //$NON-NLS-1$
+		fmt= fmt.replace("[:album:]", OSSpecific.makeFilenameSafe(ad.getAlbum())); //$NON-NLS-1$
 		return fmt;
 	}
 
 	private String formatFilename(String fmt, FileData fd) {
 		fmt= formatFilename(fmt, fd.getAlbumData());
 		fmt= fmt.replace("[:tn:]", String.format("%02d", fd.getTn())); //$NON-NLS-1$ //$NON-NLS-2$
-		fmt= fmt.replace("[:track:]", Helpers.makeFilenameSafe(fd.getTrack())); //$NON-NLS-1$
+		fmt= fmt.replace("[:track:]", OSSpecific.makeFilenameSafe(fd.getTrack())); //$NON-NLS-1$
 		return fmt;
 	}
 

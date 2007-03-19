@@ -3,8 +3,6 @@ package golly.tanuki2.support;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import org.eclipse.swt.program.Program;
-
 /**
  * @author Golly
  * @since 08/03/2007
@@ -26,8 +24,7 @@ public class WebBrowser {
 	 * Opens a page in the default web browser.
 	 */
 	public static void open(String url) {
-		// TODO win32
-		Program.launch(url);
+		OSSpecific.openBrowser(url);
 	}
 
 }

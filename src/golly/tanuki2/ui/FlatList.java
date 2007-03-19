@@ -7,6 +7,7 @@ import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.AutoResizeColumnsListener;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.OSSpecific;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
@@ -34,8 +35,6 @@ import org.eclipse.swt.widgets.TableItem;
  * @since 19/02/2007
  */
 public class FlatList extends AbstractFileView {
-	private static final String EOL= "\r\n"; //$NON-NLS-1$ // TODO win32
-
 	private final Table table;
 	private final int INDEX_FILENAME, INDEX_ARTIST, INDEX_YEAR, INDEX_ALBUM, INDEX_TN, INDEX_TRACK;
 	private final AutoResizeColumnsListener autoColumnResizer;
@@ -149,6 +148,7 @@ public class FlatList extends AbstractFileView {
 	}
 
 	protected void onCopyFilenames() {
+		final String EOL= OSSpecific.getEOL();
 		StringBuilder sb= new StringBuilder();
 		for (TableItem ti : table.getSelection()) {
 			sb.append(ti.getText());
