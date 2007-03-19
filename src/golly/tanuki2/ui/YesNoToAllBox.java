@@ -97,10 +97,7 @@ public class YesNoToAllBox {
 			defaultButton.setFocus();
 		}
 
-		while (!shell.isDisposed())
-			if (!display.readAndDispatch())
-				display.sleep();
-
+		UIHelpers.passControlToUiUntilShellClosed(shell);
 		return ret;
 	}
 

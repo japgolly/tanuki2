@@ -15,7 +15,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -89,12 +88,7 @@ public class ArtistEditor {
 
 	public boolean open() {
 		shell.open();
-
-		final Display display= Display.getCurrent();
-		while (!shell.isDisposed())
-			if (!display.readAndDispatch())
-				display.sleep();
-
+		UIHelpers.passControlToUiUntilShellClosed(shell);
 		return updated;
 	}
 

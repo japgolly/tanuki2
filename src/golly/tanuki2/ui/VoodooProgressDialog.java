@@ -106,9 +106,7 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 
 	public void open() {
 		shell.open();
-		while (!shell.isDisposed())
-			if (!display.readAndDispatch())
-				display.sleep();
+		UIHelpers.passControlToUiUntilShellClosed(shell);
 	}
 
 	public Shell getShell() {

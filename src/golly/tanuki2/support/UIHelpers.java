@@ -146,6 +146,13 @@ public class UIHelpers {
 		layout.justify= justify;
 		return layout;
 	}
+	
+	public static void passControlToUiUntilShellClosed(Shell shell) {
+		final Display display= shell.getDisplay();
+		while (!shell.isDisposed())
+			if (!display.readAndDispatch())
+				display.sleep();
+	}
 
 	public static void runWithShell(Shell shell, RunnableWithShell runnable) {
 		if (shell == null) {

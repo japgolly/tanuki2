@@ -229,10 +229,7 @@ public class AlbumEditor {
 		iwYear.setFocus();
 		iwArtist.setFocus();
 
-		Display display= Display.getCurrent();
-		while (!shell.isDisposed())
-			if (!display.readAndDispatch())
-				display.sleep();
+		UIHelpers.passControlToUiUntilShellClosed(shell);
 	}
 
 	// =============================================================================================== //

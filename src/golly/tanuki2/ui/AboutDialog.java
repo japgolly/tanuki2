@@ -9,7 +9,6 @@ import golly.tanuki2.support.WebBrowser;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -81,9 +80,6 @@ public class AboutDialog {
 
 	public void show() {
 		shell.open();
-		final Display display= Display.getCurrent();
-		while (!shell.isDisposed())
-			if (!display.readAndDispatch())
-				display.sleep();
+		UIHelpers.passControlToUiUntilShellClosed(shell);
 	}
 }
