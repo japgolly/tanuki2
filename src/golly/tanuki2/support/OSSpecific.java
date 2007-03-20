@@ -56,6 +56,10 @@ public final class OSSpecific {
 		}
 	}
 
+	public static void launch(String fullFilename) {
+		Program.launch(fullFilename);
+	}
+
 	/**
 	 * Replaces all file-system-unsafe characters with safe alternatives.
 	 */

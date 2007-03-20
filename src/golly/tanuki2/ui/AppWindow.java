@@ -8,6 +8,7 @@ import golly.tanuki2.support.AutoResizeColumnsListener;
 import golly.tanuki2.support.Config;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.OSSpecific;
 import golly.tanuki2.support.TanukiException;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
@@ -30,7 +31,6 @@ import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -444,8 +444,7 @@ public class AppWindow {
 		}
 
 		public void launch(String fullFilename) {
-			// TODO win32 only? test on other platforms
-			Program.launch(fullFilename);
+			OSSpecific.launch(fullFilename);
 		}
 
 		public void onDataUpdated(boolean isCurrentViewUptodate) {
