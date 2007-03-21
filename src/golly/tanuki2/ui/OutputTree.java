@@ -201,45 +201,52 @@ public class OutputTree extends AbstractTreeBasedFileView {
 		incompleteDirs.clear();
 
 		// Add all content that will be processed
-		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree= new HashMap<String, OptimisibleDirTreeNode>();
+		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTreeMoved= new HashMap<String, OptimisibleDirTreeNode>();
+		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTreeDeleted= new HashMap<String, OptimisibleDirTreeNode>();
 		final String rootTxtDeletion= I18n.l("outputTree_txt_rootDeletion"); //$NON-NLS-1$
 		final String rootTxtTargetDir= I18n.l("outputTree_txt_rootTargetDir"); //$NON-NLS-1$
+		final String rootTxtDeletion2= Helpers.addPathElements(rootTxtDeletion, ""); //$NON-NLS-1$
+		final String rootTxtTargetDir2= Helpers.addPathElements(rootTxtTargetDir, ""); //$NON-NLS-1$
 		for (final ProcessingCommands pc : processingList.values()) {
 			if (!pc.moves.isEmpty()) {
-				final String localPath= Helpers.addPathElements(rootTxtTargetDir, pc.targetDirectory);
-				Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree, localPath, true);
-				content.put(localPath, new TreeItemInfo(Type.MOVED, pc));
+				Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTreeMoved, pc.targetDirectory, true);
+				content.put(rootTxtTargetDir2 + pc.targetDirectory, new TreeItemInfo(Type.MOVED, pc));
 			}
 			if (!pc.deletions.isEmpty()) {
-				final String localPath= Helpers.addPathElements(rootTxtDeletion, pc.sourceDirectory);
-				Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree, localPath, true);
-				content.put(localPath, new TreeItemInfo(Type.DELETION, pc));
+				Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTreeDeleted, pc.sourceDirectory, true);
+				content.put(rootTxtDeletion2 + pc.sourceDirectory, new TreeItemInfo(Type.DELETION, pc));
 			}
 		}
-		for (String rootElement : unoptimisedDirTree.keySet())
-			Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree, rootElement, true);
-		final Map<String, Map> optimisedDirTree= Helpers.optimiseDirTree(unoptimisedDirTree);
+		final Map<String, Map> optimisedDirTreeMoved= Helpers.optimiseDirTree(unoptimisedDirTreeMoved);
+		final Map<String, Map> optimisedDirTreeDeleted= Helpers.optimiseDirTree(unoptimisedDirTreeDeleted);
+		Map<String, Map> optimisedDirTree= new HashMap<String, Map>();
+		if (!optimisedDirTreeMoved.isEmpty())
+			optimisedDirTree.put(rootTxtTargetDir, optimisedDirTreeMoved);
+		if (!optimisedDirTreeDeleted.isEmpty())
+			optimisedDirTree.put(rootTxtDeletion, optimisedDirTreeDeleted);
 		tree.removeAll();
 		populateTree(optimisedDirTree);
 
 		// Add incomplete content
-		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree2= new HashMap<String, OptimisibleDirTreeNode>();
+		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTreeIncomplete= new HashMap<String, OptimisibleDirTreeNode>();
 		final String rootTxtIncomplete= I18n.l("outputTree_txt_rootIncomplete"); //$NON-NLS-1$
+		final String rootTxtIncomplete2= Helpers.addPathElements(rootTxtIncomplete, ""); //$NON-NLS-1$
 		for (String filename : engine.files.keySet())
 			if (!addedFiles.contains(filename)) {
 				final String dir= engine.files.get(filename).getDirData().dir;
 				if (!incompleteDirs.contains(dir)) {
-					final String localPath= Helpers.addPathElements(rootTxtIncomplete, dir);
-					Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree2, localPath, true);
+					Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTreeIncomplete, dir, true);
 					final ProcessingCommands pc= new ProcessingCommands();
 					pc.sourceDirectory= dir;
-					content.put(localPath, new TreeItemInfo(Type.INCOMPLETE, pc));
+					content.put(rootTxtIncomplete2 + dir, new TreeItemInfo(Type.INCOMPLETE, pc));
 				}
 			}
-		for (String rootElement : unoptimisedDirTree2.keySet())
-			Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree2, rootElement, true);
-		final Map<String, Map> optimisedDirTree2= Helpers.optimiseDirTree(unoptimisedDirTree2);
-		populateTree(optimisedDirTree2);
+		final Map<String, Map> optimisedDirTreeIncomplete= Helpers.optimiseDirTree(unoptimisedDirTreeIncomplete);
+		if (!optimisedDirTreeIncomplete.isEmpty()) {
+			optimisedDirTree= new HashMap<String, Map>();
+			optimisedDirTree.put(rootTxtIncomplete, optimisedDirTreeIncomplete);
+			populateTree(optimisedDirTree);
+		}
 
 		// Update style of root notes
 		Font rootItemFont= null;
@@ -263,7 +270,7 @@ public class OutputTree extends AbstractTreeBasedFileView {
 
 	private void collectFullFilenames(TreeItem ti, Set<String> files) {
 		final TreeItemInfo info= (TreeItemInfo) ti.getData();
-		// Root elements + directories 
+		// Root elements + directories
 		if (info == null || info.fd == null)
 			for (TreeItem i : ti.getItems())
 				collectFullFilenames(i, files);
