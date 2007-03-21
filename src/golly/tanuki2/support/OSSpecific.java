@@ -49,13 +49,27 @@ public final class OSSpecific {
 		UIHelpers.showTanukiWarning(null, "general_err_OSFunctionFailed_attemptsFailed"); //$NON-NLS-1$		
 	}
 
-	private static boolean exec(String cmd) {
-		return exec(cmd, null);
-	}
-
-	private static boolean exec(String cmd, String dir) {
+	private static boolean exec(String cmd, String... args) {
 		if (cmd == null)
 			return false;
+		if (args.length > 0) {
+			int i= args.length;
+			String[] cmdarray= new String[i + 1];
+			while (i-- > 0)
+				cmdarray[i + 1]= args[i];
+			cmdarray[0]= cmd;
+			return execInDir(cmdarray, null);
+		} else
+			return execInDir(cmd, null);
+	}
+
+	private static boolean execInDir(String cmd, String dir) {
+		if (cmd == null)
+			return false;
+		return execInDir(new String[] {cmd}, dir);
+	}
+
+	private static boolean execInDir(String[] cmd, String dir) {
 		try {
 			Runtime.getRuntime().exec(cmd, null, dir == null ? null : new File(dir));
 			return true;
@@ -87,6 +101,7 @@ public final class OSSpecific {
 		return pMakeFilenameSafe_naughtyChars.matcher(filename).replaceAll("_"); //$NON-NLS-1$
 	}
 
+	@SuppressWarnings("nls")
 	public static void openBrowser(String url) {
 		switch (os) {
 		case WIN32:
@@ -94,27 +109,28 @@ public final class OSSpecific {
 				attemptsFailed();
 			break;
 		default:
-			Program p= Program.findProgram("html"); //$NON-NLS-1$
+			Program p= Program.findProgram("html");
 			if (p == null || !p.execute(url))
-				if (!exec("firefox " + url)) //$NON-NLS-1$
-					if (!exec("mozilla " + url)) //$NON-NLS-1$
-						if (!exec("netscape " + url)) //$NON-NLS-1$
+				if (!exec("firefox", url))
+					if (!exec("mozilla", url))
+						if (!exec("netscape", url))
 							attemptsFailed();
 		}
 	}
 
+	@SuppressWarnings("nls")
 	public static void openFolder(String dir) {
 		switch (os) {
 		case LINUX:
-			if (!exec("nautilus " + dir)) //$NON-NLS-1$
-				if (!exec("gnome-open " + dir)) //$NON-NLS-1$
-					if (!exec("kfm file:" + dir)) //$NON-NLS-1$
-						if (!exec("konqueror file:" + dir)) //$NON-NLS-1$
-							if (!exec("xfe " + dir)) //$NON-NLS-1$
+			if (!exec("nautilus", dir))
+				if (!exec("gnome-open", dir))
+					if (!exec("kfm", "file:" + dir))
+						if (!exec("konqueror", "file:" + dir))
+							if (!exec("xfe", dir))
 								attemptsFailed();
 			break;
 		case WIN32:
-			if (!exec("explorer.exe .", dir)) //$NON-NLS-1$
+			if (!execInDir("explorer.exe .", dir))
 				attemptsFailed();
 			break;
 		default:
@@ -122,17 +138,18 @@ public final class OSSpecific {
 		}
 	}
 
+	@SuppressWarnings("nls")
 	public static void openPrompt(String dir) {
 		switch (os) {
 		case LINUX:
-			if (!exec("kde-terminal", dir)) //$NON-NLS-1$
-				if (!exec("gnome-terminal", dir)) //$NON-NLS-1$
-					if (!exec("konsole", dir)) //$NON-NLS-1$
-						if (!exec("xterm", dir)) //$NON-NLS-1$
+			if (!execInDir("kde-terminal", dir))
+				if (!execInDir("gnome-terminal", dir))
+					if (!execInDir("konsole", dir))
+						if (!execInDir("xterm", dir))
 							attemptsFailed();
 			break;
 		case WIN32:
-			if (!exec("cmd.exe /C start cmd.exe", dir)) //$NON-NLS-1$
+			if (!execInDir("cmd.exe /C start cmd.exe", dir)) //$NON-NLS-1$
 				attemptsFailed();
 			break;
 		default:
