@@ -64,7 +64,12 @@ public final class Helpers {
 	public static OptimisibleDirTreeNode addDirToUnoptimisedDirTree(final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree, String dir, boolean hasFiles) {
 		Map<String, OptimisibleDirTreeNode> t= unoptimisedDirTree;
 		OptimisibleDirTreeNode latestNode= null;
+		boolean slashFirst= dir.length() > 0 && dir.charAt(0) == File.separatorChar;
 		for (String dirElement : splitDir(dir)) {
+			if (slashFirst) {
+				dirElement= File.separator;
+				slashFirst= false;
+			}
 			latestNode= t.get(dirElement);
 			if (latestNode == null) {
 				latestNode= new OptimisibleDirTreeNode();
@@ -83,7 +88,8 @@ public final class Helpers {
 			sb.append(path);
 		for (String e : elements) {
 			if (sb.length() != 0)
-				sb.append(File.separatorChar);
+				if (!(sb.length() == 1 && sb.charAt(0) == File.separatorChar))
+					sb.append(File.separatorChar);
 			sb.append(e);
 		}
 		return sb.toString();
