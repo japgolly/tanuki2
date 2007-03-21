@@ -45,6 +45,15 @@ public final class OSSpecific {
 	// = Methods
 	// =============================================================================================== //
 
+	private static boolean exec(String cmd) {
+		try {
+			Runtime.getRuntime().exec(cmd);
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
 	public static String getEOL() {
 		switch (os) {
 		case MAC:
@@ -74,7 +83,12 @@ public final class OSSpecific {
 			Program.launch(url);
 			break;
 		default:
-			unsupported();
+			Program p= Program.findProgram("html"); //$NON-NLS-1$
+			if (p == null || !p.execute(url))
+				if (!exec("firefox " + url)) //$NON-NLS-1$
+					if (!exec("mozilla " + url)) //$NON-NLS-1$
+						if (!exec("netscape " + url)) //$NON-NLS-1$
+							unsupported();
 		}
 	}
 
