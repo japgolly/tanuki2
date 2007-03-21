@@ -45,9 +45,19 @@ public final class OSSpecific {
 	// = Methods
 	// =============================================================================================== //
 
+	private static void attemptsFailed() {
+		UIHelpers.showTanukiWarning(null, "general_err_OSFunctionFailed_attemptsFailed"); //$NON-NLS-1$		
+	}
+
 	private static boolean exec(String cmd) {
+		return exec(cmd, null);
+	}
+
+	private static boolean exec(String cmd, String dir) {
+		if (cmd == null)
+			return false;
 		try {
-			Runtime.getRuntime().exec(cmd);
+			Runtime.getRuntime().exec(cmd, null, dir == null ? null : new File(dir));
 			return true;
 		} catch (IOException e) {
 			return false;
@@ -80,7 +90,8 @@ public final class OSSpecific {
 	public static void openBrowser(String url) {
 		switch (os) {
 		case WIN32:
-			Program.launch(url);
+			if (!Program.launch(url))
+				attemptsFailed();
 			break;
 		default:
 			Program p= Program.findProgram("html"); //$NON-NLS-1$
@@ -88,7 +99,7 @@ public final class OSSpecific {
 				if (!exec("firefox " + url)) //$NON-NLS-1$
 					if (!exec("mozilla " + url)) //$NON-NLS-1$
 						if (!exec("netscape " + url)) //$NON-NLS-1$
-							unsupported();
+							attemptsFailed();
 		}
 	}
 
@@ -102,10 +113,18 @@ public final class OSSpecific {
 		}
 	}
 
-	public static void openPrompt(String dir) throws IOException {
+	public static void openPrompt(String dir) {
 		switch (os) {
+		case LINUX:
+			if (!exec("kde-terminal", dir)) //$NON-NLS-1$
+				if (!exec("gnome-terminal", dir)) //$NON-NLS-1$
+					if (!exec("konsole", dir)) //$NON-NLS-1$
+						if (!exec("xterm", dir)) //$NON-NLS-1$
+							attemptsFailed();
+			break;
 		case WIN32:
-			Runtime.getRuntime().exec("cmd.exe /C start cmd.exe", null, new File(dir)); //$NON-NLS-1$
+			if (!exec("cmd.exe /C start cmd.exe", dir)) //$NON-NLS-1$
+				attemptsFailed();
 			break;
 		default:
 			unsupported();
@@ -113,6 +132,6 @@ public final class OSSpecific {
 	}
 
 	private static void unsupported() {
-		UIHelpers.showTanukiWarning(null, "general_err_unsupportedOSFunction"); //$NON-NLS-1$		
+		UIHelpers.showTanukiWarning(null, "general_err_OSFunctionFailed_unsupported"); //$NON-NLS-1$		
 	}
 }

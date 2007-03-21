@@ -251,11 +251,7 @@ abstract class AbstractFileView implements IFileView {
 		if (isSingleSelection()) {
 			final String dir= getSelectedDir();
 			if (dir != null)
-				try {
-					OSSpecific.openPrompt(dir);
-				} catch (IOException e) {
-					new TanukiException(e).showErrorDialog();
-				}
+				OSSpecific.openPrompt(dir);
 		}
 	}
 
