@@ -50,28 +50,27 @@ public final class OSSpecific {
 	}
 
 	private static boolean exec(String cmd, String... args) {
+		return execInDir(null, cmd, args);
+	}
+
+	private static boolean execInDir(String dir, String cmd, String... args) {
 		if (cmd == null)
 			return false;
+
+		// Make cmdarray
+		final String[] cmdarray;
 		if (args.length > 0) {
 			int i= args.length;
-			String[] cmdarray= new String[i + 1];
+			cmdarray= new String[i + 1];
 			while (i-- > 0)
 				cmdarray[i + 1]= args[i];
 			cmdarray[0]= cmd;
-			return execInDir(cmdarray, null);
 		} else
-			return execInDir(cmd, null);
-	}
+			cmdarray= new String[] {cmd};
 
-	private static boolean execInDir(String cmd, String dir) {
-		if (cmd == null)
-			return false;
-		return execInDir(new String[] {cmd}, dir);
-	}
-
-	private static boolean execInDir(String[] cmd, String dir) {
+		// Execute
 		try {
-			Runtime.getRuntime().exec(cmd, null, dir == null ? null : new File(dir));
+			Runtime.getRuntime().exec(cmdarray, null, dir == null ? null : new File(dir));
 			return true;
 		} catch (IOException e) {
 			return false;
@@ -130,7 +129,7 @@ public final class OSSpecific {
 								attemptsFailed();
 			break;
 		case WIN32:
-			if (!execInDir("explorer.exe .", dir))
+			if (!execInDir(dir, "explorer.exe", "."))
 				attemptsFailed();
 			break;
 		default:
@@ -142,14 +141,14 @@ public final class OSSpecific {
 	public static void openPrompt(String dir) {
 		switch (os) {
 		case LINUX:
-			if (!execInDir("kde-terminal", dir))
-				if (!execInDir("gnome-terminal", dir))
-					if (!execInDir("konsole", dir))
-						if (!execInDir("xterm", dir))
+			if (!execInDir(dir, "kde-terminal"))
+				if (!execInDir(dir, "gnome-terminal"))
+					if (!execInDir(dir, "konsole"))
+						if (!execInDir(dir, "xterm"))
 							attemptsFailed();
 			break;
 		case WIN32:
-			if (!execInDir("cmd.exe /C start cmd.exe", dir)) //$NON-NLS-1$
+			if (!execInDir(dir, "cmd.exe", "/C start cmd.exe"))
 				attemptsFailed();
 			break;
 		default:
