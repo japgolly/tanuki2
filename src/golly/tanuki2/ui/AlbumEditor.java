@@ -28,7 +28,7 @@ import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -118,11 +118,12 @@ public class AlbumEditor {
 		trackInfoComposite= new ScrolledComposite(shell, SWT.FLAT | SWT.BORDER | SWT.V_SCROLL);
 		trackInfoComposite.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL, 1, true, SWT.FILL));
 		composite= new Composite(trackInfoComposite, SWT.NONE);
-		composite.setLayout(UIHelpers.makeGridLayout(2, false, 0, 2));
-		composite.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		Color trackInfoColour= UIResourceManager.getColor("albumeditor_trackinfo_bg", 255, 255, 200); //$NON-NLS-1$
+		composite.setLayout(UIHelpers.makeGridLayout(2, false, 0, 1));
+		composite.setBackground(shell.getBackground());
 		iwTnMap= new HashMap<String, Text>();
 		iwTrackMap= new HashMap<String, Text>();
+		boolean firstTrack= true;
+		Font trackLabelFont= null;
 		for (String f : Helpers.sort(dd.files.keySet())) {
 			final FileData fd= dd.files.get(f);
 			if (fd.isAudio() && !fd.isMarkedForDeletion()) {
@@ -131,21 +132,27 @@ public class AlbumEditor {
 				Label l= new Label(composite, SWT.LEFT);
 				l.setBackground(composite.getBackground());
 				l.setText(f);
-				GridData ld= UIHelpers.makeGridData(2, true, SWT.LEFT);
-				ld.verticalIndent= 6;
+				GridData ld= UIHelpers.makeGridData(2, true, SWT.FILL);
+				if (firstTrack)
+					firstTrack= false;
+				else
+					ld.verticalIndent= 6;
 				l.setLayoutData(ld);
+				if (trackLabelFont == null)
+					trackLabelFont= UIResourceManager.getFont("albumeditor_trackLabelFont", l.getFont(), SWT.ITALIC); //$NON-NLS-1$
+				l.setFont(trackLabelFont);
+
 				// tn widget
 				Text t= new Text(composite, SWT.BORDER);
-				t.setBackground(trackInfoColour);
 				iwTnMap.put(f, t);
 				ld= UIHelpers.makeGridData(1, false, SWT.LEFT);
 				ld.minimumWidth= ld.widthHint= 24;
 				t.setLayoutData(ld);
 				if (fd.getTn() != null)
 					t.setText(fd.getTn().toString());
+
 				// track widget
 				t= new Text(composite, SWT.BORDER);
-				t.setBackground(trackInfoColour);
 				iwTrackMap.put(f, t);
 				t.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
 				setText(t, fd.getTrack());
