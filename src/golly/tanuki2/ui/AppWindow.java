@@ -93,18 +93,6 @@ public class AppWindow {
 			shell.setLocation(ca.x + (int) (ca.width * .1), ca.y + ((int) (ca.height * .1)));
 		}
 		shell.setMaximized(Config.appwndMaximised);
-		shell.addControlListener(new ControlAdapter() {
-			public void controlResized(ControlEvent e) {
-				shell.setRedraw(false);
-				resizeWidgets();
-				shell.setRedraw(true);
-			}
-		});
-		shell.addListener(SWT.Dispose, new Listener() {
-			public void handleEvent(Event event) {
-				updateConfig();
-			}
-		});
 
 		// Create window menu
 		Menu bar= new Menu(shell, SWT.BAR);
@@ -272,6 +260,20 @@ public class AppWindow {
 		expandItem.setHeight(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		expandItem.setControl(composite);
 		expandItem.setExpanded(true);
+
+		// Shell again
+		shell.addControlListener(new ControlAdapter() {
+			public void controlResized(ControlEvent e) {
+				shell.setRedraw(false);
+				resizeWidgets();
+				shell.setRedraw(true);
+			}
+		});
+		shell.addListener(SWT.Dispose, new Listener() {
+			public void handleEvent(Event event) {
+				updateConfig();
+			}
+		});
 	}
 
 	// =============================================================================================== //
