@@ -103,10 +103,19 @@ public final class OSSpecific {
 		}
 	}
 
-	public static void openFolder(String dir) throws IOException {
+	public static void openFolder(String dir) {
 		switch (os) {
+		case LINUX:
+			if (!exec("nautilus " + dir)) //$NON-NLS-1$
+				if (!exec("gnome-open " + dir)) //$NON-NLS-1$
+					if (!exec("kfm file:" + dir)) //$NON-NLS-1$
+						if (!exec("konqueror file:" + dir)) //$NON-NLS-1$
+							if (!exec("xfe " + dir)) //$NON-NLS-1$
+								attemptsFailed();
+			break;
 		case WIN32:
-			Runtime.getRuntime().exec("explorer.exe .", null, new File(dir)); //$NON-NLS-1$
+			if (!exec("explorer.exe .", dir)) //$NON-NLS-1$
+				attemptsFailed();
 			break;
 		default:
 			unsupported();
