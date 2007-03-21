@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.TreeItem;
 public class InputTree extends AbstractTreeBasedFileView {
 	private static final String albumInfoFmt= "%s / %s / %s"; //$NON-NLS-1$
 	private static final String trackInfoFmt= "   %2s / %s"; //$NON-NLS-1$
+	private static final boolean dirsWithNoFilesHaveCheck= false;
 
 	/**
 	 * Creates a string that contains info about album or track data. The resulting string will appear beside the
@@ -76,6 +77,8 @@ public class InputTree extends AbstractTreeBasedFileView {
 	@Override
 	protected void addFilesToTree(TreeItem parent, String path) {
 		final DirData dd= dirs.get(path);
+		if (dd == null || dd.files.isEmpty())
+			parent.setChecked(dirsWithNoFilesHaveCheck);
 		if (dd != null) {
 			final Map<String, FileData> files= dd.files;
 			if (!files.isEmpty()) {
@@ -207,6 +210,7 @@ public class InputTree extends AbstractTreeBasedFileView {
 
 	private void onCheck(SelectionEvent e) {
 		final TreeItem ti= (TreeItem) e.item;
+		// Update file
 		if (ti.getData() instanceof FileData) {
 			final FileData fd= (FileData) ti.getData();
 			fd.setMarkedForDeletion(!ti.getChecked());
@@ -214,10 +218,25 @@ public class InputTree extends AbstractTreeBasedFileView {
 			setFileItemColor(ti, fd);
 			updateAlbumDirItem(ti.getParentItem(), fd.getDirData());
 			sharedUIResources.appUIShared.onDataUpdated(true);
-		} else {
-			// TODO InputTree.onCheck() on a dir should update children
-			ti.setChecked(true);
-			e.doit= false;
+		}
+		// Update dir and children
+		else {
+			DirData dd= engine.dirs.get(getFullFilename(ti));
+			if (dd == null || dd.files.isEmpty()) {
+				ti.setChecked(dirsWithNoFilesHaveCheck);
+				e.doit= false;
+			} else {
+				final boolean delete= !ti.getChecked();
+				for (TreeItem i : ti.getItems())
+					if (i.getData() instanceof FileData) {
+						FileData fd= (FileData) i.getData();
+						i.setChecked(!delete);
+						fd.setMarkedForDeletion(delete);
+						setFileItemInfoText(i, fd);
+						setFileItemColor(i, fd);
+					}
+				updateAlbumDirItem(ti, dd);
+			}
 		}
 	}
 
