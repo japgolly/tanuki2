@@ -253,47 +253,45 @@ public class InputTree extends AbstractTreeBasedFileView {
 	}
 
 	private void updateAlbumDirItem(TreeItem parent, DirData dd) {
-		// Collect data about files
-		// TODO This checks sub-files but not sub-dirs
-		final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
-		boolean allMarkedForDeletion= true;
-		if (dd.files.isEmpty())
-			allMarkedForDeletion= false;
-		else
-			for (FileData fd : dd.files.values()) {
-				if (!fd.isMarkedForDeletion()) {
-					allMarkedForDeletion= false;
-					if (fd.isAudio())
-						if (fd.getAlbumData() != null)
-							albumDataSet.add(fd.getAlbumData());
-				}
-			}
-
-		// Set text + check if album data complete
-		boolean isAlbumDataIncomplete= false;
-		if (allMarkedForDeletion)
-			parent.setText(1, I18n.l("inputTree_txt_markedForDeletion")); //$NON-NLS-1$
-		else if (!dd.hasAudioContent(true) || albumDataSet.isEmpty())
-			parent.setText(1, ""); //$NON-NLS-1$
-		else if (albumDataSet.size() == 1) {
-			AlbumData ad= albumDataSet.iterator().next();
-			parent.setText(1, formatInfo(albumInfoFmt, ad.getArtist(), ad.getYear(), ad.getAlbum()));
-			isAlbumDataIncomplete= !ad.isComplete();
-		} else {
-			parent.setText(1, I18n.l("inputTree_txt_multiAlbumInfos")); //$NON-NLS-1$
-			isAlbumDataIncomplete= true;
-		}
-
-		// Update item
+		// Update text and color
 		final TwoColours c;
-		if (allMarkedForDeletion)
-			c= sharedUIResources.deletionColours;
-		else if (isAlbumDataIncomplete)
-			c= sharedUIResources.itemIncompleteColours;
-		else
+		final String txt;
+		// If contains audio content not marked for deletion
+		if (dd.hasAudioContent(true)) {
+			final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
+			for (FileData fd : dd.files.values())
+				if (!fd.isMarkedForDeletion() && fd.isAudio())
+					albumDataSet.add(fd.getAlbumData());
+			// Album data not in sync
+			if (albumDataSet.size() > 1) {
+				txt= I18n.l("inputTree_txt_multiAlbumInfos"); //$NON-NLS-1$
+				c= sharedUIResources.itemIncompleteColours;
+			}
+			// Album data in sync or empty
+			else {
+				AlbumData ad= albumDataSet.isEmpty() ? null : albumDataSet.iterator().next();
+				if (ad == null)
+					ad= new AlbumData();
+				txt= formatInfo(albumInfoFmt, ad.getArtist(), ad.getYear(), ad.getAlbum());
+				c= ad.isComplete() ? sharedUIResources.itemCompleteColours : sharedUIResources.itemIncompleteColours;
+			}
+		}
+		// Either no files or all marked for deletion
+		else {
+			txt= ""; //$NON-NLS-1$
 			c= sharedUIResources.itemCompleteColours;
-		parent.setChecked(!allMarkedForDeletion);
+		}
+		parent.setText(1, txt);
 		parent.setBackground(c.background);
 		parent.setForeground(c.foreground);
+
+		// Update check
+		boolean nonDelete= false;
+		for (FileData fd : dd.files.values())
+			if (!fd.isMarkedForDeletion()) {
+				nonDelete= true;
+				break;
+			}
+		parent.setChecked(nonDelete);
 	}
 }
