@@ -179,6 +179,7 @@ public class AppWindow {
 
 		// Create expandBar
 		expandBar= new ExpandBar(shell, SWT.NONE);
+		expandBar.setSpacing(0);
 		expandBar.addExpandListener(new ExpandListener() {
 			public void itemCollapsed(ExpandEvent e) {
 				resize((ExpandItem) e.item, false);
