@@ -103,6 +103,10 @@ public final class OSSpecific {
 	@SuppressWarnings("nls")
 	public static void openBrowser(String url) {
 		switch (os) {
+		case MAC:
+			if (!exec("/usr/bin/open", url))
+				attemptsFailed();
+			break;
 		case WIN32:
 			if (!Program.launch(url))
 				attemptsFailed();
@@ -128,6 +132,10 @@ public final class OSSpecific {
 							if (!exec("xfe", dir))
 								attemptsFailed();
 			break;
+		case MAC:
+			if (!exec("/usr/bin/open", dir))
+				attemptsFailed();
+			break;
 		case WIN32:
 			if (!execInDir(dir, "explorer.exe", "."))
 				attemptsFailed();
@@ -146,6 +154,10 @@ public final class OSSpecific {
 					if (!execInDir(dir, "konsole"))
 						if (!execInDir(dir, "xterm"))
 							attemptsFailed();
+			break;
+		case MAC:
+			if (!execInDir(dir, "/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal"))
+				attemptsFailed();
 			break;
 		case WIN32:
 			if (!execInDir(dir, "cmd.exe", "/C start cmd.exe"))
