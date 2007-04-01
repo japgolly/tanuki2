@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -289,6 +290,15 @@ public class AppWindow {
 	// = Internal
 	// =============================================================================================== //
 
+	private void add(final String... sources) {
+		BusyIndicator.showWhile(display, new Runnable() {
+			public void run() {
+				engine.add(btnTitleCase.getSelection(), sources);
+				appUIShared.onDataUpdated_RefreshNow();
+			}
+		});
+	}
+
 	private String getCleanedUpTargetDir() {
 		return Helpers.unicodeTrim(Helpers.ensureCorrectDirSeperators(iwTargetDir.getText()));
 	}
@@ -311,11 +321,8 @@ public class AppWindow {
 			}
 
 			public void drop(DropTargetEvent event) {
-				if (fileTransfer.isSupportedType(event.currentDataType)) {
-					String[] files= (String[]) event.data;
-					engine.add(btnTitleCase.getSelection(), files);
-					appUIShared.onDataUpdated_RefreshNow();
-				}
+				if (fileTransfer.isSupportedType(event.currentDataType))
+					add((String[]) event.data);
 			}
 		});
 	}
@@ -329,8 +336,7 @@ public class AppWindow {
 			File f= new File(file);
 			String dir= f.isDirectory() ? f.toString() : f.getParent();
 			Config.lastAddedDir= dir;
-			engine.add(btnTitleCase.getSelection(), Helpers.map(dlg.getFileNames(), Helpers.addPathElements(dir, ""), "")); //$NON-NLS-1$ //$NON-NLS-2$
-			appUIShared.onDataUpdated_RefreshNow();
+			add(Helpers.map(dlg.getFileNames(), Helpers.addPathElements(dir, ""), "")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -342,8 +348,7 @@ public class AppWindow {
 		String dir= dlg.open();
 		if (dir != null) {
 			Config.lastAddedDir= dir;
-			engine.add(btnTitleCase.getSelection(), dir);
-			appUIShared.onDataUpdated_RefreshNow();
+			add(dir);
 		}
 	}
 
