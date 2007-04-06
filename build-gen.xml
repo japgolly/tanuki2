@@ -1,0 +1,53 @@
+<project name="Tanuki 2">
+	<property name="tanuki.builds" value="linux,win32" />
+
+	<property name="linux.bin" value="bin/linux" />
+	<property name="linux.swt.zip" value="lib/swt-3.3M6-gtk-linux-x86.zip" />
+
+	<property name="win32.bin" value="bin/win32" />
+	<property name="win32.swt.zip" value="lib/swt-3.3M6-win32-win32-x86.zip" />
+
+	<!-- ================================================================== -->
+
+	<target name="clean">
+		<delete dir="${build.bin}" />
+	</target>
+
+	<!-- ================================================================== -->
+
+	<target name="make">
+		<mkdir dir="${build.bin}" />
+		<unzip src="${build.swt.zip}" dest="${build.bin}">
+			<patternset>
+				<include name="swt.jar" />
+			</patternset>
+		</unzip>
+		<path id="tanuki.classpath">
+			<fileset dir="${build.bin}" includes="*.jar" />
+		</path>
+		<javac srcdir="src" destdir="${build.bin}" excludes="**/qa/**" classpathref="tanuki.classpath" encoding="utf8" debug="off" optimize="on" source="1.5" />
+		<copy todir="${build.bin}">
+			<fileset dir="src">
+				<exclude name="**/*.java" />
+				<exclude name="**/qa/**" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- ================================================================== -->
+
+	<target name="jar" depends="make-${build}">
+		<pathconvert property="tanuki.classpath.txt" pathsep=" ">
+			<path refid="tanuki.classpath" />
+			<flattenmapper />
+		</pathconvert>
+		<jar destfile="${build.bin}/tanuki2.jar" basedir="${build.bin}">
+			<manifest>
+				<attribute name="Main-Class" value="golly.tanuki2.Tanuki" />
+				<attribute name="Class-Path" value="${tanuki.classpath.txt}" />
+				<attribute name="Sealed" value="true" />
+			</manifest>
+		</jar>
+	</target>
+
+</project>
