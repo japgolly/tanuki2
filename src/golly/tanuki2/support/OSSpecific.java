@@ -87,6 +87,10 @@ public final class OSSpecific {
 			return "\n"; //$NON-NLS-1$
 		}
 	}
+	
+	public static OS getOS() {
+		return os;
+	}
 
 	public static void launch(String fullFilename) {
 		Program.launch(fullFilename);
