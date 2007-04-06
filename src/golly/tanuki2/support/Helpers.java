@@ -1,5 +1,7 @@
 package golly.tanuki2.support;
 
+import golly.tanuki2.support.OSSpecific.OS;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -205,6 +207,11 @@ public final class Helpers {
 		String tmpDir= System.getenv("TEMP");
 		if (tmpDir == null)
 			tmpDir= System.getenv("TMP");
+		if (tmpDir == null && OSSpecific.getOS() != OS.WIN32) {
+			File f= new File("/tmp");
+			if (f.isDirectory() && f.canWrite())
+				tmpDir= "/tmp";
+		}
 		if (tmpDir == null)
 			throw new RuntimeException("Could determine temp dir.");
 		if (!(new File(tmpDir).isDirectory()))
