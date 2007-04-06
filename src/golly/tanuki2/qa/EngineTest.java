@@ -120,7 +120,9 @@ public class EngineTest extends TestHelper {
 		TrackProperties a1, a2, a3;
 		mtpr.addMockResult("A/a1", a1= makeTrackProperties("Metallica", 2006, "A", "1", "A One"));
 		mtpr.addMockResult("A/a2", makeTrackProperties("!etallica", 2006, "A", "2", "A Two @bad")); // should lose
-		mtpr.addMockResult("A/a2", a2= makeTrackProperties("Metallica", 2006, "A", "2", "A Two")); // should win - same album info as other tracks
+		mtpr.addMockResult("A/a2", a2= makeTrackProperties("Metallica", 2006, "A", "2", "A Two")); // should win - same
+		// album info as
+		// other tracks
 		mtpr.addMockResult("A/a2", makeTrackProperties("Zetallica", 2006, "A", "2", "A Two @bad")); // should lose
 		mtpr.addMockResult("A/a3", a3= makeTrackProperties("Metallica", 2006, "A", "3", "A Three"));
 		engine2.readTrackProprties2();
@@ -187,23 +189,23 @@ public class EngineTest extends TestHelper {
 
 	@Test
 	public void wholeDirHasMultipleResults_checksAlbumDataOfOtherTracks() {
-		// || ARTIST       | RANK || YEAR | RANK || ALBUM     | RANK ||
+		// || ARTIST | RANK || YEAR | RANK || ALBUM | RANK ||
 		// ||--------------|------||------|------||-----------|------||
-		// || Bullshit     | 1    || 2006 | 5    || A         | 4    ||
-		// || Metallica    | 2    || 1980 | 1    || FakeAlbum | 1    ||
-		// || Crap         | 1    ||
-		// || WhatCanYouDo | 1    ||
-		// || WayOff       | 1    ||
+		// || Bullshit | 1 || 2006 | 5 || A | 4 ||
+		// || Metallica | 2 || 1980 | 1 || FakeAlbum | 1 ||
+		// || Crap | 1 ||
+		// || WhatCanYouDo | 1 ||
+		// || WayOff | 1 ||
 		//
 		// A/a1
-		//   11 (2+5+4) - "Metallica", 2006, "A"
-		//   10 (1+5+4) - "Bullshit", 2006, "A"
+		// 11 (2+5+4) - "Metallica", 2006, "A"
+		// 10 (1+5+4) - "Bullshit", 2006, "A"
 		// A/a2
-		//   11 (2+5+4) - "Metallica", 2006, "A"
-		//   10 (1+5+4) - "Crap", 2006, "A"
+		// 11 (2+5+4) - "Metallica", 2006, "A"
+		// 10 (1+5+4) - "Crap", 2006, "A"
 		// A/a3
-		//   7 (1+5+1) - "WhatCanYouDo", 2006, "FakeAlbum"
-		//   2 (1+1+0) - "WayOff", 1980, null
+		// 7 (1+5+1) - "WhatCanYouDo", 2006, "FakeAlbum"
+		// 2 (1+1+0) - "WayOff", 1980, null
 		addFakeDirsToEngine();
 		TrackProperties a1, a2, a3;
 		mtpr.addMockResult("A/a1", makeTrackProperties("Bullshit", 2006, "A", "2", "A Two @bad"));
@@ -238,9 +240,10 @@ public class EngineTest extends TestHelper {
 		assertEngineTrackProperties("C/c1", noprop);
 		assertEngineTrackProperties("C/c2", noprop);
 		assertEngineTrackProperties("C/c3", noprop);
-		AlbumData ad1= engine2.files.get("A\\a1.mp3").getAlbumData();
-		AlbumData ad2= engine2.files.get("A\\a2.mp3").getAlbumData();
-		AlbumData ad3= engine2.files.get("A\\a3.mp3").getAlbumData();
+		final String aDir= "A" + File.separator;
+		AlbumData ad1= engine2.files.get(aDir + "a1.mp3").getAlbumData();
+		AlbumData ad2= engine2.files.get(aDir + "a2.mp3").getAlbumData();
+		AlbumData ad3= engine2.files.get(aDir + "a3.mp3").getAlbumData();
 		assertEquals(ad1, ad2);
 		assertEquals(ad1, ad3);
 	}
@@ -432,7 +435,7 @@ public class EngineTest extends TestHelper {
 		String[] actual= d.list();
 		Arrays.sort(expectedFiles2);
 		Arrays.sort(actual);
-		//		assertEquals(expectedFiles2, actual);
+		// assertEquals(expectedFiles2, actual);
 		assertEquals(Arrays.deepToString(expectedFiles2), Arrays.deepToString(actual));
 	}
 
