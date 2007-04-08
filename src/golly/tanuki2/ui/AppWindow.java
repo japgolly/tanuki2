@@ -501,6 +501,9 @@ public class AppWindow {
 		}
 
 		public boolean removeFiles(String[] files) {
+			if (files.length == 0)
+				return false;
+
 			final MessageBox mb= new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.APPLICATION_MODAL);
 			mb.setText(I18n.l("general_app_title")); //$NON-NLS-1$
 			mb.setMessage(I18n.l("main_txt_removeSelectedConfirmationMsg")); //$NON-NLS-1$
