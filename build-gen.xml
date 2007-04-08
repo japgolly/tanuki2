@@ -1,8 +1,11 @@
 <project name="Tanuki 2">
-	<property name="tanuki.builds" value="linux,win32" />
+	<property name="tanuki.builds" value="linux,macosx,win32" />
 
 	<property name="linux.bin" value="bin/linux" />
 	<property name="linux.swt.zip" value="lib/swt-3.3M6-gtk-linux-x86.zip" />
+
+	<property name="macosx.bin" value="bin/macosx" />
+	<property name="macosx.swt.zip" value="lib/swt-3.3M6-carbon-macosx.zip" />
 
 	<property name="win32.bin" value="bin/win32" />
 	<property name="win32.swt.zip" value="lib/swt-3.3M6-win32-win32-x86.zip" />
