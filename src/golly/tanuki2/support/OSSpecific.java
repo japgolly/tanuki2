@@ -160,6 +160,7 @@ public final class OSSpecific {
 							attemptsFailed();
 			break;
 		case MAC:
+			// TODO openPrompt doesn't work on mac
 			if (!execInDir(dir, "/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal"))
 				attemptsFailed();
 			break;

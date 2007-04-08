@@ -157,6 +157,7 @@ public class AppWindow {
 		ti.setData(outputTree);
 		ti.setText(I18n.l("main_tab_outputTree")); //$NON-NLS-1$
 		// Tab folder again
+		// TODO makeDropTarget doesn't work properly on mac
 		makeDropTarget(tabFolder);
 		tabFolder.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
