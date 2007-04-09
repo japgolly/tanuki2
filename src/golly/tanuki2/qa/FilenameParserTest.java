@@ -74,6 +74,16 @@ public class FilenameParserTest extends TestHelper {
 	}
 
 	@Test
+	public void testParsingSingle_dirOnly() {
+		subtestParse(fp, "C:\\2\\Nevermore\\[2004] Enemies of Reality\\Who Decides.mp3", "Nevermore", 2004, "Enemies of Reality", null, "Who Decides");
+		subtestParse(fp, "/home/golly/music/4. Done/Unexpect/2006 - In a Flesh Aquarium/Megalomaniac Trees.mp3", "Unexpect", 2006, "In a Flesh Aquarium", null, "Megalomaniac Trees");
+		subtestParse(fp, "X:\\music\\1. Fresh\\Meshuggah - Discografia [heavytorrents.org]\\1995. Destroy Erase Improve (320)\\Inside What's Within Behind.mp3", "Meshuggah", 1995, "Destroy Erase Improve", null, "Inside What's Within Behind");
+		subtestParse(fp, "X:\\music\\1. Fresh\\Altera Enigma - 2006 - Alteration [VBR HQ]\\Skyward (Outer Atmosphere).mp3", "Altera Enigma", 2006, "Alteration", null, "Skyward (Outer Atmosphere)");
+		subtestParse(fp, "/Jordan Rudess - 4NYC  (www.heavytorrents.org)\\If I Could.mp3", "Jordan Rudess", null, "4NYC", null, "If I Could");
+		subtestParse(fp, "/var/music/IN FLAMES Discografia (www.heavytorrents.org)/IN FLAMES Clayman/Pinball Map.mp3", "IN FLAMES", null, "Clayman", null, "Pinball Map");
+	}
+
+	@Test
 	public void testParsingMulti_commonSuffixInFilesAndDir() {
 		// Test that readMultipleTrackProperties removes common suffix from filenames AND DIR
 		DirData dd= new DirData("/var/music/Virgin Steele-Visions of Eden-2006-AMRC");

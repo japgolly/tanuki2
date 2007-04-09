@@ -133,11 +133,13 @@ public class FilenameParser implements ITrackProprtyReader {
 		String yearAndAlbumWithArtist= "(?:[:artist:]<sepSpaceOrUndsc>)?[:year:]<sepSpaceUndscOrDot>(?:[:artist:]<sepSpaceOrUndsc>)?[:album:](?:<sepSpaceOrUndsc>[:artist:])?";
 		String albumWithArtist= "(?:[:artist:]<sepSpaceOrUndsc>)?[:album:](?:<sepSpaceOrUndsc>[:artist:])?";
 
+		// track in filename, other in dirs
 		addPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", yearAndAlbumWithArtist, tnAndTrack);
 		addPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", albumWithArtist, tnAndTrack);
 		addPattern("[:artist:]<sepSpaceOrUndsc>[:year:]<sepSpaceOrUndsc>[:album:]", tnAndTrack);
 		addPattern("[:artist:]<sep>[:album:](?:<sepSpaceOrUndsc>[:year:])?", tnAndTrack);
-		
+
+		// everything in filename
 		addPattern("[:artist:]<sepSpaceUndscOrDot>[:year:](?:<sepSpaceUndscOrDot>[:album:])?<sepSpaceOrUndsc>" + tnAndTrack);
 		addPattern("[:artist:](?:<sep>[:album:])?<sepSpaceOrUndsc>" + tnAndTrack);
 		addPattern("[:album:](?:<sep>[:artist:])?<sepSpaceOrUndsc>" + tnAndTrack);
@@ -246,13 +248,18 @@ public class FilenameParser implements ITrackProprtyReader {
 	private void addPattern(String... patternStrings) {
 		patterns.add(new SmartPattern(patternStrings));
 		if (patternStrings.length > 1) {
-			// Make sure the filename pattern doesn't include an artist or album tag
+
+			// If the filename pattern doesn't include an artist or album tag...
 			final String filenamePattern= patternStrings[patternStrings.length - 1];
 			if (!filenamePattern.contains("[:artist:]") && !filenamePattern.contains("[:album:]")) {
-				// Replace the filename pattern and add
+				// Replace the filename pattern and as a dir pattern
 				patternStrings[patternStrings.length - 1]= "[^\\\\/]+"; //$NON-NLS-1$
 				dirPatterns.add(new SmartPattern(patternStrings));
 			}
+
+			// Add the same pattern but make the filename pattern read the whole track
+			patternStrings[patternStrings.length - 1]= "[:track:]"; //$NON-NLS-1$
+			patterns.add(new SmartPattern(patternStrings));
 		}
 	}
 
