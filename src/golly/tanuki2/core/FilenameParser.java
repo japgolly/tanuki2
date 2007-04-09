@@ -131,10 +131,12 @@ public class FilenameParser implements ITrackProprtyReader {
 		// No need to check for duplicate artist/album values in the file basename because it is removed automagically in readMultipleTrackProperties()
 		String tnAndTrack= "[:tn:]<sepSpaceUndscOrDot>[:track:]";
 		String yearAndAlbumWithArtist= "(?:[:artist:]<sepSpaceOrUndsc>)?[:year:]<sepSpaceUndscOrDot>(?:[:artist:]<sepSpaceOrUndsc>)?[:album:](?:<sepSpaceOrUndsc>[:artist:])?";
+		String yearAndAlbumWithArtist2= "(?:[:artist:]<sepSpaceOrUndsc>)?[:album:]<sepSpaceUndscOrDot>(?:[:artist:]<sepSpaceOrUndsc>)?[:year:](?:<sepSpaceOrUndsc>[:artist:])?";
 		String albumWithArtist= "(?:[:artist:]<sepSpaceOrUndsc>)?[:album:](?:<sepSpaceOrUndsc>[:artist:])?";
 
 		// track in filename, other in dirs
 		addPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", yearAndAlbumWithArtist, tnAndTrack);
+		addPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", yearAndAlbumWithArtist2, tnAndTrack);
 		addPattern("[:artist:](?:<sepSpaceOrUndsc>Discogra.+?)?", albumWithArtist, tnAndTrack);
 		addPattern("[:artist:]<sepSpaceOrUndsc>[:year:]<sepSpaceOrUndsc>[:album:]", tnAndTrack);
 		addPattern("[:artist:]<sep>[:album:](?:<sepSpaceOrUndsc>[:year:])?", tnAndTrack);
