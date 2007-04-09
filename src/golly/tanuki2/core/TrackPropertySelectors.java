@@ -107,11 +107,15 @@ class TrackPropertySelectors {
 				}
 				// If more than one winner and not on first pass..
 				else if (!firstPass && rankedTPs.getWinnerCount() > 1) {
-					// Out of the winners, penalise the rank of strings with unlikely substrings in them
+					// Try to change ranks of of the winners
 					for (RankedObject<TrackProperties> i : rankedTPs.getWinners()) {
+						// Penalise the rank of strings with unlikely substrings in them
 						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.ARTIST));
 						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.ALBUM));
 						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.TRACK));
+						// Increase rank of those with TN set
+						if (i.data.get(TrackPropertyType.TN) != null)
+							i.increaseRank(0.001);
 					}
 					rankedTPs.sort();
 					// select one of the winners
