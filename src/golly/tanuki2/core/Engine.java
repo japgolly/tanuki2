@@ -13,6 +13,7 @@ import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.OSSpecific;
 import golly.tanuki2.support.TanukiException;
+import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.ui.YesNoToAllBox;
 
 import java.io.File;
@@ -25,6 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import org.eclipse.swt.SWT;
 
 /**
  * @author Golly
@@ -40,6 +43,10 @@ public class Engine implements ITextProcessor {
 		public int getCommandCount() {
 			return deletions.size() + moves.size();
 		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class VoodooAborted extends Exception {
 	}
 
 	public static boolean PRETEND_MODE= false;
@@ -191,7 +198,10 @@ public class Engine implements ITextProcessor {
 							for (String sourceFilename : Helpers.sort(pc.moves.keySet())) {
 								final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
 								progressDlg.nextFile();
-								if (moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename))))
+								final Boolean result= moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename)));
+								if (result == null)
+									throw new VoodooAborted();
+								else if (result)
 									removeList.add(sourceFullFilename);
 							}
 						}
@@ -218,7 +228,8 @@ public class Engine implements ITextProcessor {
 				}
 
 			} catch (Throwable t) {
-				TanukiException.showErrorDialog(t);
+				if (!(t instanceof VoodooAborted))
+					TanukiException.showErrorDialog(t);
 			}
 		} // end if (!progressDlg.isCancelled())
 
@@ -398,7 +409,7 @@ public class Engine implements ITextProcessor {
 		return fmt;
 	}
 
-	private boolean moveFile(final IVoodooProgressMonitor progressDlg, final String sourceFilename, final String targetFilename) throws IOException {
+	private Boolean moveFile(final IVoodooProgressMonitor progressDlg, final String sourceFilename, final String targetFilename) {
 		File source= new File(sourceFilename);
 		File target= new File(targetFilename);
 
@@ -433,9 +444,21 @@ public class Engine implements ITextProcessor {
 
 		// Move file (and overwrite if neccessary)
 		progressDlg.moving(source, target);
-		if (!PRETEND_MODE)
-			Helpers.mv(source, target);
-		return true;
+		if (PRETEND_MODE)
+			return true;
+		while (true) {
+			try {
+				Helpers.mv(source, target);
+				return true;
+			} catch (IOException e) {
+				switch (UIHelpers.showAbortIgnoreRetryBox(progressDlg.getShell(), I18n.l("general_error_title"), I18n.l("voodoo_err_movedFailedPrompt", source, target))) {//$NON-NLS-1$ //$NON-NLS-2$
+				case SWT.IGNORE:
+					return false;
+				case SWT.ABORT:
+					return null;
+				}
+			}
+		} // end while
 	}
 
 	protected void readAndAssignTrackProprties() {
