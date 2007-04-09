@@ -12,6 +12,7 @@ import golly.tanuki2.support.Config;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.OSSpecific;
+import golly.tanuki2.support.TanukiException;
 import golly.tanuki2.ui.YesNoToAllBox;
 
 import java.io.File;
@@ -156,7 +157,7 @@ public class Engine implements ITextProcessor {
 	 * <li>Removes empty directories</li>
 	 * </ul>
 	 */
-	public void doYaVoodoo(final String targetBaseDir, final IVoodooProgressMonitor progressDlg, Boolean overwriteAll) throws IOException {
+	public void doYaVoodoo(final String targetBaseDir, final IVoodooProgressMonitor progressDlg, Boolean overwriteAll) {
 		this.overwriteAll= overwriteAll;
 
 		// TODO: Check for missing files (ie files in memory but no longer on hd)
@@ -169,52 +170,56 @@ public class Engine implements ITextProcessor {
 
 		progressDlg.starting(processingList.size(), totalCommands);
 		if (!progressDlg.isCancelled()) {
-
-			// Make target base dir
-			if (!PRETEND_MODE)
-				Helpers.mkdir_p(targetBaseDir);
-
-			// Start processing
-			final Set<String> removeList= new HashSet<String>();
 			try {
-				for (final String srcDir : Helpers.sort(processingList.keySet())) {
-					final ProcessingCommands pc= processingList.get(srcDir);
 
-					progressDlg.nextDir(srcDir, pc.targetDirectory, pc.getCommandCount());
+				// Make target base dir
+				if (!PRETEND_MODE)
+					Helpers.mkdir_p(targetBaseDir);
 
-					// Move files
-					if (!pc.moves.isEmpty()) {
-						if (!PRETEND_MODE)
-							Helpers.mkdir_p(pc.targetDirectory);
-						for (String sourceFilename : Helpers.sort(pc.moves.keySet())) {
-							final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
-							progressDlg.nextFile();
-							if (moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename))))
-								removeList.add(sourceFullFilename);
+				// Start processing
+				final Set<String> removeList= new HashSet<String>();
+				try {
+					for (final String srcDir : Helpers.sort(processingList.keySet())) {
+						final ProcessingCommands pc= processingList.get(srcDir);
+
+						progressDlg.nextDir(srcDir, pc.targetDirectory, pc.getCommandCount());
+
+						// Move files
+						if (!pc.moves.isEmpty()) {
+							if (!PRETEND_MODE)
+								Helpers.mkdir_p(pc.targetDirectory);
+							for (String sourceFilename : Helpers.sort(pc.moves.keySet())) {
+								final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
+								progressDlg.nextFile();
+								if (moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename))))
+									removeList.add(sourceFullFilename);
+							}
 						}
-					}
 
-					// Delete files
-					for (String f : Helpers.sort(pc.deletions)) {
-						final String sourceFullFilename= addPathElements(srcDir, f);
-						progressDlg.nextFile();
-						deleteFile(progressDlg, sourceFullFilename);
-						removeList.add(sourceFullFilename);
-					}
+						// Delete files
+						for (String f : Helpers.sort(pc.deletions)) {
+							final String sourceFullFilename= addPathElements(srcDir, f);
+							progressDlg.nextFile();
+							deleteFile(progressDlg, sourceFullFilename);
+							removeList.add(sourceFullFilename);
+						}
 
-					// remove empty dirs from HD
-					List<File> removedDirs= new ArrayList<File>();
-					if (!PRETEND_MODE)
-						Helpers.rmdirPath(new File(srcDir), removedDirs);
-					progressDlg.rmdirs(removedDirs);
+						// remove empty dirs from HD
+						List<File> removedDirs= new ArrayList<File>();
+						if (!PRETEND_MODE)
+							Helpers.rmdirPath(new File(srcDir), removedDirs);
+						progressDlg.rmdirs(removedDirs);
+					}
+				} finally {
+					// Remove processed files
+					for (String f : removeList)
+						remove(f);
+					removeEmptyDirs();
 				}
-			} finally {
-				// Remove processed files
-				for (String f : removeList)
-					remove(f);
-				removeEmptyDirs();
-			}
 
+			} catch (Throwable t) {
+				TanukiException.showErrorDialog(t);
+			}
 		} // end if (!progressDlg.isCancelled())
 
 		System.gc();

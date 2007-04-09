@@ -61,6 +61,10 @@ public class TanukiException extends Exception {
 		showErrorDialog(null, message);
 	}
 
+	public static void showErrorDialog(Throwable t) {
+		showErrorDialog(null, t);
+	}
+
 	/**
 	 * Displays an error dialog showing the error to the user. <br>
 	 * If an error occurs opening up a dialog box, then the error message is instead sent to <em>stderr</em>.
@@ -71,5 +75,10 @@ public class TanukiException extends Exception {
 		} catch (Throwable t) {
 			System.err.println(message);
 		}
+	}
+
+	public static void showErrorDialog(Shell shell, Throwable t) {
+		TanukiException e= (t instanceof TanukiException) ? (TanukiException) t : new TanukiException(t);
+		e.showErrorDialog(shell);
 	}
 }

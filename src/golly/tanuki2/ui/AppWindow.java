@@ -9,7 +9,6 @@ import golly.tanuki2.support.Config;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.OSSpecific;
-import golly.tanuki2.support.TanukiException;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 
@@ -388,12 +387,7 @@ public class AppWindow {
 			final VoodooProgressDialog dlg= new VoodooProgressDialog(shell);
 			final Thread t= new Thread(new Runnable() {
 				public void run() {
-					try {
-						engine.doYaVoodoo(targetDir, dlg, null);
-					} catch (Throwable t) {
-						TanukiException e= (t instanceof TanukiException) ? (TanukiException) t : new TanukiException(t);
-						e.showErrorDialog(shell);
-					}
+					engine.doYaVoodoo(targetDir, dlg, null);
 				}
 			});
 			t.start();
