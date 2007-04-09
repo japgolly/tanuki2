@@ -305,7 +305,7 @@ public final class Helpers {
 	public static String inspectExcept(final Object obj, boolean includeObjectId, String... fieldNames) {
 		if (obj == null)
 			return inspect(null, includeObjectId);
-		
+
 		Set<Field> fields= new HashSet<Field>();
 		for (Field f : obj.getClass().getDeclaredFields())
 			if (!contains(fieldNames, f.getName()))
@@ -333,7 +333,13 @@ public final class Helpers {
 		return sb.toString();
 	}
 
-	public static String makeTitleCase(String text) {
+	/**
+	 * Converts a string to title case.
+	 * 
+	 * @param intelligentTitleCase If <code>true</code> then articles, conjunctions and prepositions will remain lower
+	 *            case. If <code>false</code> then <em>all</em> words will begin with a capital letter.
+	 */
+	public static String makeTitleCase(String text, boolean intelligentTitleCase) {
 		final Matcher m= pTitleCase_prepost.matcher(text);
 		if (!m.matches())
 			return text;
@@ -353,7 +359,9 @@ public final class Helpers {
 				t[i]= w.toUpperCase();
 			else if (i == 0 || i == lastIndex)
 				t[i]= makeTitleCase_iCap(w);
-			else if (setTitleCase_exceptions.contains(w) || ((i > 1) && "'".equals(b[i - 1]) && pTitleCase_hasw.matcher(b[i - 2]).matches()))
+			else if (intelligentTitleCase && setTitleCase_exceptions.contains(w))
+				t[i]= w;
+			else if ((i > 1) && "'".equals(b[i - 1]) && pTitleCase_hasw.matcher(b[i - 2]).matches())
 				t[i]= w;
 			else
 				t[i]= makeTitleCase_iCap(w);
