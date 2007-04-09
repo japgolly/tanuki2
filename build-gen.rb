@@ -1,5 +1,6 @@
 INPUT_FILE= 'build-gen.xml'
 OUTPUT_FILE= 'build.xml'
+BUILD_TAG= '${build}'
 
 # Read input
 x= File.read(INPUT_FILE)
@@ -19,15 +20,14 @@ x.gsub! %r|[ \t]*<target .+?</target>[ \t]*|m do |target_xml|
   raise unless target_xml =~ /<target( +.+?=".+?")? +name="(.+?)"/
   name= $2
   puts "   #{name}"
-  t= builds.map{|b|
-    a= target_xml.gsub "${build.", "${#{b}."
-    a.gsub! "${build}", b
-    a.sub! /<target( +.+?=".+?")? +name="(.+?)"/, "<target\\1 name=\"\\2-#{b}\""
-    a
-  }
-  target_xml =~ /^([ \t]*).+?([ \t]*)$/
-  t<< "#{$1}<target name=\"#{name}-all\" depends=\"#{builds.map{|b|"#{name}-#{b}"}.join ','}\" />#{$2}"
-  t.join("\n\n")
+  if target_xml =~ /^.*?<target [^>]+?\$\{build\}/
+    t= builds.map{|b| target_xml.gsub("${build.", "${#{b}.").gsub(BUILD_TAG, b)}
+    target_xml =~ /^([ \t]*).+?([ \t]*)$/
+    t<< "#{$1}<target name=\"#{name.gsub BUILD_TAG, 'all'}\" depends=\"#{builds.map{|b|"#{name.gsub BUILD_TAG, b}"}.join ','}\" />#{$2}"
+    t.join("\n\n")
+  else
+    target_xml
+  end
 end
 
 # Output to file

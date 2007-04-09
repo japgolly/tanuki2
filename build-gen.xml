@@ -12,13 +12,13 @@
 
 	<!-- ================================================================== -->
 
-	<target name="clean">
+	<target name="clean-${build}">
 		<delete dir="${build.bin}" />
 	</target>
 
 	<!-- ================================================================== -->
 
-	<target name="make">
+	<target name="make-${build}">
 		<mkdir dir="${build.bin}" />
 		<unzip src="${build.swt.zip}" dest="${build.bin}">
 			<patternset>
@@ -39,7 +39,7 @@
 
 	<!-- ================================================================== -->
 
-	<target name="jar" depends="make-${build}">
+	<target name="jar-${build}" depends="make-${build}">
 		<pathconvert property="tanuki.classpath.txt" pathsep=" ">
 			<path refid="tanuki.classpath" />
 			<flattenmapper />
