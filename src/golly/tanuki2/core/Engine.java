@@ -212,9 +212,12 @@ public class Engine implements ITextProcessor {
 						for (String f : Helpers.sort(pc.deletions)) {
 							final String sourceFullFilename= addPathElements(srcDir, f);
 							progressDlg.nextFile();
-							deleteFile(progressDlg, sourceFullFilename);
-							progressDlg.fileOperationComplete(true);
-							removeList.add(sourceFullFilename);
+							final Boolean result= deleteFile(progressDlg, sourceFullFilename);
+							progressDlg.fileOperationComplete(result != null && result);
+							if (result == null)
+								throw new VoodooAborted();
+							else if (result)
+								removeList.add(sourceFullFilename);
 						}
 
 						// remove empty dirs from HD
@@ -384,13 +387,25 @@ public class Engine implements ITextProcessor {
 			dirsNeedingTrackProprties.add(dd);
 	}
 
-	private void deleteFile(IVoodooProgressMonitor progressDlg, final String sourceFilename) throws IOException {
+	private Boolean deleteFile(IVoodooProgressMonitor progressDlg, final String sourceFilename) {
 		// TODO Move to recycling bin
 		final File f= new File(sourceFilename);
 		progressDlg.deleting(f);
-		if (!PRETEND_MODE)
-			if (!f.delete())
-				throw new IOException("Delete failed. (\"" + sourceFilename + "\")"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (PRETEND_MODE)
+			return true;
+		while (true) {
+			try {
+				if (f.delete())
+					return true;
+			} catch (Throwable t) {
+			}
+			switch (UIHelpers.showAbortIgnoreRetryBox(progressDlg.getShell(), I18n.l("general_error_title"), I18n.l("voodoo_err_deleteFailedPrompt", sourceFilename))) {//$NON-NLS-1$ //$NON-NLS-2$
+			case SWT.IGNORE:
+				return false;
+			case SWT.ABORT:
+				return null;
+			}
+		}
 	}
 
 	private DirData getOrCreateDirData(String dir) {
