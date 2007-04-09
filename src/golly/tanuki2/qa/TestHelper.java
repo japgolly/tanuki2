@@ -7,13 +7,6 @@ import static golly.tanuki2.data.TrackPropertyType.TRACK;
 import static golly.tanuki2.data.TrackPropertyType.YEAR;
 import static golly.tanuki2.support.Helpers.addPathElements;
 import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import golly.tanuki2.core.Engine;
 import golly.tanuki2.core.ITrackProprtyReader;
 import golly.tanuki2.core.IVoodooProgressMonitor;
@@ -21,6 +14,12 @@ import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.TrackProperties;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
@@ -177,7 +176,7 @@ class MockVoodooProgressMonitor implements IVoodooProgressMonitor {
 		return false;
 	}
 
-	public void fileOperationComplete(boolean result) {
+	public void fileOperationComplete(int status) {
 	}
 }
 
@@ -226,7 +225,17 @@ class NoisyMockVoodooProgressMonitor implements IVoodooProgressMonitor {
 		return false;
 	}
 
-	public void fileOperationComplete(boolean result) {
-		System.out.println(result ? "ok" : "FAILED");
+	public void fileOperationComplete(int status) {
+		switch (status) {
+		case SUCCEEDED:
+			System.out.println("ok");
+			break;
+		case FAILED:
+			System.out.println("FAILED");
+			break;
+		case SKIPPED:
+			System.out.println("skipped");
+			break;
+		}
 	}
 }

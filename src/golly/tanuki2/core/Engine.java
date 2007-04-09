@@ -381,7 +381,7 @@ public class Engine implements ITextProcessor {
 
 	private boolean deleteFile(IVoodooProgressMonitor progressDlg, final String sourceFilename) throws VoodooAborted {
 		// TODO Move to recycling bin
-		boolean completedOk= true;
+		int completionStatus= IVoodooProgressMonitor.SUCCEEDED;
 		try {
 			final File f= new File(sourceFilename);
 			progressDlg.deleting(f);
@@ -395,15 +395,15 @@ public class Engine implements ITextProcessor {
 				}
 				switch (UIHelpers.showAbortIgnoreRetryBox(progressDlg.getShell(), I18n.l("general_error_title"), I18n.l("voodoo_err_deleteFailedPrompt", sourceFilename))) {//$NON-NLS-1$ //$NON-NLS-2$
 				case SWT.IGNORE:
-					completedOk= false;
+					completionStatus= IVoodooProgressMonitor.FAILED;
 					return false;
 				case SWT.ABORT:
-					completedOk= false;
+					completionStatus= IVoodooProgressMonitor.FAILED;
 					throw new VoodooAborted();
 				}
 			}
 		} finally {
-			progressDlg.fileOperationComplete(completedOk);
+			progressDlg.fileOperationComplete(completionStatus);
 		}
 	}
 
@@ -429,7 +429,7 @@ public class Engine implements ITextProcessor {
 	}
 
 	private boolean moveFile(final IVoodooProgressMonitor progressDlg, final String sourceFilename, final String targetFilename) throws VoodooAborted {
-		boolean completedOk= true;
+		int completionStatus= IVoodooProgressMonitor.SUCCEEDED;
 		try {
 			File source= new File(sourceFilename);
 			File target= new File(targetFilename);
@@ -459,8 +459,10 @@ public class Engine implements ITextProcessor {
 					}
 				else
 					overwrite= overwriteAll;
-				if (!overwrite)
-					return false;// TODO result should be SKIPPED not OK
+				if (!overwrite) {
+					completionStatus= IVoodooProgressMonitor.SKIPPED;
+					return false;
+				}
 			}
 
 			// Move file (and overwrite if neccessary)
@@ -474,16 +476,16 @@ public class Engine implements ITextProcessor {
 				} catch (IOException e) {
 					switch (UIHelpers.showAbortIgnoreRetryBox(progressDlg.getShell(), I18n.l("general_error_title"), I18n.l("voodoo_err_movedFailedPrompt", source, target))) {//$NON-NLS-1$ //$NON-NLS-2$
 					case SWT.IGNORE:
-						completedOk= false;
+						completionStatus= IVoodooProgressMonitor.FAILED;
 						return false;
 					case SWT.ABORT:
-						completedOk= false;
+						completionStatus= IVoodooProgressMonitor.FAILED;
 						throw new VoodooAborted();
 					}
 				}
 			} // end while
 		} finally {
-			progressDlg.fileOperationComplete(completedOk);
+			progressDlg.fileOperationComplete(completionStatus);
 		}
 	}
 

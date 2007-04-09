@@ -191,13 +191,20 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		});
 	}
 
-	public void fileOperationComplete(final boolean result) {
+	public void fileOperationComplete(final int status) {
 		display.syncExec(new Runnable() {
 			public void run() {
-				if (result)
+				switch (status) {
+				case SUCCEEDED:
 					consoleWriteLn(I18n.l("voodoo_consoletxt_fileCompleted_ok")); //$NON-NLS-1$
-				else
+					break;
+				case FAILED:
 					consoleWriteLn(I18n.l("voodoo_consoletxt_fileCompleted_failed"), clrFailed, true); //$NON-NLS-1$
+					break;
+				case SKIPPED:
+					consoleWriteLn(I18n.l("voodoo_consoletxt_fileCompleted_skipped")); //$NON-NLS-1$
+					break;
+				}
 				console.setTopIndex(consoleLines);
 			}
 		});
