@@ -68,7 +68,7 @@ public class AppWindow {
 	private final Shell shell;
 	private final TabFolder tabFolder;
 	private final Text iwTargetDir;
-	private final Button btnTargetDirBrowse, btnTitleCase;
+	private final Button btnTargetDirBrowse;
 	private final Set<IFileView> fileViewsUptodate= new HashSet<IFileView>();
 	private IFileView currentFileView= null;
 
@@ -217,10 +217,6 @@ public class AppWindow {
 				onAddFiles();
 			}
 		});
-		// chk: auto title case
-		btnTitleCase= new Button(c2, SWT.CHECK);
-		UIHelpers.setButtonText(btnTitleCase, "main_btn_autoTitleCase"); //$NON-NLS-1$
-		btnTitleCase.setSelection(Config.autoTitleCase);
 
 		// Controls row
 		c2= new Composite(composite, SWT.NONE);
@@ -293,7 +289,7 @@ public class AppWindow {
 	private void add(final String... sources) {
 		BusyIndicator.showWhile(display, new Runnable() {
 			public void run() {
-				engine.add(btnTitleCase.getSelection(), sources);
+				engine.add(Config.autoTitleCase, sources);
 				appUIShared.onDataUpdated_RefreshNow();
 			}
 		});
@@ -421,9 +417,7 @@ public class AppWindow {
 		Config.appwndY= b.y;
 		Config.appwndHeight= b.height;
 		Config.appwndWidth= b.width;
-
 		Config.targetDir= iwTargetDir.getText();
-		Config.autoTitleCase= btnTitleCase.getSelection();
 	}
 
 	// =============================================================================================== //

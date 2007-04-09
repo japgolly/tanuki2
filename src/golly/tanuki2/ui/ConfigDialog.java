@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
@@ -39,13 +40,29 @@ public class ConfigDialog {
 	private final Color tagInFormatStringColour;
 	private boolean firstWidget= true, updated= false;
 	private final LineStyleListener lineStyleListener;
+	private final Button btnTitleCase;
 
 	public ConfigDialog(Shell parent) {
 		shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-		shell.setLayout(UIHelpers.makeGridLayout(1, false, 7, 3));
+		shell.setLayout(UIHelpers.makeGridLayout(1, false, 4, 16));
 		shell.setText(I18n.l("config_title_window")); //$NON-NLS-1$
 		shell.setImage(TanukiImage.TANUKI.get());
 
+		// GROUP: Input
+		Group g= new Group(shell, SWT.SHADOW_ETCHED_IN);
+		g.setText(I18n.l("config_grp_input")); //$NON-NLS-1$
+		g.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
+		g.setLayout(UIHelpers.makeGridLayout(1, false, 4, 8));
+		// Title case button
+		btnTitleCase= new Button(g, SWT.CHECK);
+		btnTitleCase.setText(I18n.l("config_btn_autoTitleCase")); //$NON-NLS-1$
+		btnTitleCase.setSelection(Config.autoTitleCase);
+
+		// GROUP: Output
+		g= new Group(shell, SWT.SHADOW_ETCHED_IN);
+		g.setText(I18n.l("config_grp_output")); //$NON-NLS-1$
+		g.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
+		g.setLayout(UIHelpers.makeGridLayout(1, false, 4, 2));
 		// Add output format widgets
 		tagInFormatStringColour= shell.getDisplay().getSystemColor(SWT.COLOR_BLUE);
 		lineStyleListener= new LineStyleListener() {
@@ -62,13 +79,12 @@ public class ConfigDialog {
 				event.styles= (StyleRange[]) styles.toArray(new StyleRange[styles.size()]);
 			}
 		};
-		iwTargetDirFormat= addStyledText("config_txt_targetDirFormat", Config.targetDirFormat); //$NON-NLS-1$
-		iwTargetAudioFileFormat= addStyledText("config_txt_targetAudioFileFormat", Config.targetAudioFileFormat); //$NON-NLS-1$
+		iwTargetDirFormat= addStyledText(g, "config_txt_targetDirFormat", Config.targetDirFormat); //$NON-NLS-1$
+		iwTargetAudioFileFormat= addStyledText(g, "config_txt_targetAudioFileFormat", Config.targetAudioFileFormat); //$NON-NLS-1$
 
 		// Ok and Cancel buttons
 		Composite composite= new Composite(shell, SWT.NONE);
 		GridData gd= UIHelpers.makeGridData(1, true, SWT.CENTER);
-		gd.verticalIndent= 12;
 		composite.setLayoutData(gd);
 		composite.setLayout(UIHelpers.makeGridLayout(2, true, 0, 24));
 		// Button: ok
@@ -106,8 +122,8 @@ public class ConfigDialog {
 	// = Internal
 	// =============================================================================================== //
 
-	private StyledText addStyledText(String label, String value) {
-		Label l= new Label(shell, SWT.NONE);
+	private StyledText addStyledText(Composite parent, String label, String value) {
+		Label l= new Label(parent, SWT.NONE);
 		GridData gd= UIHelpers.makeGridData(1, true, SWT.FILL);
 		if (firstWidget)
 			firstWidget= false;
@@ -116,7 +132,7 @@ public class ConfigDialog {
 		l.setLayoutData(gd);
 		l.setText(I18n.l(label));
 
-		StyledText t= new StyledText(shell, SWT.BORDER | SWT.SINGLE);
+		StyledText t= new StyledText(parent, SWT.BORDER | SWT.SINGLE);
 		t.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
 		t.setText(value);
 		t.addLineStyleListener(lineStyleListener);
@@ -146,6 +162,7 @@ public class ConfigDialog {
 		}
 
 		// Update config
+		Config.autoTitleCase= btnTitleCase.getSelection();
 		Config.targetAudioFileFormat= targetAudioFileFormat;
 		Config.targetDirFormat= targetDirFormat;
 
