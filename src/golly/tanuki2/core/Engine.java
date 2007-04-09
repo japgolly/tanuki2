@@ -199,11 +199,7 @@ public class Engine implements ITextProcessor {
 							for (String sourceFilename : Helpers.sort(pc.moves.keySet())) {
 								final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
 								progressDlg.nextFile();
-								final Boolean result= moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename)));
-								progressDlg.fileOperationComplete(result != null && result);
-								if (result == null)
-									throw new VoodooAborted();
-								else if (result)
+								if (moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename))))
 									removeList.add(sourceFullFilename);
 							}
 						}
@@ -212,11 +208,7 @@ public class Engine implements ITextProcessor {
 						for (String f : Helpers.sort(pc.deletions)) {
 							final String sourceFullFilename= addPathElements(srcDir, f);
 							progressDlg.nextFile();
-							final Boolean result= deleteFile(progressDlg, sourceFullFilename);
-							progressDlg.fileOperationComplete(result != null && result);
-							if (result == null)
-								throw new VoodooAborted();
-							else if (result)
+							if (deleteFile(progressDlg, sourceFullFilename))
 								removeList.add(sourceFullFilename);
 						}
 
@@ -387,24 +379,31 @@ public class Engine implements ITextProcessor {
 			dirsNeedingTrackProprties.add(dd);
 	}
 
-	private Boolean deleteFile(IVoodooProgressMonitor progressDlg, final String sourceFilename) {
+	private boolean deleteFile(IVoodooProgressMonitor progressDlg, final String sourceFilename) throws VoodooAborted {
 		// TODO Move to recycling bin
-		final File f= new File(sourceFilename);
-		progressDlg.deleting(f);
-		if (PRETEND_MODE)
-			return true;
-		while (true) {
-			try {
-				if (f.delete())
-					return true;
-			} catch (Throwable t) {
+		boolean completedOk= true;
+		try {
+			final File f= new File(sourceFilename);
+			progressDlg.deleting(f);
+			if (PRETEND_MODE)
+				return true;
+			while (true) {
+				try {
+					if (f.delete())
+						return true;
+				} catch (Throwable t) {
+				}
+				switch (UIHelpers.showAbortIgnoreRetryBox(progressDlg.getShell(), I18n.l("general_error_title"), I18n.l("voodoo_err_deleteFailedPrompt", sourceFilename))) {//$NON-NLS-1$ //$NON-NLS-2$
+				case SWT.IGNORE:
+					completedOk= false;
+					return false;
+				case SWT.ABORT:
+					completedOk= false;
+					throw new VoodooAborted();
+				}
 			}
-			switch (UIHelpers.showAbortIgnoreRetryBox(progressDlg.getShell(), I18n.l("general_error_title"), I18n.l("voodoo_err_deleteFailedPrompt", sourceFilename))) {//$NON-NLS-1$ //$NON-NLS-2$
-			case SWT.IGNORE:
-				return false;
-			case SWT.ABORT:
-				return null;
-			}
+		} finally {
+			progressDlg.fileOperationComplete(completedOk);
 		}
 	}
 
@@ -429,56 +428,63 @@ public class Engine implements ITextProcessor {
 		return fmt;
 	}
 
-	private Boolean moveFile(final IVoodooProgressMonitor progressDlg, final String sourceFilename, final String targetFilename) {
-		File source= new File(sourceFilename);
-		File target= new File(targetFilename);
+	private boolean moveFile(final IVoodooProgressMonitor progressDlg, final String sourceFilename, final String targetFilename) throws VoodooAborted {
+		boolean completedOk= true;
+		try {
+			File source= new File(sourceFilename);
+			File target= new File(targetFilename);
 
-		if (source.equals(target))
-			return true;
-
-		// Target file already exists
-		if (target.isFile()) {
-			final boolean overwrite;
-			if (overwriteAll == null)
-				switch (YesNoToAllBox.show(progressDlg.getShell(), I18n.l("voodoo_txt_overwritePrompt", targetFilename), YesNoToAllBox.Value.NO)) { //$NON-NLS-1$
-				case NO:
-					overwrite= false;
-					break;
-				case YES:
-					overwrite= true;
-					break;
-				case NO_TO_ALL:
-					overwriteAll= overwrite= false;
-					break;
-				case YES_TO_ALL:
-					overwriteAll= overwrite= true;
-					break;
-				default:
-					throw new RuntimeException(); // This is just to shut up the compiler.
-				}
-			else
-				overwrite= overwriteAll;
-			if (!overwrite)
-				return false;
-		}
-
-		// Move file (and overwrite if neccessary)
-		progressDlg.moving(source, target);
-		if (PRETEND_MODE)
-			return true;
-		while (true) {
-			try {
-				Helpers.mv(source, target);
+			if (source.equals(target))
 				return true;
-			} catch (IOException e) {
-				switch (UIHelpers.showAbortIgnoreRetryBox(progressDlg.getShell(), I18n.l("general_error_title"), I18n.l("voodoo_err_movedFailedPrompt", source, target))) {//$NON-NLS-1$ //$NON-NLS-2$
-				case SWT.IGNORE:
-					return false;
-				case SWT.ABORT:
-					return null;
-				}
+
+			// Target file already exists
+			if (target.isFile()) {
+				final boolean overwrite;
+				if (overwriteAll == null)
+					switch (YesNoToAllBox.show(progressDlg.getShell(), I18n.l("voodoo_txt_overwritePrompt", targetFilename), YesNoToAllBox.Value.NO)) { //$NON-NLS-1$
+					case NO:
+						overwrite= false;
+						break;
+					case YES:
+						overwrite= true;
+						break;
+					case NO_TO_ALL:
+						overwriteAll= overwrite= false;
+						break;
+					case YES_TO_ALL:
+						overwriteAll= overwrite= true;
+						break;
+					default:
+						throw new RuntimeException(); // This is just to shut up the compiler.
+					}
+				else
+					overwrite= overwriteAll;
+				if (!overwrite)
+					return false;// TODO result should be SKIPPED not OK
 			}
-		} // end while
+
+			// Move file (and overwrite if neccessary)
+			progressDlg.moving(source, target);
+			if (PRETEND_MODE)
+				return true;
+			while (true) {
+				try {
+					Helpers.mv(source, target);
+					return true;
+				} catch (IOException e) {
+					switch (UIHelpers.showAbortIgnoreRetryBox(progressDlg.getShell(), I18n.l("general_error_title"), I18n.l("voodoo_err_movedFailedPrompt", source, target))) {//$NON-NLS-1$ //$NON-NLS-2$
+					case SWT.IGNORE:
+						completedOk= false;
+						return false;
+					case SWT.ABORT:
+						completedOk= false;
+						throw new VoodooAborted();
+					}
+				}
+			} // end while
+		} finally {
+			progressDlg.fileOperationComplete(completedOk);
+		}
 	}
 
 	protected void readAndAssignTrackProprties() {
