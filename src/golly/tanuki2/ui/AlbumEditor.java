@@ -216,7 +216,10 @@ public class AlbumEditor {
 			}
 
 		// Resize and position window
+		final String iwYearTxt= iwYear.getText();
+		iwYear.setText("xxxxxxxx"); //$NON-NLS-1$
 		shell.pack();
+		iwYear.setText(iwYearTxt);
 		Rectangle dca= Display.getCurrent().getClientArea();
 		Rectangle shellBounds= shell.getBounds();
 		if (shellBounds.height > dca.height)
