@@ -146,7 +146,7 @@ public class UIHelpers {
 		layout.justify= justify;
 		return layout;
 	}
-	
+
 	public static void passControlToUiUntilShellClosed(Shell shell) {
 		final Display display= shell.getDisplay();
 		while (!shell.isDisposed())
@@ -200,6 +200,19 @@ public class UIHelpers {
 
 	public static void setWidth(Control control, int width) {
 		control.setSize(width, control.getSize().y);
+	}
+
+	public static int showAbortIgnoreRetryBox(Shell shell, final String title, final String message) {
+		final RunnableWithShell r= new RunnableWithShell() {
+			public void run(Shell shell) {
+				MessageBox m= new MessageBox(shell, SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY | SWT.IGNORE);
+				m.setText(title);
+				m.setMessage(message);
+				ret= (Integer) m.open();
+			}
+		};
+		runWithShell(shell, r);
+		return (Integer) r.ret;
 	}
 
 	public static boolean showOkCancelBox(Shell shell, final int iconType, final String title, final String message) {
