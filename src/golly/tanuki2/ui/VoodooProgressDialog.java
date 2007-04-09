@@ -1,6 +1,7 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.core.IVoodooProgressMonitor;
+import golly.tanuki2.support.Config;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIResourceManager;
@@ -12,6 +13,7 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -49,7 +51,11 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		shell.setText(parent.getText());
 		shell.addListener(SWT.Close, new Listener() {
 			public void handleEvent(Event event) {
-				if (!allowClose)
+				if (allowClose) {
+					final Point sz= shell.getSize();
+					Config.voodooWndWidth= sz.x;
+					Config.voodooWndHeight= sz.y;
+				} else
 					event.doit= false;
 			}
 		});
@@ -93,9 +99,18 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		lblOverallP.setText("xxxxx/xxxxx"); //$NON-NLS-1$
 		shell.pack();
 		final Rectangle dca= display.getClientArea();
-		UIHelpers.setWidth(shell, (int) Math.min(1000, dca.width * .975));
-		UIHelpers.setHeight(shell, (int) Math.min(652, dca.height * .975));
-		UIHelpers.centerInFrontOfParent(display, shell, dca);
+		int w= Config.voodooWndWidth;
+		int h= Config.voodooWndHeight;
+		if (w < 16)
+			w= (int) Math.min(1000, dca.width * .975);
+		else if (w > dca.width)
+			w= dca.width;
+		if (h < 16)
+			h= (int) Math.min(652, dca.height * .975);
+		else if (h > dca.height)
+			h= dca.height;
+		shell.setSize(w, h);
+		UIHelpers.centerInFrontOfParent(display, shell, parent.getBounds());
 		lblOverallP.setText(""); //$NON-NLS-1$
 		shell.setFocus();
 	}
