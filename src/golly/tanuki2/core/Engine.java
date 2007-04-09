@@ -61,7 +61,6 @@ public class Engine implements ITextProcessor {
 	protected final List<ITrackProprtyReader> trackProprtyReaders= new ArrayList<ITrackProprtyReader>();
 	protected final Set<DirData> dirsNeedingTrackProprties= new HashSet<DirData>();
 	private Boolean overwriteAll= null;
-	protected boolean autoTitleCase= true;
 
 	public Engine() {
 		trackProprtyReaders.add(new FilenameParser());
@@ -70,8 +69,7 @@ public class Engine implements ITextProcessor {
 	/**
 	 * Add files, and recursively add contents of folders to the processing list.
 	 */
-	public void add(boolean autoTitleCase, String... filesAndDirs) {
-		this.autoTitleCase= autoTitleCase;
+	public void add(String... filesAndDirs) {
 		for (String filename : filesAndDirs) {
 			File f= new File(filename);
 			if (f.isDirectory())
@@ -256,8 +254,8 @@ public class Engine implements ITextProcessor {
 
 	public String processText(String txt) {
 		if (txt != null) {
-			if (autoTitleCase)
-				txt= Helpers.makeTitleCase(txt);
+			if (Config.autoTitleCase)
+				txt= Helpers.makeTitleCase(txt, Config.intelligentTitleCase);
 		}
 		return txt;
 	}

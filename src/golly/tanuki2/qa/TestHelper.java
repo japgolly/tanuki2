@@ -71,7 +71,6 @@ class Engine2 extends Engine {
 		super();
 		trackProprtyReaders.clear();
 		trackProprtyReaders.add(tr);
-		autoTitleCase= false;
 	}
 
 	public void addFakeDir(String path, String... filenames) {
@@ -98,7 +97,6 @@ class Engine2 extends Engine {
  */
 class Engine3 extends Engine {
 	public Engine3() {
-		autoTitleCase= false;
 	}
 
 	public void addDirNeedingTrackProprties(DirData dd) {

@@ -10,6 +10,7 @@ import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
+import golly.tanuki2.support.Config;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
@@ -387,11 +388,11 @@ public class AlbumEditor {
 	}
 
 	private static void makeTitleCase(Combo w) {
-		w.setText(Helpers.makeTitleCase(w.getText()));
+		w.setText(Helpers.makeTitleCase(w.getText(), Config.intelligentTitleCase));
 	}
 
 	private static void makeTitleCase(Text w) {
-		w.setText(Helpers.makeTitleCase(w.getText()));
+		w.setText(Helpers.makeTitleCase(w.getText(), Config.intelligentTitleCase));
 	}
 
 	private static String processWidgetText(String text) {

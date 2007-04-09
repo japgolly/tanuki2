@@ -289,7 +289,7 @@ public class AppWindow {
 	private void add(final String... sources) {
 		BusyIndicator.showWhile(display, new Runnable() {
 			public void run() {
-				engine.add(Config.autoTitleCase, sources);
+				engine.add(sources);
 				appUIShared.onDataUpdated_RefreshNow();
 			}
 		});
