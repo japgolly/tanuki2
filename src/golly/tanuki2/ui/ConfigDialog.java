@@ -40,7 +40,7 @@ public class ConfigDialog {
 	private final Color tagInFormatStringColour;
 	private boolean firstWidget= true, updated= false;
 	private final LineStyleListener lineStyleListener;
-	private final Button btnTitleCase;
+	private final Button btnAutoTitleCase, btnIntelligentTitleCase;
 
 	public ConfigDialog(Shell parent) {
 		shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
@@ -48,15 +48,19 @@ public class ConfigDialog {
 		shell.setText(I18n.l("config_title_window")); //$NON-NLS-1$
 		shell.setImage(TanukiImage.TANUKI.get());
 
-		// GROUP: Input
+		// GROUP: Text
 		Group g= new Group(shell, SWT.SHADOW_ETCHED_IN);
-		g.setText(I18n.l("config_grp_input")); //$NON-NLS-1$
+		g.setText(I18n.l("config_grp_text")); //$NON-NLS-1$
 		g.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
 		g.setLayout(UIHelpers.makeGridLayout(1, false, 4, 8));
-		// Title case button
-		btnTitleCase= new Button(g, SWT.CHECK);
-		btnTitleCase.setText(I18n.l("config_btn_autoTitleCase")); //$NON-NLS-1$
-		btnTitleCase.setSelection(Config.autoTitleCase);
+		// Auto title case button
+		btnAutoTitleCase= new Button(g, SWT.CHECK);
+		btnAutoTitleCase.setText(I18n.l("config_btn_autoTitleCase")); //$NON-NLS-1$
+		btnAutoTitleCase.setSelection(Config.autoTitleCase);
+		// Intelligent title case button
+		btnIntelligentTitleCase= new Button(g, SWT.CHECK);
+		btnIntelligentTitleCase.setText(I18n.l("config_btn_intelligentTitleCase")); //$NON-NLS-1$
+		btnIntelligentTitleCase.setSelection(Config.intelligentTitleCase);
 
 		// GROUP: Output
 		g= new Group(shell, SWT.SHADOW_ETCHED_IN);
@@ -162,7 +166,8 @@ public class ConfigDialog {
 		}
 
 		// Update config
-		Config.autoTitleCase= btnTitleCase.getSelection();
+		Config.autoTitleCase= btnAutoTitleCase.getSelection();
+		Config.intelligentTitleCase= btnIntelligentTitleCase.getSelection();
 		Config.targetAudioFileFormat= targetAudioFileFormat;
 		Config.targetDirFormat= targetDirFormat;
 
