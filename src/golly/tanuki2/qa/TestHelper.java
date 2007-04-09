@@ -151,7 +151,7 @@ class MockVoodooProgressMonitor implements IVoodooProgressMonitor {
 	public void deleting(File file) {
 	}
 
-	public void finished() {
+	public void finished(boolean aborted) {
 	}
 
 	public Shell getShell() {
@@ -175,6 +175,9 @@ class MockVoodooProgressMonitor implements IVoodooProgressMonitor {
 
 	public boolean isCancelled() {
 		return false;
+	}
+
+	public void fileOperationComplete(boolean result) {
 	}
 }
 
@@ -203,11 +206,11 @@ class NoisyMockVoodooProgressMonitor implements IVoodooProgressMonitor {
 	}
 
 	public void deleting(File file) {
-		System.out.println("  Deleting " + file.getName());
+		System.out.print("  Deleting " + file.getName() + "...");
 	}
 
 	public void moving(File source, File target) {
-		System.out.println("  Moving " + source.getName() + " to " + target.getName());
+		System.out.print("  Moving " + source.getName() + " to " + target.getName() + "...");
 	}
 
 	public void rmdirs(List<File> removedDirs) {
@@ -215,11 +218,15 @@ class NoisyMockVoodooProgressMonitor implements IVoodooProgressMonitor {
 			System.out.println("  rmdir " + f.toString());
 	}
 
-	public void finished() {
-		System.out.println("Finished");
+	public void finished(boolean aborted) {
+		System.out.println(aborted ? "Aborted" : "Finished");
 	}
 
 	public boolean isCancelled() {
 		return false;
+	}
+
+	public void fileOperationComplete(boolean result) {
+		System.out.println(result ? "ok" : "FAILED");
 	}
 }

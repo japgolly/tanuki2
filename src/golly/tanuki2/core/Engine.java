@@ -176,6 +176,7 @@ public class Engine implements ITextProcessor {
 			totalCommands+= pc.getCommandCount();
 
 		progressDlg.starting(processingList.size(), totalCommands);
+		boolean aborted= false;
 		if (!progressDlg.isCancelled()) {
 			try {
 
@@ -199,6 +200,7 @@ public class Engine implements ITextProcessor {
 								final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
 								progressDlg.nextFile();
 								final Boolean result= moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename)));
+								progressDlg.fileOperationComplete(result != null && result);
 								if (result == null)
 									throw new VoodooAborted();
 								else if (result)
@@ -211,6 +213,7 @@ public class Engine implements ITextProcessor {
 							final String sourceFullFilename= addPathElements(srcDir, f);
 							progressDlg.nextFile();
 							deleteFile(progressDlg, sourceFullFilename);
+							progressDlg.fileOperationComplete(true);
 							removeList.add(sourceFullFilename);
 						}
 
@@ -228,13 +231,15 @@ public class Engine implements ITextProcessor {
 				}
 
 			} catch (Throwable t) {
-				if (!(t instanceof VoodooAborted))
+				if (t instanceof VoodooAborted)
+					aborted= true;
+				else
 					TanukiException.showErrorDialog(t);
 			}
 		} // end if (!progressDlg.isCancelled())
 
 		System.gc();
-		progressDlg.finished();
+		progressDlg.finished(aborted);
 	}
 
 	/**

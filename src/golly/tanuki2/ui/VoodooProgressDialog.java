@@ -37,7 +37,7 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	private final Label lblOverall1, lblOverallP;
 	private final ProgressBar pbOverall;
 	private final Button btnClose;
-	private final TwoColours clrDelete, clrMoveSource, clrMoveTarget, clrDirSource, clrDirTarget, clrRmdir;
+	private final TwoColours clrDelete, clrMoveSource, clrMoveTarget, clrDirSource, clrDirTarget, clrRmdir, clrFailed;
 
 	private boolean allowClose= false, cancelled= false;
 	private int totalFiles, currentFileNumber;
@@ -67,6 +67,7 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		clrDirSource= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrDirSource_bg", 255, 254, 192), UIResourceManager.getColorGrey("voodooProgessDlg_clrDirSource_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 		clrDirTarget= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrDirTarget_bg", 214, 255, 214), UIResourceManager.getColorGrey("voodooProgessDlg_clrDirTarget_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 		clrRmdir= new TwoColours(UIResourceManager.getColor("voodooProgessDlg_clrRmdir_bg", 255, 232, 232), UIResourceManager.getColorGrey("voodooProgessDlg_clrRmdir_fg", 0)); //$NON-NLS-1$ //$NON-NLS-2$
+		clrFailed= new TwoColours(null, UIResourceManager.getColor("voodooProgessDlg_clrFailed_fg", 212, 0, 0)); //$NON-NLS-1$
 
 		// Console
 		console= new StyledText(shell, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.READ_ONLY);
@@ -175,8 +176,8 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	public void deleting(final File file) {
 		display.syncExec(new Runnable() {
 			public void run() {
-				consoleWriteLn(true, "voodoo_consoletxt_fileDeleting", file.getName(), clrDelete, false); //$NON-NLS-1$
-				console.setTopIndex(consoleLines);
+				consoleWrite(true, "voodoo_consoletxt_fileDeleting", file.getName(), clrDelete, false); //$NON-NLS-1$
+				consoleWrite(I18n.l("voodoo_consoletxt_fileCompleted_prefix")); //$NON-NLS-1$
 			}
 		});
 	}
@@ -184,7 +185,19 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	public void moving(final File source, final File target) {
 		display.syncExec(new Runnable() {
 			public void run() {
-				consoleWriteLn(true, "voodoo_consoletxt_fileMoving", source.getName(), clrMoveSource, false, target.getName(), clrMoveTarget, false); //$NON-NLS-1$
+				consoleWrite(true, "voodoo_consoletxt_fileMoving", source.getName(), clrMoveSource, false, target.getName(), clrMoveTarget, false); //$NON-NLS-1$
+				consoleWrite(I18n.l("voodoo_consoletxt_fileCompleted_prefix")); //$NON-NLS-1$
+			}
+		});
+	}
+
+	public void fileOperationComplete(final boolean result) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				if (result)
+					consoleWriteLn(I18n.l("voodoo_consoletxt_fileCompleted_ok")); //$NON-NLS-1$
+				else
+					consoleWriteLn(I18n.l("voodoo_consoletxt_fileCompleted_failed"), clrFailed, true); //$NON-NLS-1$
 				console.setTopIndex(consoleLines);
 			}
 		});
@@ -200,7 +213,7 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		});
 	}
 
-	public void finished() {
+	public void finished(final boolean aborted) {
 		display.syncExec(new Runnable() {
 			public void run() {
 				if (totalFiles > 0) {
@@ -210,7 +223,10 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 					shell.setDefaultButton(btnClose);
 					btnClose.setFocus();
 					consoleWriteLn();
-					consoleWriteLn(I18n.l("voodoo_consoletxt_finished")); //$NON-NLS-1$
+					if (aborted)
+						consoleWriteLn(I18n.l("voodoo_consoletxt_aborted")); //$NON-NLS-1$
+					else
+						consoleWriteLn(I18n.l("voodoo_consoletxt_finished")); //$NON-NLS-1$
 					console.setTopIndex(consoleLines);
 				}
 				allowClose= true;
@@ -224,6 +240,34 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	// = Internal
 	// =============================================================================================== //
 
+	private void consoleWrite(String txt) {
+		console.append(txt);
+		consoleIndex+= txt.length();
+	}
+
+	private void consoleWrite(String txt, TwoColours colours, boolean bold) {
+		console.append(txt);
+		applyConsoleStyle(txt, txt, colours, bold);
+		consoleIndex+= txt.length();
+	}
+
+	private void consoleWrite(boolean indent, String i18nKey, String arg1, TwoColours colours1, boolean bold1) {
+		final String txt= (indent ? CONSOLE_INDENT : "") + I18n.l(i18nKey, arg1); //$NON-NLS-1$
+		console.append(txt);
+		applyConsoleStyle(txt, arg1, colours1, bold1);
+		consoleIndex+= txt.length();
+	}
+
+	private void consoleWrite(boolean indent, String i18nKey, String arg1, TwoColours colours1, boolean bold1, String arg2, TwoColours colours2, boolean bold2) {
+		final String txt= (indent ? CONSOLE_INDENT : "") + I18n.l(i18nKey, arg1, arg2); //$NON-NLS-1$
+		final String txt1= (indent ? CONSOLE_INDENT : "") + I18n.l(i18nKey, arg1, makeFakeString(arg2)); //$NON-NLS-1$
+		final String txt2= (indent ? CONSOLE_INDENT : "") + I18n.l(i18nKey, makeFakeString(arg1), arg2); //$NON-NLS-1$
+		console.append(txt);
+		applyConsoleStyle(txt1, arg1, colours1, bold1);
+		applyConsoleStyle(txt2, arg2, colours2, bold2);
+		consoleIndex+= txt.length();
+	}
+
 	private void consoleWriteLn() {
 		consoleWriteLn(""); //$NON-NLS-1$
 	}
@@ -234,23 +278,14 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		consoleLines++;
 	}
 
-	private void consoleWriteLn(boolean indent, String i18nKey, String arg1, TwoColours colours1, boolean bold1) {
-		final String txt= (indent ? CONSOLE_INDENT : "") + I18n.l(i18nKey, arg1); //$NON-NLS-1$
-		console.append(txt + "\n"); //$NON-NLS-1$
-		applyConsoleStyle(txt, arg1, colours1, bold1);
-		consoleIndex+= txt.length() + 1;
-		consoleLines++;
+	private void consoleWriteLn(String txt, TwoColours colours, boolean bold) {
+		consoleWrite(txt, colours, bold);
+		consoleWriteLn();
 	}
 
-	private void consoleWriteLn(boolean indent, String i18nKey, String arg1, TwoColours colours1, boolean bold1, String arg2, TwoColours colours2, boolean bold2) {
-		final String txt= (indent ? CONSOLE_INDENT : "") + I18n.l(i18nKey, arg1, arg2); //$NON-NLS-1$
-		final String txt1= (indent ? CONSOLE_INDENT : "") + I18n.l(i18nKey, arg1, makeFakeString(arg2)); //$NON-NLS-1$
-		final String txt2= (indent ? CONSOLE_INDENT : "") + I18n.l(i18nKey, makeFakeString(arg1), arg2); //$NON-NLS-1$
-		console.append(txt + "\n"); //$NON-NLS-1$
-		applyConsoleStyle(txt1, arg1, colours1, bold1);
-		applyConsoleStyle(txt2, arg2, colours2, bold2);
-		consoleIndex+= txt.length() + 1;
-		consoleLines++;
+	private void consoleWriteLn(boolean indent, String i18nKey, String arg1, TwoColours colours1, boolean bold1) {
+		consoleWrite(indent, i18nKey, arg1, colours1, bold1);
+		consoleWriteLn();
 	}
 
 	private void applyConsoleStyle(final String txt, String selection, TwoColours colours, boolean bold) {

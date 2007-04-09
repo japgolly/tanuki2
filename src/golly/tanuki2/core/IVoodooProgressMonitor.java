@@ -25,8 +25,9 @@ public interface IVoodooProgressMonitor {
 
 	public abstract void moving(File source, File target);
 
+	public abstract void fileOperationComplete(boolean result);
+
 	public abstract void rmdirs(List<File> removedDirs);
 
-	public abstract void finished();
-
+	public abstract void finished(boolean aborted);
 }
