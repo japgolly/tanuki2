@@ -3,6 +3,7 @@ package golly.tanuki2.support;
 import golly.tanuki2.support.AutoResizeColumnsListener.WidgetWithColumns;
 import golly.tanuki2.support.AutoResizeColumnsListener.WidgetWithColumns_Table;
 import golly.tanuki2.support.AutoResizeColumnsListener.WidgetWithColumns_Tree;
+import golly.tanuki2.support.OSSpecific.OS;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -191,7 +192,10 @@ public class UIHelpers {
 	}
 
 	public static void setButtonText(Button button, String i18nStringKey) {
-		button.setText("   " + I18n.l(i18nStringKey) + "   "); //$NON-NLS-1$ //$NON-NLS-2$
+		if (OSSpecific.getOS() == OS.MAC)
+			button.setText(I18n.l(i18nStringKey));
+		else
+			button.setText("   " + I18n.l(i18nStringKey) + "   "); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public static void setHeight(Control control, int height) {
