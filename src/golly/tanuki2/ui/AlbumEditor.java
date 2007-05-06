@@ -304,15 +304,19 @@ public class AlbumEditor {
 		final ClipboardParser cp= new ClipboardParser();
 		final String clipboardText= cp.getClipboardText(sharedUIResources.clipboard);
 		if (clipboardText == null)
-			UIHelpers.showTanukiWarning(shell, "albumEditor_err_noClipboardData"); //$NON-NLS-1$
+			UIHelpers.showTanukiWarning(shell, "albumEditor_err_noClipboardText"); //$NON-NLS-1$
 		else {
 			final Map<String, TrackProperties> results= cp.parseAndMatch(dd, clipboardText);
-			for (String filename : results.keySet()) {
-				TrackProperties tp= results.get(filename);
-				setText(iwTnMap.get(filename), tp.get(TrackPropertyType.TN));
-				setText(iwTrackMap.get(filename), tp.get(TrackPropertyType.TRACK));
+			if (results.isEmpty())
+				UIHelpers.showMessageBox(shell, SWT.ICON_WARNING, shell.getText(), I18n.l("albumEditor_err_noClipboardMatches")); //$NON-NLS-1$
+			else {
+				for (String filename : results.keySet()) {
+					TrackProperties tp= results.get(filename);
+					setText(iwTnMap.get(filename), tp.get(TrackPropertyType.TN));
+					setText(iwTrackMap.get(filename), tp.get(TrackPropertyType.TRACK));
+				}
+				UIHelpers.showMessageBox(shell, SWT.ICON_INFORMATION, shell.getText(), I18n.l("albumEditor_txt_readClipboardFinished", results.size())); //$NON-NLS-1$
 			}
-			UIHelpers.showMessageBox(shell, SWT.ICON_INFORMATION, shell.getText(), I18n.l("albumEditor_txt_readClipboardFinished", results.size())); //$NON-NLS-1$
 		}
 	}
 
