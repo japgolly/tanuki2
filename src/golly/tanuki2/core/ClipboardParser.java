@@ -10,8 +10,10 @@ import golly.tanuki2.support.LevenshteinDistance;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -95,24 +97,34 @@ public class ClipboardParser {
 	private void assignBestResultMatches(final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches, final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult) {
 		while (!rankedMatchesPerResult.isEmpty()) {
 			// Find highest ranking matches
+			final Set<Integer> keysWithoutMatches= new HashSet<Integer>();
 			final RankedObjectCollection<Integer> highestRanks= new RankedObjectCollection<Integer>();
 			for (Integer tn : rankedMatchesPerResult.keySet()) {
 				final RankedObjectCollection<String> ranks= rankedMatchesPerResult.get(tn);
-				highestRanks.add(tn, ranks.getWinningRank() - (ranks.getWinnerCount() > 1 ? 0.2 : 0));
+				if (ranks.isEmpty())
+					keysWithoutMatches.add(tn);
+				else
+					highestRanks.add(tn, ranks.getWinningRank() - (ranks.getWinnerCount() > 1 ? 0.2 : 0));
 			}
 
-			// Assign
-			final Integer tn= highestRanks.getWinner();
-			TrackProperties tp= new TrackProperties();
-			tp.put(TrackPropertyType.TN, tn.toString());
-			tp.put(TrackPropertyType.TRACK, clipboardResults.get(tn));
-			final String filename= rankedMatchesPerResult.get(tn).getWinner();
-			completeMatches.put(filename, tp);
+			// Remove empty matches
+			for (Integer i : keysWithoutMatches)
+				rankedMatchesPerResult.remove(i);
 
-			// Remove
-			rankedMatchesPerResult.remove(tn);
-			for (RankedObjectCollection<String> r : rankedMatchesPerResult.values())
-				r.remove(filename);
+			// Assign
+			if (!highestRanks.isEmpty()) {
+				final Integer tn= highestRanks.getWinner();
+				TrackProperties tp= new TrackProperties();
+				tp.put(TrackPropertyType.TN, tn.toString());
+				tp.put(TrackPropertyType.TRACK, clipboardResults.get(tn));
+				final String filename= rankedMatchesPerResult.get(tn).getWinner();
+				completeMatches.put(filename, tp);
+
+				// Remove
+				rankedMatchesPerResult.remove(tn);
+				for (RankedObjectCollection<String> r : rankedMatchesPerResult.values())
+					r.remove(filename);
+			}
 		}
 	}
 
