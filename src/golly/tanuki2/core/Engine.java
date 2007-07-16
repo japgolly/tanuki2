@@ -8,7 +8,7 @@ import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
-import golly.tanuki2.support.Config;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.OSSpecific;
@@ -84,8 +84,8 @@ public class Engine implements ITextProcessor {
 	public Map<String, ProcessingCommands> createProcessingList(String targetBaseDir) {
 		if (targetBaseDir != null)
 			targetBaseDir= Helpers.ensureCorrectDirSeperators(targetBaseDir);
-		final String targetDirFormat= Helpers.ensureCorrectDirSeperators(Config.targetDirFormat);
-		final String targetAudioFileFormat= Helpers.ensureCorrectDirSeperators(Config.targetAudioFileFormat);
+		final String targetDirFormat= Helpers.ensureCorrectDirSeperators(RuntimeConfig.targetDirFormat);
+		final String targetAudioFileFormat= Helpers.ensureCorrectDirSeperators(RuntimeConfig.targetAudioFileFormat);
 
 		final Map<String, ProcessingCommands> processingList= new HashMap<String, ProcessingCommands>();
 		for (final String srcDir : dirs.keySet()) {
@@ -254,8 +254,8 @@ public class Engine implements ITextProcessor {
 
 	public String processText(String txt) {
 		if (txt != null) {
-			if (Config.autoTitleCase)
-				txt= Helpers.makeTitleCase(txt, Config.intelligentTitleCase);
+			if (RuntimeConfig.autoTitleCase)
+				txt= Helpers.makeTitleCase(txt, RuntimeConfig.intelligentTitleCase);
 		}
 		return txt;
 	}

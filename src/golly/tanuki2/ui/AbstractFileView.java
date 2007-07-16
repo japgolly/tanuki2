@@ -5,9 +5,7 @@ import golly.tanuki2.data.FileData;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.OSSpecific;
-import golly.tanuki2.support.TanukiException;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 

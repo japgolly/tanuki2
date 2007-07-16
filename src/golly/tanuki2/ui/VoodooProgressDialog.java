@@ -1,7 +1,7 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.core.IVoodooProgressMonitor;
-import golly.tanuki2.support.Config;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIResourceManager;
@@ -53,8 +53,8 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 			public void handleEvent(Event event) {
 				if (allowClose) {
 					final Point sz= shell.getSize();
-					Config.voodooWndWidth= sz.x;
-					Config.voodooWndHeight= sz.y;
+					RuntimeConfig.voodooWndWidth= sz.x;
+					RuntimeConfig.voodooWndHeight= sz.y;
 				} else
 					event.doit= false;
 			}
@@ -100,8 +100,8 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		lblOverallP.setText("xxxxx/xxxxx"); //$NON-NLS-1$
 		shell.pack();
 		final Rectangle dca= display.getClientArea();
-		int w= Config.voodooWndWidth;
-		int h= Config.voodooWndHeight;
+		int w= RuntimeConfig.voodooWndWidth;
+		int h= RuntimeConfig.voodooWndHeight;
 		if (w < 16)
 			w= (int) Math.min(1000, dca.width * .975);
 		else if (w > dca.width)

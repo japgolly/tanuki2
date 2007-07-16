@@ -8,7 +8,7 @@ import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.res.TanukiImage;
-import golly.tanuki2.support.Config;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.Helpers;
 
 import java.io.BufferedReader;
@@ -38,7 +38,7 @@ public class EngineTest extends TestHelper {
 
 	@Before
 	public void setup() {
-		Config.autoTitleCase= false;
+		RuntimeConfig.autoTitleCase= false;
 		mtpr= new MockTrackProprtyReader();
 		engine= engine2= new Engine2(mtpr);
 	}

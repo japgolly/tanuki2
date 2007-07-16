@@ -1,7 +1,7 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.res.TanukiImage;
-import golly.tanuki2.support.Config;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
@@ -56,11 +56,11 @@ public class ConfigDialog {
 		// Auto title case button
 		btnAutoTitleCase= new Button(g, SWT.CHECK);
 		btnAutoTitleCase.setText(I18n.l("config_btn_autoTitleCase")); //$NON-NLS-1$
-		btnAutoTitleCase.setSelection(Config.autoTitleCase);
+		btnAutoTitleCase.setSelection(RuntimeConfig.autoTitleCase);
 		// Intelligent title case button
 		btnIntelligentTitleCase= new Button(g, SWT.CHECK);
 		btnIntelligentTitleCase.setText(I18n.l("config_btn_intelligentTitleCase")); //$NON-NLS-1$
-		btnIntelligentTitleCase.setSelection(Config.intelligentTitleCase);
+		btnIntelligentTitleCase.setSelection(RuntimeConfig.intelligentTitleCase);
 
 		// GROUP: Output
 		g= new Group(shell, SWT.SHADOW_ETCHED_IN);
@@ -83,8 +83,8 @@ public class ConfigDialog {
 				event.styles= (StyleRange[]) styles.toArray(new StyleRange[styles.size()]);
 			}
 		};
-		iwTargetDirFormat= addStyledText(g, "config_txt_targetDirFormat", Config.targetDirFormat); //$NON-NLS-1$
-		iwTargetAudioFileFormat= addStyledText(g, "config_txt_targetAudioFileFormat", Config.targetAudioFileFormat); //$NON-NLS-1$
+		iwTargetDirFormat= addStyledText(g, "config_txt_targetDirFormat", RuntimeConfig.targetDirFormat); //$NON-NLS-1$
+		iwTargetAudioFileFormat= addStyledText(g, "config_txt_targetAudioFileFormat", RuntimeConfig.targetAudioFileFormat); //$NON-NLS-1$
 
 		// Ok and Cancel buttons
 		Composite composite= new Composite(shell, SWT.NONE);
@@ -166,10 +166,10 @@ public class ConfigDialog {
 		}
 
 		// Update config
-		Config.autoTitleCase= btnAutoTitleCase.getSelection();
-		Config.intelligentTitleCase= btnIntelligentTitleCase.getSelection();
-		Config.targetAudioFileFormat= targetAudioFileFormat;
-		Config.targetDirFormat= targetDirFormat;
+		RuntimeConfig.autoTitleCase= btnAutoTitleCase.getSelection();
+		RuntimeConfig.intelligentTitleCase= btnIntelligentTitleCase.getSelection();
+		RuntimeConfig.targetAudioFileFormat= targetAudioFileFormat;
+		RuntimeConfig.targetDirFormat= targetDirFormat;
 
 		// Finished
 		updated= true;

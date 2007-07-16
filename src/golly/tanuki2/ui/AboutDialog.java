@@ -1,6 +1,6 @@
 package golly.tanuki2.ui;
 
-import golly.tanuki2.Tanuki;
+import golly.tanuki2.StaticConfig;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.UIHelpers;
@@ -20,9 +20,6 @@ import org.eclipse.swt.widgets.Shell;
  * @since 16/03/2007
  */
 public class AboutDialog {
-	public static final String WEBSITE_LASTFM= "http://www.last.fm/user/japgolly"; //$NON-NLS-1$
-	public static final String WEBSITE_TANUKI= "http://software.davidbarri.com"; //$NON-NLS-1$
-
 	private final Shell shell;
 
 	public AboutDialog(Shell parent) {
@@ -37,7 +34,7 @@ public class AboutDialog {
 
 		l= new Label(shell, SWT.NONE);
 		l.setLayoutData(UIHelpers.makeGridData(1, true, SWT.LEFT));
-		l.setText(I18n.l("about_txt_appWithVersion", Tanuki.VERSION)); //$NON-NLS-1$
+		l.setText(I18n.l("about_txt_appWithVersion", StaticConfig.VERSION)); //$NON-NLS-1$
 
 		l= new Label(shell, SWT.NONE);
 		l.setLayoutData(UIHelpers.makeGridData(2, true, SWT.LEFT));
@@ -45,7 +42,7 @@ public class AboutDialog {
 
 		Link link= new Link(shell, SWT.NONE);
 		link.setLayoutData(UIHelpers.makeGridData(2, true, SWT.LEFT));
-		link.setText(I18n.l("about_txt_websiteTanuki", "<a>" + WEBSITE_TANUKI + "</a>")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		link.setText(I18n.l("about_txt_websiteTanuki", "<a>" + StaticConfig.URL_TANUKI_HOMEPAGE + "</a>")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		link.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				WebBrowser.open(event.text);
@@ -54,7 +51,7 @@ public class AboutDialog {
 
 		link= new Link(shell, SWT.NONE);
 		link.setLayoutData(UIHelpers.makeGridData(2, true, SWT.LEFT));
-		link.setText(I18n.l("about_txt_websiteLastfm", "<a>" + WEBSITE_LASTFM + "</a>")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		link.setText(I18n.l("about_txt_websiteLastfm", "<a>" + StaticConfig.URL_LASTFM + "</a>")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		link.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				WebBrowser.open(event.text);
