@@ -1,6 +1,7 @@
 package golly.tanuki2.core;
 
 import golly.tanuki2.data.DirData;
+import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.TrackProperties;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.support.Helpers;
@@ -55,7 +56,6 @@ public class FilenameParser implements ITrackProprtyReader {
 			macros.put("bitrate", possiblyEnclosed(bitrate + "(?:" + macros.get("sepOrSpace") + bitrate + ")?"));
 			macros.put("dirCrap", "(?: *" + Helpers.regexOr(macros.get("website"), macros.get("bitrate")) + ")*");
 			macros.put("album_andor_artist", Helpers.regexOr("[:artist:](?:<sepOrSpace>[:album:])?", "[:album:](?:<sepOrSpace>[:artist:])?"));
-
 		}
 
 		// ======================================================= //
@@ -69,9 +69,9 @@ public class FilenameParser implements ITrackProprtyReader {
 			String patternString= ".*[\\\\/]" + Helpers.join(patternStrings, "<dirCrap>[\\\\/]") + "\\.[^.]+$";
 
 			// Replace macros with regex
-			for (String i : macros.keySet()) {
-				patternString= patternString.replace("<" + i + ">?", "(?:" + macros.get(i) + ")?");
-				patternString= patternString.replace("<" + i + ">", "(?:" + macros.get(i) + ")");
+			for (Map.Entry<String, String> i : macros.entrySet()) {
+				patternString= patternString.replace("<" + i.getKey() + ">?", "(?:" + i.getValue() + ")?");
+				patternString= patternString.replace("<" + i.getKey() + ">", "(?:" + i.getValue() + ")");
 			}
 
 			// Get indexes for track properties and add back-references
@@ -154,8 +154,9 @@ public class FilenameParser implements ITrackProprtyReader {
 		Map<String, String> processedFilenameMap= new HashMap<String, String>();
 		String processedDir= dd.dir;
 		StringBuilder allFilenames= new StringBuilder();
-		for (String shortFilename : dd.files.keySet())
-			if (dd.files.get(shortFilename).isAudio()) {
+		for (Map.Entry<String, FileData> e : dd.files.entrySet())
+			if (e.getValue().isAudio()) {
+				final String shortFilename= e.getKey();
 				allFilenames.append(Helpers.removeFilenameExtension(shortFilename));
 				allFilenames.append('/');
 				processedFilenameMap.put(shortFilename, shortFilename);
@@ -220,8 +221,8 @@ public class FilenameParser implements ITrackProprtyReader {
 			}
 
 		// Read track properties for each file
-		for (String shortFilename : processedFilenameMap.keySet())
-			r.put(shortFilename, readTrackProperties(Helpers.addPathElements(processedDir, processedFilenameMap.get(shortFilename))));
+		for (Map.Entry<String, String> e : processedFilenameMap.entrySet())
+			r.put(e.getKey(), readTrackProperties(Helpers.addPathElements(processedDir, e.getValue())));
 
 		return r;
 	}
