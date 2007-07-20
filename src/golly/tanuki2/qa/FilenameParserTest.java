@@ -6,7 +6,7 @@ import static golly.tanuki2.data.TrackPropertyType.TN;
 import static golly.tanuki2.data.TrackPropertyType.TRACK;
 import static golly.tanuki2.data.TrackPropertyType.YEAR;
 import golly.tanuki2.core.FilenameParser;
-import golly.tanuki2.core.ITrackProprtyReader;
+import golly.tanuki2.core.ITrackPropertyReader;
 import golly.tanuki2.core.FilenameParser.SmartPattern;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.TrackProperties;
@@ -25,7 +25,7 @@ import org.junit.Test;
  */
 @SuppressWarnings("nls")
 public class FilenameParserTest extends TestHelper {
-	private ITrackProprtyReader fp= null;
+	private ITrackPropertyReader fp= null;
 
 	@Before
 	public void setup() {
@@ -334,7 +334,7 @@ public class FilenameParserTest extends TestHelper {
 		}
 	}
 
-	private void subtestParse(ITrackProprtyReader fp, String filename, String artist, Integer year, String album, String tn, String track) {
+	private void subtestParse(ITrackPropertyReader fp, String filename, String artist, Integer year, String album, String tn, String track) {
 		final TrackProperties expected= makeTrackProperties(artist, year, album, tn, track);
 
 		final Collection<TrackProperties> r= fp.readTrackProperties(filename);

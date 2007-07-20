@@ -8,7 +8,7 @@ import static golly.tanuki2.data.TrackPropertyType.YEAR;
 import static golly.tanuki2.support.Helpers.addPathElements;
 import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
 import golly.tanuki2.core.Engine;
-import golly.tanuki2.core.ITrackProprtyReader;
+import golly.tanuki2.core.ITrackPropertyReader;
 import golly.tanuki2.core.IVoodooProgressMonitor;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
@@ -67,7 +67,7 @@ public abstract class TestHelper extends Assert {
  */
 class Engine2 extends Engine {
 	@SuppressWarnings("nls")
-	public Engine2(ITrackProprtyReader tr) {
+	public Engine2(ITrackPropertyReader tr) {
 		super();
 		trackProprtyReaders.clear();
 		trackProprtyReaders.add(tr);
@@ -112,7 +112,7 @@ class Engine3 extends Engine {
  * @author Golly
  * @since 24/02/2007
  */
-class MockTrackProprtyReader extends TestHelper implements ITrackProprtyReader {
+class MockTrackProprtyReader extends TestHelper implements ITrackPropertyReader {
 
 	private final Map<String, List<TrackProperties>> mockResults= new HashMap<String, List<TrackProperties>>();
 

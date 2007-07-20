@@ -10,7 +10,7 @@ import java.util.Map;
  * @author Golly
  * @since 24/02/2007
  */
-public interface ITrackProprtyReader {
+public interface ITrackPropertyReader {
 
 	public abstract Map<String, List<TrackProperties>> readMultipleTrackProperties(final DirData dd);
 

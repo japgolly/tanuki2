@@ -58,7 +58,7 @@ public class Engine implements ITextProcessor {
 	public final HashMap<String, DirData> dirs= new HashMap<String, DirData>();
 	public final HashMap<String, FileData> files= new HashMap<String, FileData>();
 
-	protected final List<ITrackProprtyReader> trackProprtyReaders= new ArrayList<ITrackProprtyReader>();
+	protected final List<ITrackPropertyReader> trackProprtyReaders= new ArrayList<ITrackPropertyReader>();
 	protected final Set<DirData> dirsNeedingTrackProprties= new HashSet<DirData>();
 	private Boolean overwriteAll= null;
 
@@ -280,7 +280,7 @@ public class Engine implements ITextProcessor {
 		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= new HashMap<DirData, Map<String, List<TrackProperties>>>();
 		for (DirData dd : dirsToProcess) {
 			final Map<String, List<TrackProperties>> trackPropertyMap= new HashMap<String, List<TrackProperties>>();
-			for (ITrackProprtyReader reader : trackProprtyReaders)
+			for (ITrackPropertyReader reader : trackProprtyReaders)
 				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
 			unassignedData.put(dd, trackPropertyMap);
 		}

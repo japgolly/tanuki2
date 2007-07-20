@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * @author Golly
  * @since 23/02/2007
  */
-public class FilenameParser implements ITrackProprtyReader {
+public class FilenameParser implements ITrackPropertyReader {
 
 	// =============================================================================================== //
 	// = SmartPattern
