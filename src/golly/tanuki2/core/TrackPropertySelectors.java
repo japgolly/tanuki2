@@ -5,7 +5,7 @@ import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.RankedObject;
 import golly.tanuki2.data.RankedObjectCollection;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.support.Helpers;
 
@@ -30,11 +30,11 @@ class TrackPropertySelectors {
 	 * Assigns result if only one exists.
 	 */
 	public static class AssignSingleRows extends AbstractTrackPropertySelector {
-		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
+		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackPropertyMap>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
 			for (String filename : trackPropertyMap.keySet()) {
-				final List<TrackProperties> resultArray= trackPropertyMap.get(filename);
+				final List<TrackPropertyMap> resultArray= trackPropertyMap.get(filename);
 				if (resultArray.size() == 1) {
-					TrackProperties tp= resultArray.iterator().next();
+					TrackPropertyMap tp= resultArray.iterator().next();
 					assignTrackPropertiesToFile(ddFiles.get(filename), tp, sharedAlbumData);
 					successfulFiles.add(filename);
 				}
@@ -62,14 +62,14 @@ class TrackPropertySelectors {
 			this.firstPass= firstPass;
 		}
 
-		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
+		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackPropertyMap>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
 			final Map<TrackPropertyType, RankedObjectCollection<String>> rankedIndividualAlbumProperties= new HashMap<TrackPropertyType, RankedObjectCollection<String>>();
 			// STEP 1: Create individual, ranked album properties
 			for (TrackPropertyType propType : TrackPropertyType.albumTypes) {
 				final RankedObjectCollection<String> roc= new RankedObjectCollection<String>();
 				rankedIndividualAlbumProperties.put(propType, roc);
 				for (String filename : trackPropertyMap.keySet())
-					for (TrackProperties tp : trackPropertyMap.get(filename)) {
+					for (TrackPropertyMap tp : trackPropertyMap.get(filename)) {
 						String x= tp.get(propType);
 						if (x != null) {
 							x= Helpers.normalizeText(x);
@@ -89,8 +89,8 @@ class TrackPropertySelectors {
 
 			// STEP 3: Rank each tp
 			for (String filename : trackPropertyMap.keySet()) {
-				final RankedObjectCollection<TrackProperties> rankedTPs= new RankedObjectCollection<TrackProperties>();
-				for (TrackProperties tp : trackPropertyMap.get(filename)) {
+				final RankedObjectCollection<TrackPropertyMap> rankedTPs= new RankedObjectCollection<TrackPropertyMap>();
+				for (TrackPropertyMap tp : trackPropertyMap.get(filename)) {
 					double rank= 0;
 					for (TrackPropertyType propType : TrackPropertyType.albumTypes) {
 						final RankedObjectCollection<String> roc= rankedIndividualAlbumProperties.get(propType);
@@ -108,7 +108,7 @@ class TrackPropertySelectors {
 				// If more than one winner and not on first pass..
 				else if (!firstPass && rankedTPs.getWinnerCount() > 1) {
 					// Try to change ranks of of the winners
-					for (RankedObject<TrackProperties> i : rankedTPs.getWinners()) {
+					for (RankedObject<TrackPropertyMap> i : rankedTPs.getWinners()) {
 						// Penalise the rank of strings with unlikely substrings in them
 						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.ARTIST));
 						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.ALBUM));
@@ -119,7 +119,7 @@ class TrackPropertySelectors {
 					}
 					rankedTPs.sort();
 					// select one of the winners
-					TrackProperties winner= rankedTPs.iterator().next().data;
+					TrackPropertyMap winner= rankedTPs.iterator().next().data;
 					assignTrackPropertiesToFile(ddFiles.get(filename), winner, sharedAlbumData);
 					successfulFiles.add(filename);
 					// and increase the rank of all album properties found in the winner
@@ -132,7 +132,7 @@ class TrackPropertySelectors {
 			}
 		}
 
-		private void penaliseUnlikelySubstrings(RankedObject<TrackProperties> i, String a) {
+		private void penaliseUnlikelySubstrings(RankedObject<TrackPropertyMap> i, String a) {
 			if (a != null) {
 				final Matcher m= pUnlikely.matcher(a);
 				while (m.find())
@@ -146,7 +146,7 @@ class TrackPropertySelectors {
 	// =============================================================================================== //
 
 	private static abstract class AbstractTrackPropertySelector {
-		public abstract void run(Map<String, FileData> ddFiles, Map<String, List<TrackProperties>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles);
+		public abstract void run(Map<String, FileData> ddFiles, Map<String, List<TrackPropertyMap>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles);
 
 		private ITextProcessor textProcessor= null;
 
@@ -154,7 +154,7 @@ class TrackPropertySelectors {
 			this.textProcessor= textProcessor;
 		}
 
-		protected void assignTrackPropertiesToFile(final FileData fd, TrackProperties tp, final RankedObjectCollection<AlbumData> sharedAlbumData) {
+		protected void assignTrackPropertiesToFile(final FileData fd, TrackPropertyMap tp, final RankedObjectCollection<AlbumData> sharedAlbumData) {
 			fd.setTn(tp.get(TrackPropertyType.TN));
 			fd.setTrack(textProcessor.processText(tp.get(TrackPropertyType.TRACK)));
 			final AlbumData ad= sharedAlbumData.increaseRank(tp.toAlbumData(), 1).data;
@@ -169,11 +169,11 @@ class TrackPropertySelectors {
 	// =============================================================================================== //
 
 	public static class Runner {
-		private final Map<DirData, Map<String, List<TrackProperties>>> unassignedData;
+		private final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData;
 		private final RankedObjectCollection<AlbumData> sharedAlbumData;
 		private final ITextProcessor textProcessor;
 
-		public Runner(final Map<DirData, Map<String, List<TrackProperties>>> unassignedData, ITextProcessor textProcessor) {
+		public Runner(final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData, ITextProcessor textProcessor) {
 			this.unassignedData= unassignedData;
 			this.sharedAlbumData= new RankedObjectCollection<AlbumData>();
 			this.textProcessor= textProcessor;
@@ -183,7 +183,7 @@ class TrackPropertySelectors {
 			selector.init(textProcessor);
 			final Set<String> successfulFiles= new HashSet<String>();
 			for (DirData dd : unassignedData.keySet()) {
-				final Map<String, List<TrackProperties>> trackPropertyMap= unassignedData.get(dd);
+				final Map<String, List<TrackPropertyMap>> trackPropertyMap= unassignedData.get(dd);
 				final Map<String, FileData> ddFiles= dd.files;
 				selector.run(ddFiles, trackPropertyMap, sharedAlbumData, successfulFiles);
 				removeSuccessfulTrackProperties(trackPropertyMap, successfulFiles);
@@ -191,13 +191,13 @@ class TrackPropertySelectors {
 			removeEmptyValues(unassignedData);
 		}
 
-		private static void removeEmptyValues(final Map<DirData, Map<String, List<TrackProperties>>> unassignedData) {
-			for (Map<String, List<TrackProperties>> tpm : unassignedData.values())
+		private static void removeEmptyValues(final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData) {
+			for (Map<String, List<TrackPropertyMap>> tpm : unassignedData.values())
 				Helpers.removeEmptyCollections(tpm);
 			Helpers.removeEmptyMaps(unassignedData);
 		}
 
-		private static void removeSuccessfulTrackProperties(final Map<String, List<TrackProperties>> trackPropertyMap, final Set<String> successfulFiles) {
+		private static void removeSuccessfulTrackProperties(final Map<String, List<TrackPropertyMap>> trackPropertyMap, final Set<String> successfulFiles) {
 			for (String filename : successfulFiles)
 				trackPropertyMap.remove(filename);
 			successfulFiles.clear();

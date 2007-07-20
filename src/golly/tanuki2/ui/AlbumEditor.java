@@ -7,7 +7,7 @@ import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.RankedObject;
 import golly.tanuki2.data.RankedObjectCollection;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.RuntimeConfig;
@@ -208,9 +208,9 @@ public class AlbumEditor {
 		}
 
 		// Populate (using potential data)
-		final Map<String, List<TrackProperties>> trackPropertyMap= engine.readTrackProprties(dd);
-		for (List<TrackProperties> tpList : trackPropertyMap.values())
-			for (TrackProperties tp : tpList) {
+		final Map<String, List<TrackPropertyMap>> trackPropertyMap= engine.readTrackProprties(dd);
+		for (List<TrackPropertyMap> tpList : trackPropertyMap.values())
+			for (TrackPropertyMap tp : tpList) {
 				addToCombo(iwArtist, tp.get(TrackPropertyType.ARTIST), false);
 				addToCombo(iwYear, tp.get(TrackPropertyType.YEAR), false);
 				addToCombo(iwAlbum, tp.get(TrackPropertyType.ALBUM), false);
@@ -306,12 +306,12 @@ public class AlbumEditor {
 		if (clipboardText == null)
 			UIHelpers.showTanukiWarning(shell, "albumEditor_err_noClipboardText"); //$NON-NLS-1$
 		else {
-			final Map<String, TrackProperties> results= cp.parseAndMatch(dd, clipboardText);
+			final Map<String, TrackPropertyMap> results= cp.parseAndMatch(dd, clipboardText);
 			if (results.isEmpty())
 				UIHelpers.showMessageBox(shell, SWT.ICON_WARNING, shell.getText(), I18n.l("albumEditor_err_noClipboardMatches")); //$NON-NLS-1$
 			else {
 				for (String filename : results.keySet()) {
-					TrackProperties tp= results.get(filename);
+					TrackPropertyMap tp= results.get(filename);
 					setText(iwTnMap.get(filename), tp.get(TrackPropertyType.TN));
 					setText(iwTrackMap.get(filename), tp.get(TrackPropertyType.TRACK));
 				}

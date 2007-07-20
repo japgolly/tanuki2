@@ -12,11 +12,11 @@ import java.util.HashMap;
  * @author Golly
  * @since 23/02/2007
  */
-public class TrackProperties extends HashMap<TrackPropertyType, String> {
+public class TrackPropertyMap extends HashMap<TrackPropertyType, String> {
 	private static final long serialVersionUID= -1436707286917587072L;
 
-	public static TrackProperties fromFileData(FileData fd) {
-		final TrackProperties tp= new TrackProperties();
+	public static TrackPropertyMap fromFileData(FileData fd) {
+		final TrackPropertyMap tp= new TrackPropertyMap();
 		AlbumData ad= fd.getAlbumData();
 		if (ad != null) {
 			tp.put(ARTIST, ad.getArtist());
@@ -40,7 +40,7 @@ public class TrackProperties extends HashMap<TrackPropertyType, String> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof TrackProperties))
+		if (obj == null || !(obj instanceof TrackPropertyMap))
 			return false;
 		return super.equals(obj);
 	}

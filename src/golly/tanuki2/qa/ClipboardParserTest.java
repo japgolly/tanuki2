@@ -2,7 +2,7 @@ package golly.tanuki2.qa;
 
 import golly.tanuki2.core.ClipboardParser;
 import golly.tanuki2.data.DirData;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.support.Helpers;
 
@@ -243,7 +243,7 @@ public class ClipboardParserTest extends TestHelper {
 		for (String f : fAll)
 			makeFileData(dd, f, true);
 		final String txt= "01. Splintered Visions\n02. Embraced By Desolation\n03. 3 Dimensional Aperture\n04. Beginning Of The End\n05. Point Of Uncertainty\n06. Spiraling Into Depression\n07. Isolation\n08. Buried In Oblivion\n09. Black Sea Of Agony\n10. Morose Seclusion";
-		Map<String, TrackProperties> r= cp.parseAndMatch(dd, txt);
+		Map<String, TrackPropertyMap> r= cp.parseAndMatch(dd, txt);
 		assertMatchResults(r, f1, 1, "Splintered Visions");
 		assertMatchResults(r, f2, 2, "Embraced By Desolation");
 		assertMatchResults(r, f3, 3, "3 Dimensional Aperture");
@@ -256,8 +256,8 @@ public class ClipboardParserTest extends TestHelper {
 		assertMatchResults(r, f10, 10, "Morose Seclusion");
 	}
 
-	private void assertMatchResults(Map<String, TrackProperties> r, String filename, Integer tn, String track) {
-		TrackProperties tp= r.get(filename);
+	private void assertMatchResults(Map<String, TrackPropertyMap> r, String filename, Integer tn, String track) {
+		TrackPropertyMap tp= r.get(filename);
 		assertNotNull(tp);
 		assertEquals(track, tp.get(TrackPropertyType.TRACK));
 		assertEquals(tn.toString(), tp.get(TrackPropertyType.TN));

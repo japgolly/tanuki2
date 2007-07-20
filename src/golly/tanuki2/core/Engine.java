@@ -5,7 +5,7 @@ import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.RankedObjectCollection;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.RuntimeConfig;
@@ -265,7 +265,7 @@ public class Engine implements ITextProcessor {
 	 * 
 	 * @return a map of filenames to list-of-potential-properties.
 	 */
-	public Map<String, List<TrackProperties>> readTrackProprties(DirData dd) {
+	public Map<String, List<TrackPropertyMap>> readTrackProprties(DirData dd) {
 		Set<DirData> dirset= new HashSet<DirData>();
 		dirset.add(dd);
 		return readTrackProprties(dirset).get(dd);
@@ -276,10 +276,10 @@ public class Engine implements ITextProcessor {
 	 * 
 	 * @return a map of filenames to list-of-potential-properties for each directory.
 	 */
-	public Map<DirData, Map<String, List<TrackProperties>>> readTrackProprties(Set<DirData> dirsToProcess) {
-		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= new HashMap<DirData, Map<String, List<TrackProperties>>>();
+	public Map<DirData, Map<String, List<TrackPropertyMap>>> readTrackProprties(Set<DirData> dirsToProcess) {
+		final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData= new HashMap<DirData, Map<String, List<TrackPropertyMap>>>();
 		for (DirData dd : dirsToProcess) {
-			final Map<String, List<TrackProperties>> trackPropertyMap= new HashMap<String, List<TrackProperties>>();
+			final Map<String, List<TrackPropertyMap>> trackPropertyMap= new HashMap<String, List<TrackPropertyMap>>();
 			for (ITrackPropertyReader reader : trackProprtyReaders)
 				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
 			unassignedData.put(dd, trackPropertyMap);
@@ -489,12 +489,12 @@ public class Engine implements ITextProcessor {
 
 	protected void readAndAssignTrackProprties() {
 		// Read properties
-		final Map<DirData, Map<String, List<TrackProperties>>> unassignedData= readTrackProprties(dirsNeedingTrackProprties);
+		final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData= readTrackProprties(dirsNeedingTrackProprties);
 
 		// Remove for files that already have values
 		final Set<String> removeList= new HashSet<String>();
 		for (DirData dd : unassignedData.keySet()) {
-			final Map<String, List<TrackProperties>> trackPropertyMap= unassignedData.get(dd);
+			final Map<String, List<TrackPropertyMap>> trackPropertyMap= unassignedData.get(dd);
 			// Find out which to delete
 			for (String f : trackPropertyMap.keySet()) {
 				FileData fd= dd.files.get(f);
@@ -517,11 +517,11 @@ public class Engine implements ITextProcessor {
 		dirsNeedingTrackProprties.clear();
 	}
 
-	private static RankedObjectCollection<String> rankUnconfirmedArtists(Map<DirData, Map<String, List<TrackProperties>>> unassignedData) {
+	private static RankedObjectCollection<String> rankUnconfirmedArtists(Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData) {
 		final RankedObjectCollection<String> x= new RankedObjectCollection<String>();
-		for (Map<String, List<TrackProperties>> map : unassignedData.values())
-			for (List<TrackProperties> props : map.values())
-				for (TrackProperties tp : props)
+		for (Map<String, List<TrackPropertyMap>> map : unassignedData.values())
+			for (List<TrackPropertyMap> props : map.values())
+				for (TrackPropertyMap tp : props)
 					if (tp.get(TrackPropertyType.ARTIST) != null)
 						x.increaseRank(Helpers.normalizeText(tp.get(TrackPropertyType.ARTIST)), 1);
 		return x;

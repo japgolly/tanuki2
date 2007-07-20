@@ -6,7 +6,7 @@ import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.Helpers;
@@ -34,7 +34,7 @@ public class EngineTest extends TestHelper {
 	private Engine engine;
 	private Engine2 engine2;
 	private MockTrackProprtyReader mtpr;
-	private TrackProperties noprop= makeTrackProperties(null, null, null, null, null);
+	private TrackPropertyMap noprop= makeTrackProperties(null, null, null, null, null);
 
 	@Before
 	public void setup() {
@@ -103,7 +103,7 @@ public class EngineTest extends TestHelper {
 	@Test
 	public void eachTrackHasOneResult() {
 		addFakeDirsToEngine();
-		TrackProperties a1, a2, a3;
+		TrackPropertyMap a1, a2, a3;
 		mtpr.addMockResult("A/a1", a1= makeTrackProperties("Metallica", 2006, "A", "1", "A One"));
 		mtpr.addMockResult("A/a2", a2= makeTrackProperties("Metallica", 2006, "A", "2", "A Two"));
 		mtpr.addMockResult("A/a3", a3= makeTrackProperties("Metallica", 2006, "A", "3", "A Three"));
@@ -119,7 +119,7 @@ public class EngineTest extends TestHelper {
 	@Test
 	public void oneTrackHasMultipleResults_checksAlbumDataOfOtherTracks() {
 		addFakeDirsToEngine();
-		TrackProperties a1, a2, a3;
+		TrackPropertyMap a1, a2, a3;
 		mtpr.addMockResult("A/a1", a1= makeTrackProperties("Metallica", 2006, "A", "1", "A One"));
 		mtpr.addMockResult("A/a2", makeTrackProperties("!etallica", 2006, "A", "2", "A Two @bad")); // should lose
 		mtpr.addMockResult("A/a2", a2= makeTrackProperties("Metallica", 2006, "A", "2", "A Two")); // should win - same
@@ -139,7 +139,7 @@ public class EngineTest extends TestHelper {
 	@Test
 	public void wholeDirHasMultipleResults_checksArtistAgainstSuccessfulDirs() {
 		addFakeDirsToEngine();
-		TrackProperties a1, a2, a3, b1, b2, b3;
+		TrackPropertyMap a1, a2, a3, b1, b2, b3;
 		mtpr.addMockResult("A/a1", a1= makeTrackProperties("METALLICA", 2006, "A", "1", "A One"));
 		mtpr.addMockResult("A/a2", a2= makeTrackProperties("METALLICA", 2006, "A", "2", "A Two"));
 		mtpr.addMockResult("A/a3", a3= makeTrackProperties("METALLICA", 2006, "A", "3", "A Three"));
@@ -164,7 +164,7 @@ public class EngineTest extends TestHelper {
 	@Test
 	public void wholeDirHasMultipleResults_checksArtistAgainstOtherPendingDirs() {
 		addFakeDirsToEngine();
-		TrackProperties a1, a2, a3, b1, b2, b3;
+		TrackPropertyMap a1, a2, a3, b1, b2, b3;
 		mtpr.addMockResult("A/a1", makeTrackProperties("Bullshit", 2005, "B", "1", "B One @bad"));
 		mtpr.addMockResult("A/a2", makeTrackProperties("Bullshit", 2005, "B", "2", "B Two @bad"));
 		mtpr.addMockResult("A/a3", makeTrackProperties("Bullshit", 2005, "B", "3", "B Three @bad"));
@@ -209,7 +209,7 @@ public class EngineTest extends TestHelper {
 		// 7 (1+5+1) - "WhatCanYouDo", 2006, "FakeAlbum"
 		// 2 (1+1+0) - "WayOff", 1980, null
 		addFakeDirsToEngine();
-		TrackProperties a1, a2, a3;
+		TrackPropertyMap a1, a2, a3;
 		mtpr.addMockResult("A/a1", makeTrackProperties("Bullshit", 2006, "A", "2", "A Two @bad"));
 		mtpr.addMockResult("A/a1", a1= makeTrackProperties("Metallica", 2006, "A", "1", "A One @good"));
 		mtpr.addMockResult("A/a2", a2= makeTrackProperties("Metallica", 2006, "A", "2", "A Two @good"));
@@ -228,7 +228,7 @@ public class EngineTest extends TestHelper {
 	@Test
 	public void wholeDirHasMultipleResults_noWayOfKnowingWhichIsCorrect() {
 		addFakeDirsToEngine();
-		TrackProperties a1a, a2a, a3a, a1b, a2b, a3b;
+		TrackPropertyMap a1a, a2a, a3a, a1b, a2b, a3b;
 		mtpr.addMockResult("A/a1", a1a= makeTrackProperties("METALLICA", 2006, "A", "1", "A One"));
 		mtpr.addMockResult("A/a2", a2a= makeTrackProperties("METALLICA", 2006, "A", "2", "A Two"));
 		mtpr.addMockResult("A/a1", a1b= makeTrackProperties("Nirvana", 1994, "B", "7", "B One"));
@@ -253,7 +253,7 @@ public class EngineTest extends TestHelper {
 	@Test
 	public void oneTrack_mostCompleteFields() {
 		addFakeDirsToEngine();
-		TrackProperties a1;
+		TrackPropertyMap a1;
 		mtpr.addMockResult("A/a1", makeTrackProperties("Bullshit", null, "No year", "2", "A Two @bad"));
 		mtpr.addMockResult("A/a1", a1= makeTrackProperties("asd", 2006, "qwe", "2", "A Two @bad"));
 		engine2.readTrackProprties2();
@@ -441,11 +441,11 @@ public class EngineTest extends TestHelper {
 		assertEquals(Arrays.deepToString(expectedFiles2), Arrays.deepToString(actual));
 	}
 
-	private void assertEngineTrackProperties(String filename, TrackProperties expected) {
+	private void assertEngineTrackProperties(String filename, TrackPropertyMap expected) {
 		assertEngineTrackProperties(filename, expected, null);
 	}
 
-	private void assertEngineTrackProperties(String filename, TrackProperties expected1, TrackProperties expected2) {
+	private void assertEngineTrackProperties(String filename, TrackPropertyMap expected1, TrackPropertyMap expected2) {
 		filename= ensureCorrectDirSeperators(Helpers.removeFilenameExtension(filename)) + ".mp3"; //$NON-NLS-1$
 		FileData fd= engine.files.get(filename);
 		if (fd == null) {
@@ -453,7 +453,7 @@ public class EngineTest extends TestHelper {
 			System.err.println("  keys: " + Helpers.sort(engine.files.keySet()));
 			fail("assertEngineTrackProperties failed: key not found: " + filename);
 		}
-		TrackProperties test= TrackProperties.fromFileData(fd);
+		TrackPropertyMap test= TrackPropertyMap.fromFileData(fd);
 		if (expected1.equals(test))
 			return;
 		if (expected2 != null && expected2.equals(test))

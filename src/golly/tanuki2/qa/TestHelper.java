@@ -13,7 +13,7 @@ import golly.tanuki2.core.IVoodooProgressMonitor;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,8 +50,8 @@ public abstract class TestHelper extends Assert {
 		return fd;
 	}
 
-	protected TrackProperties makeTrackProperties(String artist, Integer year, String album, String tn, String track) {
-		TrackProperties expected= new TrackProperties();
+	protected TrackPropertyMap makeTrackProperties(String artist, Integer year, String album, String tn, String track) {
+		TrackPropertyMap expected= new TrackPropertyMap();
 		expected.put(ARTIST, artist);
 		expected.put(YEAR, year == null ? null : year.toString());
 		expected.put(ALBUM, album);
@@ -114,25 +114,25 @@ class Engine3 extends Engine {
  */
 class MockTrackProprtyReader extends TestHelper implements ITrackPropertyReader {
 
-	private final Map<String, List<TrackProperties>> mockResults= new HashMap<String, List<TrackProperties>>();
+	private final Map<String, List<TrackPropertyMap>> mockResults= new HashMap<String, List<TrackPropertyMap>>();
 
-	public void addMockResult(String filename, TrackProperties tp) {
+	public void addMockResult(String filename, TrackPropertyMap tp) {
 		filename= ensureCorrectDirSeperators(filename) + ".mp3"; //$NON-NLS-1$
-		List<TrackProperties> l= mockResults.get(filename);
+		List<TrackPropertyMap> l= mockResults.get(filename);
 		if (l == null)
-			mockResults.put(filename, l= new ArrayList<TrackProperties>());
+			mockResults.put(filename, l= new ArrayList<TrackPropertyMap>());
 		l.add(tp);
 	}
 
-	public Map<String, List<TrackProperties>> readMultipleTrackProperties(DirData dd) {
-		final Map<String, List<TrackProperties>> r= new HashMap<String, List<TrackProperties>>();
+	public Map<String, List<TrackPropertyMap>> readMultipleTrackProperties(DirData dd) {
+		final Map<String, List<TrackPropertyMap>> r= new HashMap<String, List<TrackPropertyMap>>();
 		for (String f : dd.files.keySet())
 			r.put(f, readTrackProperties(addPathElements(dd.dir, f)));
 		return r;
 	}
 
-	public List<TrackProperties> readTrackProperties(String filename) {
-		List<TrackProperties> r= new ArrayList<TrackProperties>();
+	public List<TrackPropertyMap> readTrackProperties(String filename) {
+		List<TrackPropertyMap> r= new ArrayList<TrackPropertyMap>();
 		if (mockResults.containsKey(filename))
 			r.addAll(mockResults.get(filename));
 		return r;

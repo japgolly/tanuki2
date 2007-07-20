@@ -1,7 +1,7 @@
 package golly.tanuki2.core;
 
 import golly.tanuki2.data.DirData;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 
 import java.util.List;
 import java.util.Map;
@@ -12,8 +12,8 @@ import java.util.Map;
  */
 public interface ITrackPropertyReader {
 
-	public abstract Map<String, List<TrackProperties>> readMultipleTrackProperties(final DirData dd);
+	public abstract Map<String, List<TrackPropertyMap>> readMultipleTrackProperties(final DirData dd);
 
-	public abstract List<TrackProperties> readTrackProperties(final String filename);
+	public abstract List<TrackPropertyMap> readTrackProperties(final String filename);
 
 }

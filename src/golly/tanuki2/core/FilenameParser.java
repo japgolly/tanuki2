@@ -2,7 +2,7 @@ package golly.tanuki2.core;
 
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.support.Helpers;
 
@@ -147,8 +147,8 @@ public class FilenameParser implements ITrackPropertyReader {
 		addPattern("[:album:](?:<sep>[:artist:])?<sepSpaceOrUndsc>" + tnAndTrack);
 	}
 
-	public Map<String, List<TrackProperties>> readMultipleTrackProperties(final DirData dd) {
-		final Map<String, List<TrackProperties>> r= new HashMap<String, List<TrackProperties>>();
+	public Map<String, List<TrackPropertyMap>> readMultipleTrackProperties(final DirData dd) {
+		final Map<String, List<TrackPropertyMap>> r= new HashMap<String, List<TrackPropertyMap>>();
 
 		// Make a map of processed filenames (audio files only)
 		Map<String, String> processedFilenameMap= new HashMap<String, String>();
@@ -227,13 +227,13 @@ public class FilenameParser implements ITrackPropertyReader {
 		return r;
 	}
 
-	public List<TrackProperties> readTrackProperties(final String filename) {
-		List<TrackProperties> r= new ArrayList<TrackProperties>();
+	public List<TrackPropertyMap> readTrackProperties(final String filename) {
+		List<TrackPropertyMap> r= new ArrayList<TrackPropertyMap>();
 		Integer i;
 		Matcher m;
 		for (SmartPattern sp : patterns)
 			if ((m= sp.pat.matcher(filename)).matches()) {
-				TrackProperties tp= new TrackProperties();
+				TrackPropertyMap tp= new TrackPropertyMap();
 				for (TrackPropertyType k : TrackPropertyType.values())
 					if ((i= sp.indexes.get(k)) != null)
 						if (m.group(i) != null)

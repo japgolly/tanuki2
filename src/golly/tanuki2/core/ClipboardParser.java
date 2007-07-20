@@ -3,7 +3,7 @@ package golly.tanuki2.core;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.RankedObjectCollection;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.LevenshteinDistance;
@@ -80,8 +80,8 @@ public class ClipboardParser {
 	 * 
 	 * @return a map of filenames to track properties.
 	 */
-	public Map<String, TrackProperties> parseAndMatch(DirData dd, String txt) {
-		final Map<String, TrackProperties> completeMatches= new HashMap<String, TrackProperties>();
+	public Map<String, TrackPropertyMap> parseAndMatch(DirData dd, String txt) {
+		final Map<String, TrackPropertyMap> completeMatches= new HashMap<String, TrackPropertyMap>();
 		final Map<Integer, String> clipboardResults= parse(txt);
 
 		matchClipboardResultsUsingTrackName(dd.files, clipboardResults, completeMatches);
@@ -94,7 +94,7 @@ public class ClipboardParser {
 	// = Internal
 	// =============================================================================================== //
 
-	private void assignBestResultMatches(final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches, final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult) {
+	private void assignBestResultMatches(final Map<Integer, String> clipboardResults, final Map<String, TrackPropertyMap> completeMatches, final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult) {
 		while (!rankedMatchesPerResult.isEmpty()) {
 			// Find highest ranking matches
 			final Set<Integer> keysWithoutMatches= new HashSet<Integer>();
@@ -114,7 +114,7 @@ public class ClipboardParser {
 			// Assign
 			if (!highestRanks.isEmpty()) {
 				final Integer tn= highestRanks.getWinner();
-				TrackProperties tp= new TrackProperties();
+				TrackPropertyMap tp= new TrackPropertyMap();
 				tp.put(TrackPropertyType.TN, tn.toString());
 				tp.put(TrackPropertyType.TRACK, clipboardResults.get(tn));
 				final String filename= rankedMatchesPerResult.get(tn).getWinner();
@@ -128,7 +128,7 @@ public class ClipboardParser {
 		}
 	}
 
-	private void matchClipboardResultsUsingTrackName(Map<String, FileData> ddFiles, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
+	private void matchClipboardResultsUsingTrackName(Map<String, FileData> ddFiles, final Map<Integer, String> clipboardResults, final Map<String, TrackPropertyMap> completeMatches) {
 		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
 		for (Integer tn : clipboardResults.keySet()) {
 			final String nTrack= Helpers.normalizeText(clipboardResults.get(tn));
@@ -150,7 +150,7 @@ public class ClipboardParser {
 		assignBestResultMatches(clipboardResults, completeMatches, rankedMatchesPerResult);
 	}
 
-	private void matchClipboardResultsUsingTN(Map<String, FileData> ddFiles, final Map<Integer, String> clipboardResults, final Map<String, TrackProperties> completeMatches) {
+	private void matchClipboardResultsUsingTN(Map<String, FileData> ddFiles, final Map<Integer, String> clipboardResults, final Map<String, TrackPropertyMap> completeMatches) {
 		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
 		for (String filename : ddFiles.keySet())
 			if (ddFiles.get(filename).isAudio()) {

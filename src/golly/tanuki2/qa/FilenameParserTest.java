@@ -9,7 +9,7 @@ import golly.tanuki2.core.FilenameParser;
 import golly.tanuki2.core.ITrackPropertyReader;
 import golly.tanuki2.core.FilenameParser.SmartPattern;
 import golly.tanuki2.data.DirData;
-import golly.tanuki2.data.TrackProperties;
+import golly.tanuki2.data.TrackPropertyMap;
 
 import java.io.File;
 import java.util.Collection;
@@ -92,7 +92,7 @@ public class FilenameParserTest extends TestHelper {
 		dd.files.put(fn4, makeFileData(dd, true));
 		dd.files.put(fn5, makeFileData(dd, true));
 		dd.files.put("as.jpg", makeFileData(dd, false));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn4));
 		assertTrue(r.containsKey(fn5));
@@ -109,7 +109,7 @@ public class FilenameParserTest extends TestHelper {
 		dd.files.put(fn4, makeFileData(dd, true));
 		dd.files.put(fn5, makeFileData(dd, true));
 		dd.files.put("as.jpg", makeFileData(dd, false));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn4));
 		assertTrue(r.containsKey(fn5));
@@ -126,7 +126,7 @@ public class FilenameParserTest extends TestHelper {
 		dd.files.put(fn4, makeFileData(dd, true));
 		dd.files.put(fn5, makeFileData(dd, true));
 		dd.files.put("as.jpg", makeFileData(dd, false));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn4));
 		assertTrue(r.containsKey(fn5));
@@ -162,7 +162,7 @@ public class FilenameParserTest extends TestHelper {
 						final String fn2= pre + "02" + mid + "woteva biatch" + post + ".mp3";
 						dd.files.put(fn1, makeFileData(dd, true));
 						dd.files.put(fn2, makeFileData(dd, true));
-						final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+						final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 						assertEquals(2, r.size());
 						assertTrue(r.containsKey(fn1));
 						assertTrue(r.containsKey(fn2));
@@ -181,7 +181,7 @@ public class FilenameParserTest extends TestHelper {
 		dd.files.put(fn1, makeFileData(dd, true));
 		dd.files.put(fn2, makeFileData(dd, true));
 		dd.files.put("as.jpg", makeFileData(dd, false));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn1));
 		assertTrue(r.containsKey(fn2));
@@ -196,7 +196,7 @@ public class FilenameParserTest extends TestHelper {
 		final String fn2= "In Flames_Trigger_02 Watch Them Feed In Flames - TRIGGER.mp3";
 		dd.files.put(fn1, makeFileData(dd, true));
 		dd.files.put(fn2, makeFileData(dd, true));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn1));
 		assertTrue(r.containsKey(fn2));
@@ -212,7 +212,7 @@ public class FilenameParserTest extends TestHelper {
 		dd.files.put(fn4, makeFileData(dd, true));
 		dd.files.put(fn5, makeFileData(dd, true));
 		dd.files.put("as.jpg", makeFileData(dd, false));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn4));
 		assertTrue(r.containsKey(fn5));
@@ -228,7 +228,7 @@ public class FilenameParserTest extends TestHelper {
 		dd.files.put(fn4, makeFileData(dd, true));
 		dd.files.put(fn5, makeFileData(dd, true));
 		dd.files.put("as.jpg", makeFileData(dd, false));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(2, r.size());
 		assertTrue(r.containsKey(fn4));
 		assertTrue(r.containsKey(fn5));
@@ -248,7 +248,7 @@ public class FilenameParserTest extends TestHelper {
 		dd.files.put(fn3, makeFileData(dd, true));
 		dd.files.put(fn4, makeFileData(dd, true));
 		dd.files.put("hi there.jpg", makeFileData(dd, false));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(4, r.size());
 		assertTrue(r.containsKey(fn1));
 		assertTrue(r.containsKey(fn2));
@@ -270,7 +270,7 @@ public class FilenameParserTest extends TestHelper {
 		dd.files.put(fn2, makeFileData(dd, true));
 		dd.files.put(fn3, makeFileData(dd, true));
 		dd.files.put("hi there.jpg", makeFileData(dd, false));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(3, r.size());
 		assertTrue(r.containsKey(fn1));
 		assertTrue(r.containsKey(fn2));
@@ -297,7 +297,7 @@ public class FilenameParserTest extends TestHelper {
 			dd.files.put(f, makeFileData(dd, true));
 		dd.files.put("Hawaii - 00 - The Natives Are Restless.nfo", makeFileData(dd, false));
 		dd.files.put("Hawaii - The Natives Are Restless.jpg", makeFileData(dd, false));
-		final Map<String, List<TrackProperties>> r= fp.readMultipleTrackProperties(dd);
+		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(9, r.size());
 		for (String f : fnAll)
 			assertTrue(r.containsKey(f));
@@ -316,9 +316,9 @@ public class FilenameParserTest extends TestHelper {
 	// = private
 	// =============================================================================================== //
 
-	private void assertTrackPropertiesFound(String filename, TrackProperties expected, final Collection<TrackProperties> test) {
+	private void assertTrackPropertiesFound(String filename, TrackPropertyMap expected, final Collection<TrackPropertyMap> test) {
 		boolean found= false;
-		for (TrackProperties tp : test)
+		for (TrackPropertyMap tp : test)
 			if (tp.equals(expected)) {
 				found= true;
 				break;
@@ -327,7 +327,7 @@ public class FilenameParserTest extends TestHelper {
 			System.err.println("Expected TrackProperties not found.");
 			System.err.println("  Filename: " + filename);
 			System.err.println("  Expected: " + expected);
-			for (TrackProperties tp : test)
+			for (TrackPropertyMap tp : test)
 				System.err.println("  Found:    " + tp);
 			System.err.println();
 			fail("Expected TrackProperties not found.");
@@ -335,9 +335,9 @@ public class FilenameParserTest extends TestHelper {
 	}
 
 	private void subtestParse(ITrackPropertyReader fp, String filename, String artist, Integer year, String album, String tn, String track) {
-		final TrackProperties expected= makeTrackProperties(artist, year, album, tn, track);
+		final TrackPropertyMap expected= makeTrackProperties(artist, year, album, tn, track);
 
-		final Collection<TrackProperties> r= fp.readTrackProperties(filename);
+		final Collection<TrackPropertyMap> r= fp.readTrackProperties(filename);
 		//		if (r.size() > 1) {
 		//			System.out.println("=================================================================================");
 		//			System.out.println(filename);
@@ -350,7 +350,7 @@ public class FilenameParserTest extends TestHelper {
 		File f= new File(filename);
 		DirData dd= new DirData(f.getParent());
 		dd.files.put(f.getName(), makeFileData(dd, true));
-		Map<String, List<TrackProperties>> r2= fp.readMultipleTrackProperties(dd);
+		Map<String, List<TrackPropertyMap>> r2= fp.readMultipleTrackProperties(dd);
 		assertEquals(1, r2.size());
 		assertEquals(f.getName(), r2.keySet().iterator().next());
 		assertTrackPropertiesFound(filename, expected, r2.get(f.getName()));
