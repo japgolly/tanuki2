@@ -48,6 +48,10 @@ public class Log {
 	private static final String FILENAME= "log.txt"; //$NON-NLS-1$
 	private static final String STARTUP_LOG_ENTRY= "==================== STARTING ===================="; //$NON-NLS-1$
 
+	private Log() {
+		// Private constructor
+	}
+	
 	public static void init() throws SecurityException, IOException {
 		log= Logger.getLogger(""); //$NON-NLS-1$
 		for (Handler h : log.getHandlers())
