@@ -5,14 +5,12 @@ import static golly.tanuki2.data.TrackPropertyType.ARTIST;
 import static golly.tanuki2.data.TrackPropertyType.TN;
 import static golly.tanuki2.data.TrackPropertyType.TRACK;
 import static golly.tanuki2.data.TrackPropertyType.YEAR;
-import golly.tanuki2.core.FilenameParser;
 import golly.tanuki2.core.ITrackPropertyReader;
-import golly.tanuki2.core.FilenameParser.SmartPattern;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.TrackPropertyMap;
+import golly.tanuki2.modules.FilenameParser;
+import golly.tanuki2.modules.FilenameParser.SmartPattern;
 
-import java.io.File;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -310,49 +308,5 @@ public class FilenameParserTest extends TestHelper {
 		assertTrackPropertiesFound(fn7, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "07", "Lies"), r.get(fn7));
 		assertTrackPropertiesFound(fn8, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "08", "Omichan No Uta"), r.get(fn8));
 		assertTrackPropertiesFound(fn9, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "09", "Dynamite"), r.get(fn9));
-	}
-
-	// =============================================================================================== //
-	// = private
-	// =============================================================================================== //
-
-	private void assertTrackPropertiesFound(String filename, TrackPropertyMap expected, final Collection<TrackPropertyMap> test) {
-		boolean found= false;
-		for (TrackPropertyMap tp : test)
-			if (tp.equals(expected)) {
-				found= true;
-				break;
-			}
-		if (!found) {
-			System.err.println("Expected TrackProperties not found.");
-			System.err.println("  Filename: " + filename);
-			System.err.println("  Expected: " + expected);
-			for (TrackPropertyMap tp : test)
-				System.err.println("  Found:    " + tp);
-			System.err.println();
-			fail("Expected TrackProperties not found.");
-		}
-	}
-
-	private void subtestParse(ITrackPropertyReader fp, String filename, String artist, Integer year, String album, String tn, String track) {
-		final TrackPropertyMap expected= makeTrackProperties(artist, year, album, tn, track);
-
-		final Collection<TrackPropertyMap> r= fp.readTrackProperties(filename);
-		//		if (r.size() > 1) {
-		//			System.out.println("=================================================================================");
-		//			System.out.println(filename);
-		//			for (TrackProperties tp : r)
-		//				System.out.println("  " + tp.size() + " : " + tp);
-		//			System.out.println();
-		//		}
-		assertTrackPropertiesFound(filename, expected, r);
-
-		File f= new File(filename);
-		DirData dd= new DirData(f.getParent());
-		dd.files.put(f.getName(), makeFileData(dd, true));
-		Map<String, List<TrackPropertyMap>> r2= fp.readMultipleTrackProperties(dd);
-		assertEquals(1, r2.size());
-		assertEquals(f.getName(), r2.keySet().iterator().next());
-		assertTrackPropertiesFound(filename, expected, r2.get(f.getName()));
 	}
 }
