@@ -30,7 +30,7 @@ public final class Helpers {
 		public boolean hasFiles= false;
 	}
 
-	public static final String whitespaceChars= "\u0020\u3000\n\r\u0009\u000b\u000c\u001c\u001d\u001e\u001f\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2008\u2009\u200a\u200b\u2028\u2029\u205f";
+	public static final String whitespaceChars= "\0\u0020\u3000\n\r\u0009\u000b\u000c\u001c\u001d\u001e\u001f\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2008\u2009\u200a\u200b\u2028\u2029\u205f";
 	private static final String KATAKANA_FULL= "アイウエオァィゥェォカキクケコサシスセソタチツッテトナニヌネノハヒフヘホマミムメモヤユヨャュョラリルレロワヲンー゛゜";
 	private static final String KATAKANA_HALF= "ｱｲｳｴｵｧｨｩｪｫｶｷｸｹｺｻｼｽｾｿﾀﾁﾂｯﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖｬｭｮﾗﾘﾙﾚﾛﾜｦﾝｰﾞﾟ";
 	private static final String KATAKANA_TENTEN= "カキクケコサシスセソタチツテトハヒフヘホ";
@@ -495,6 +495,9 @@ public final class Helpers {
 	 * </ul>
 	 */
 	public static final String normalizeText(final String input, List<Integer> map) {
+		if (input == null)
+			return null;
+		
 		final StringBuilder sb= new StringBuilder();
 		final int inputLength= input.length() - 1;
 		boolean ignoreNextMapChar= false;
