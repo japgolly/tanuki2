@@ -58,7 +58,7 @@ public abstract class TestHelper extends Assert {
 			fail("Expected TrackProperties not found.");
 		}
 	}
-	
+
 	static String getQAPath(String path) {
 		try {
 			return new File(ID3V2TagReaderTest.class.getResource(path).toURI()).getAbsolutePath();
@@ -66,7 +66,7 @@ public abstract class TestHelper extends Assert {
 			throw new RuntimeException();
 		}
 	}
-	
+
 	protected FileData makeFileData(DirData dd, boolean isAudio) {
 		FileData fd= new FileData(dd);
 		fd.setAudio(isAudio);
@@ -88,7 +88,7 @@ public abstract class TestHelper extends Assert {
 		expected.put(TRACK, track);
 		return expected;
 	}
-	
+
 	protected void subtestParse(ITrackPropertyReader tpr, String filename, String artist, Integer year, String album, String tn, String track) {
 		final TrackPropertyMap expected= makeTrackProperties(artist, year, album, tn, track);
 
@@ -117,11 +117,15 @@ public abstract class TestHelper extends Assert {
  * @since 24/02/2007
  */
 class Engine2 extends Engine {
-	@SuppressWarnings("nls")
-	public Engine2(ITrackPropertyReader tr) {
+	public Engine2(ITrackPropertyReader... trackReaders) {
 		super();
 		trackProprtyReaders.clear();
-		trackProprtyReaders.add(tr);
+		add(trackReaders);
+	}
+
+	public void add(ITrackPropertyReader... trackReaders) {
+		for (ITrackPropertyReader tr : trackReaders)
+			trackProprtyReaders.add(tr);
 	}
 
 	public void addFakeDir(String path, String... filenames) {

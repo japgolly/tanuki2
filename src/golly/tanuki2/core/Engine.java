@@ -289,8 +289,8 @@ public class Engine implements ITextProcessor {
 			for (ITrackPropertyReader reader : trackProprtyReaders)
 				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
 			unassignedData.put(dd, trackPropertyMap);
-			RichRandomAccessFileCache.getInstance().clear();
 		}
+		postTrackPropertyReading(unassignedData);
 		return unassignedData;
 	}
 
@@ -382,6 +382,26 @@ public class Engine implements ITextProcessor {
 		// Place in dirsNeedingTrackProprties
 		if (dd.hasAudioContent(true))
 			dirsNeedingTrackProprties.add(dd);
+	}
+
+	private static Map<DirData, Map<String, List<TrackPropertyMap>>> copy(Map<DirData, Map<String, List<TrackPropertyMap>>> src) {
+		final Map<DirData, Map<String, List<TrackPropertyMap>>> copy= new HashMap<DirData, Map<String, List<TrackPropertyMap>>>(src.size());
+		for (Map.Entry<DirData, Map<String, List<TrackPropertyMap>>> e : src.entrySet())
+			copy.put(e.getKey(), copy2(e.getValue()));
+		return copy;
+	}
+
+	private static Map<String, List<TrackPropertyMap>> copy2(Map<String, List<TrackPropertyMap>> src) {
+		final Map<String, List<TrackPropertyMap>> copy= new HashMap<String, List<TrackPropertyMap>>(src.size());
+		for (Map.Entry<String, List<TrackPropertyMap>> e : src.entrySet())
+			copy.put(e.getKey(), copy(e.getValue()));
+		return copy;
+	}
+
+	private static List<TrackPropertyMap> copy(List<TrackPropertyMap> src) {
+		final List<TrackPropertyMap> copy= new ArrayList<TrackPropertyMap>(src.size());
+		copy.addAll(src);
+		return copy;
 	}
 
 	private boolean deleteFile(IVoodooProgressMonitor progressDlg, final String sourceFilename) throws VoodooAborted {
@@ -494,9 +514,36 @@ public class Engine implements ITextProcessor {
 		}
 	}
 
+	/**
+	 * This should be called after properties are read from a batch of files.
+	 */
+	private void postTrackPropertyReading(Map<DirData, Map<String, List<TrackPropertyMap>>> data) {
+		// Close open files
+		RichRandomAccessFileCache.getInstance().clear();
+
+		// Trim all values and remove if empty
+		for (final Map<String, List<TrackPropertyMap>> tpm : data.values())
+			for (final List<TrackPropertyMap> rows : tpm.values())
+				for (final TrackPropertyMap row : rows)
+					for (final TrackPropertyType field : new HashSet<TrackPropertyType>(row.keySet())) {
+						final String value= row.get(field);
+						if (value != null) {
+							final String newValue= Helpers.unicodeTrim(value);
+							if (newValue.isEmpty())
+								row.remove(field);
+							else
+								row.put(field, newValue);
+						}
+					}
+
+		// Remove empty containers
+		removeEmptyContainers(data);
+	}
+
 	protected void readAndAssignTrackProprties() {
 		// Read properties
-		final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData= readTrackProprties(dirsNeedingTrackProprties);
+		final Map<DirData, Map<String, List<TrackPropertyMap>>> allData= readTrackProprties(dirsNeedingTrackProprties);
+		final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData= copy(allData);
 
 		// Remove for files that already have values
 		final Set<String> removeList= new HashSet<String>();
@@ -519,6 +566,7 @@ public class Engine implements ITextProcessor {
 		trackPropertySelector.run(new TrackPropertySelectors.AssignSingleRows());
 		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(getRankedArtists(true), rankUnconfirmedArtists(unassignedData), true));
 		trackPropertySelector.run(new TrackPropertySelectors.RankEachAlbumPropertyThenRankResults(getRankedArtists(true), rankUnconfirmedArtists(unassignedData), false));
+		new TrackPropertySelectors.PopulateEmptyFields(allData, this).run();
 
 		// Finished. Clean up.
 		dirsNeedingTrackProprties.clear();
@@ -539,5 +587,11 @@ public class Engine implements ITextProcessor {
 		for (String file : dd.files.keySet())
 			files.remove(addPathElements(dir, file));
 		dirs.remove(dir);
+	}
+
+	static void removeEmptyContainers(final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData) {
+		for (Map<String, List<TrackPropertyMap>> tpm : unassignedData.values())
+			Helpers.removeEmptyCollections(tpm);
+		Helpers.removeEmptyMaps(unassignedData);
 	}
 }

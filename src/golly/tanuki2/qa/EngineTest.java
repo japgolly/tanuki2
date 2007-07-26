@@ -34,12 +34,14 @@ public class EngineTest extends TestHelper {
 	private Engine engine;
 	private Engine2 engine2;
 	private MockTrackProprtyReader mtpr;
+	private MockTrackProprtyReader mtpr1, mtpr2;
 	private TrackPropertyMap noprop= makeTrackProperties(null, null, null, null, null);
 
 	@Before
 	public void setup() {
 		RuntimeConfig.autoTitleCase= false;
-		mtpr= new MockTrackProprtyReader();
+		mtpr= mtpr1= new MockTrackProprtyReader();
+		mtpr2= null;
 		engine= engine2= new Engine2(mtpr);
 	}
 
@@ -260,8 +262,59 @@ public class EngineTest extends TestHelper {
 		assertEngineTrackProperties("A/a1", a1);
 	}
 
-	// TODO Add more TrackProperty selection tests: check for matches from different sources
+	@Test
+	public void multipleSources_simple() {
+		useTwoTrackReaders();
+		addFakeDirsToEngine();
+		mtpr1.addMockResult("A/a1", makeTrackProperties("some bullshit", null, null, null, null));
+		mtpr1.addMockResult("A/a1", makeTrackProperties("asd", 2006, "qwe", "2", null));
+		mtpr2.addMockResult("A/a1", makeTrackProperties("asd", null, "qwe", "2", "aahh"));
+		engine2.readTrackProprties2();
+		assertEngineTrackProperties("A/a1", makeTrackProperties("asd", 2006, "qwe", "2", "aahh"));
+	}
+	
+	@Test
+	public void multipleSources_prefersHighlyRankedRows_singleTrack() {
+		useTwoTrackReaders();
+		addFakeDirsToEngine();
+		mtpr1.addMockResult("A/a1", makeTrackProperties("some bullshit", 1995, null, null, "rubbish"));
+		mtpr1.addMockResult("A/a1", makeTrackProperties("asd", 2006, "qwe", "2", null));
+		mtpr2.addMockResult("A/a1", makeTrackProperties("ASD", null, "QWE", null, "AAHH"));
+		mtpr2.addMockResult("A/a1", makeTrackProperties("not gonna happen", 1995, "hehe", null, "more rubbish"));
+		engine2.readTrackProprties2();
+		assertEngineTrackProperties("A/a1", makeTrackProperties("asd", 2006, "qwe", "2", "AAHH"));
+	}
+	
+	@Test
+	public void multipleSources_prefersHighlyRankedRows_multipleTracks() {
+		useTwoTrackReaders();
+		addFakeDirsToEngine();
+		
+		mtpr1.addMockResult("A/a1", makeTrackProperties("machine head", null, "the blackening", null, "dissent"));
+		mtpr1.addMockResult("A/a1", makeTrackProperties("INCORRECT", 1995, "INCORRECT", "8", "INCORRECT"));
+		mtpr2.addMockResult("A/a1", makeTrackProperties("Machine Head", 2007, null, null, null));
+		mtpr2.addMockResult("A/a1", makeTrackProperties(null, null, null, "1", "DISSENT"));
+		
+		mtpr1.addMockResult("A/a2", makeTrackProperties("machine head", null, "the blackening", null, "mourning"));
+		mtpr1.addMockResult("A/a2", makeTrackProperties("INCORRECT", 1995, "INCORRECT", "8", "INCORRECT"));
+		mtpr2.addMockResult("A/a2", makeTrackProperties("Machine Head", 2007, null, null, null));
+		mtpr2.addMockResult("A/a2", makeTrackProperties(null, null, null, "2", "MOURNING"));
+		
+		RuntimeConfig.autoTitleCase= true;
+		engine2.readTrackProprties2();
+		assertEngineTrackProperties("A/a1", makeTrackProperties("Machine Head", 2007, "The Blackening", "1", "Dissent"));
+		assertEngineTrackProperties("A/a2", makeTrackProperties("Machine Head", 2007, "The Blackening", "2", "Mourning"));
+	}
 
+	@Test
+	public void shouldTrimAndIgnoreEmptyStrings() {
+		System.out.println("-------------------------------------------------");
+		addFakeDirsToEngine();
+		mtpr1.addMockResult("A/a1", makeTrackProperties("\0asd hehe　 ", 2006, "", " 2", "　 \0"));
+		engine2.readTrackProprties2();
+		assertEngineTrackProperties("A/a1", makeTrackProperties("asd hehe", 2006, null, "2", null));
+	}
+	
 	@Test
 	public void testTPSelectionMisc1() {
 		DirData dd= new DirData(ensureCorrectDirSeperators("X:\\music\\1. Fresh\\Hawaii - The Natives Are Restless (1985) 320 Kbps"));
@@ -490,5 +543,10 @@ public class EngineTest extends TestHelper {
 		if (targetDir.exists())
 			Helpers.rm_rf(targetDir);
 		return targetDir.toString();
+	}
+	
+	private void useTwoTrackReaders() {
+		mtpr2= new MockTrackProprtyReader();
+		engine2.add(mtpr2);
 	}
 }

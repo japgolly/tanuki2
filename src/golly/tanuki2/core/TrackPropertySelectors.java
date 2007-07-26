@@ -3,6 +3,7 @@ package golly.tanuki2.core;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
+import golly.tanuki2.data.RankedNormalisedStringCollection;
 import golly.tanuki2.data.RankedObject;
 import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.data.TrackPropertyMap;
@@ -155,8 +156,8 @@ class TrackPropertySelectors {
 		}
 
 		protected void assignTrackPropertiesToFile(final FileData fd, TrackPropertyMap tp, final RankedObjectCollection<AlbumData> sharedAlbumData) {
-			fd.setTn(tp.get(TrackPropertyType.TN));
-			fd.setTrack(textProcessor.processText(tp.get(TrackPropertyType.TRACK)));
+			TrackPropertyType.TRACK.setValue(fd, tp.get(TrackPropertyType.TRACK), textProcessor);
+			TrackPropertyType.TN.setValue(fd, tp.get(TrackPropertyType.TN), textProcessor);
 			final AlbumData ad= sharedAlbumData.increaseRank(tp.toAlbumData(), 1).data;
 			ad.setArtist(textProcessor.processText(ad.getArtist()));
 			ad.setAlbum(textProcessor.processText(ad.getAlbum()));
@@ -182,25 +183,116 @@ class TrackPropertySelectors {
 		public void run(AbstractTrackPropertySelector selector) {
 			selector.init(textProcessor);
 			final Set<String> successfulFiles= new HashSet<String>();
-			for (DirData dd : unassignedData.keySet()) {
-				final Map<String, List<TrackPropertyMap>> trackPropertyMap= unassignedData.get(dd);
+			for (Map.Entry<DirData, Map<String, List<TrackPropertyMap>>> entry : unassignedData.entrySet()) {
+				final DirData dd= entry.getKey();
+				final Map<String, List<TrackPropertyMap>> trackPropertyMap= entry.getValue();
 				final Map<String, FileData> ddFiles= dd.files;
 				selector.run(ddFiles, trackPropertyMap, sharedAlbumData, successfulFiles);
 				removeSuccessfulTrackProperties(trackPropertyMap, successfulFiles);
 			}
-			removeEmptyValues(unassignedData);
-		}
-
-		private static void removeEmptyValues(final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData) {
-			for (Map<String, List<TrackPropertyMap>> tpm : unassignedData.values())
-				Helpers.removeEmptyCollections(tpm);
-			Helpers.removeEmptyMaps(unassignedData);
+			Engine.removeEmptyContainers(unassignedData);
 		}
 
 		private static void removeSuccessfulTrackProperties(final Map<String, List<TrackPropertyMap>> trackPropertyMap, final Set<String> successfulFiles) {
 			for (String filename : successfulFiles)
 				trackPropertyMap.remove(filename);
 			successfulFiles.clear();
+		}
+	}
+
+	// =============================================================================================== //
+	// = PopulateEmptyFields
+	// =============================================================================================== //
+	/**
+	 * Attempts to populate any empty fields without any regard for which row each value is in, etc.
+	 */
+	public static class PopulateEmptyFields {
+		private final Map<DirData, Map<String, List<TrackPropertyMap>>> allData;
+		private final ITextProcessor textProcessor;
+		private RankedObjectCollection<TrackPropertyMap> rankedTrackPropertyMaps= null;
+
+		public PopulateEmptyFields(Map<DirData, Map<String, List<TrackPropertyMap>>> allData, ITextProcessor textProcessor) {
+			this.allData= allData;
+			this.textProcessor= textProcessor;
+		}
+
+		public void run() {
+			for (final Map.Entry<DirData, Map<String, List<TrackPropertyMap>>> e1 : allData.entrySet()) {
+				final DirData dd= e1.getKey();
+				final Map<String, List<TrackPropertyMap>> trackPropertyMap= e1.getValue();
+				final Map<String, FileData> ddFiles= dd.files;
+				for (final Map.Entry<String, List<TrackPropertyMap>> e2 : trackPropertyMap.entrySet()) {
+					final String filename= e2.getKey();
+					final List<TrackPropertyMap> rows= trackPropertyMap.get(filename);
+					if (rows.size() > 1) {
+						final FileData fd= ddFiles.get(filename);
+						for (TrackPropertyType field : TrackPropertyType.values())
+							if (field.getValue(fd) == null) {
+
+								// Found an empty field
+								if (rankedTrackPropertyMaps == null)
+									rankEachRow(fd, rows);
+								populateEmptyProperty(fd, field, rows);
+							}
+					}
+					rankedTrackPropertyMaps= null;
+				}
+			}
+		}
+
+		/**
+		 * Ranks each row. These values are used when we have multiple possible values for a currently empty field. It
+		 * helps to improve the general accuracy of the chosen value.
+		 */
+		private void rankEachRow(final FileData fd, final List<TrackPropertyMap> rows) {
+			rankedTrackPropertyMaps= new RankedObjectCollection<TrackPropertyMap>();
+
+			// Assign every row an initial score of 1
+			for (TrackPropertyMap tpm : rows)
+				rankedTrackPropertyMaps.add(tpm, 1);
+
+			// Compare the values in the rows to the values in the FileData
+			for (TrackPropertyType field : TrackPropertyType.values()) {
+				final String v= Helpers.normalizeText(field.getValue(fd));
+				if (v != null)
+					for (TrackPropertyMap row : rows)
+						if (v.equals(Helpers.normalizeText(row.get(field))))
+							rankedTrackPropertyMaps.increaseRank(row, 1);
+						else if (row.get(field) != null)
+							rankedTrackPropertyMaps.increaseRank(row, 0.0001);
+			}
+
+//			// Compare the values in each row to the values in each row of lower rank
+//			// NOTE: After writing this and then realising I had a mistake in my test it turns out
+//			// that this might not be required after all.
+//			for (TrackPropertyType field : TrackPropertyType.values())
+//				for (RankedObject<TrackPropertyMap> outerRow : rankedTrackPropertyMaps) {
+//					final String v= Helpers.normalizeText(outerRow.data.get(field));
+//					if (v != null) {
+//						boolean found= false;
+//						for (RankedObject<TrackPropertyMap> innerRow : rankedTrackPropertyMaps) {
+//							if (!found) {
+//								if (innerRow == outerRow)
+//									found= true;
+//							} else {
+//								if (v.equals(Helpers.normalizeText(innerRow.data.get(field))))
+//									innerRow.increaseRank(outerRow.getRank() * 0.08);
+//							}
+//						}
+//					}
+//				}
+//			rankedTrackPropertyMaps.sort();
+		}
+
+		private void populateEmptyProperty(final FileData fd, TrackPropertyType prop, final List<TrackPropertyMap> rows) {
+			// Rank each row
+			final RankedNormalisedStringCollection rankedValues= new RankedNormalisedStringCollection();
+			for (TrackPropertyMap row : rows)
+				if (row.containsKey(prop))
+					rankedValues.increaseRank(row.get(prop), rankedTrackPropertyMaps.getRank(row) + 1);
+
+			// Populate
+			prop.setValue(fd, rankedValues.getWinner(), textProcessor);
 		}
 	}
 }
