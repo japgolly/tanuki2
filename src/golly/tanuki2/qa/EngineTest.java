@@ -308,7 +308,6 @@ public class EngineTest extends TestHelper {
 
 	@Test
 	public void shouldTrimAndIgnoreEmptyStrings() {
-		System.out.println("-------------------------------------------------");
 		addFakeDirsToEngine();
 		mtpr1.addMockResult("A/a1", makeTrackProperties("\0asd hehe　 ", 2006, "", " 2", "　 \0"));
 		engine2.readTrackProprties2();
