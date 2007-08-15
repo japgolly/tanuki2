@@ -1,35 +1,48 @@
 <project name="Tanuki 2">
-	<property name="tanuki.builds" value="linux,macosx,win32" />
+	<property name="tanuki.builds" value="linux,win32" />
+	<property name="tanuki.version" value="2.0" />
+	<property name="tanuki.doc" value="doc" />
 
-	<property name="linux.bin" value="bin/linux" />
-	<property name="linux.swt.zip" value="lib/swt-3.3M6-gtk-linux-x86.zip" />
+	<property name="linux.swt.zip" value="lib/swt-3.3-gtk-linux-x86.zip" />
 
-	<property name="macosx.bin" value="bin/macosx" />
-	<property name="macosx.swt.zip" value="lib/swt-3.3M6-carbon-macosx.zip" />
+	<property name="macosx.swt.zip" value="lib/swt-3.3-carbon-macosx.zip" />
 
-	<property name="win32.bin" value="bin/win32" />
-	<property name="win32.swt.zip" value="lib/swt-3.3M6-win32-win32-x86.zip" />
+	<property name="win32.swt.zip" value="lib/swt-3.3-win32-win32-x86.zip" />
+	<property name="win32.tool.nsis" value="C:/Program Files/NSIS" />
 
+	<property name="${build}.bin.root" value="bin/${build}" />
+	<property name="${build}.bin.javac" value="${build.bin.root}/javac" />
+	<property name="${build}.bin.jar" value="${build.bin.root}/jar" />
+	<property name="${build}.bin.tmp" value="${build.bin.root}/tmp" />
+	<property name="${build}.bin.dist" value="dist" />
+	
+	<property name="launch4j.dir" value="vendor/launch4j" />
+	<taskdef name="launch4j"
+		classname="net.sf.launch4j.ant.Launch4jTask"
+		classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />
+	
 	<!-- ================================================================== -->
 
 	<target name="clean-${build}">
-		<delete dir="${build.bin}" />
+		<delete dir="${build.bin.root}" />
+		<delete dir="${build.bin.dist}" />
 	</target>
 
 	<!-- ================================================================== -->
 
 	<target name="make-${build}">
-		<mkdir dir="${build.bin}" />
-		<unzip src="${build.swt.zip}" dest="${build.bin}">
+		<mkdir dir="${build.bin.javac}" />
+		<mkdir dir="${build.bin.jar}" />
+		<unzip src="${build.swt.zip}" dest="${build.bin.jar}">
 			<patternset>
 				<include name="swt.jar" />
 			</patternset>
 		</unzip>
 		<path id="tanuki.classpath">
-			<fileset dir="${build.bin}" includes="*.jar" />
+			<fileset dir="${build.bin.jar}" includes="*.jar" />
 		</path>
-		<javac srcdir="src" destdir="${build.bin}" excludes="**/qa/**" classpathref="tanuki.classpath" encoding="utf8" debug="off" optimize="on" source="1.5" />
-		<copy todir="${build.bin}">
+		<javac srcdir="src" destdir="${build.bin.javac}" excludes="**/qa/**" classpathref="tanuki.classpath" encoding="utf8" debug="off" optimize="on" source="1.5" />
+		<copy todir="${build.bin.javac}">
 			<fileset dir="src">
 				<exclude name="**/*.java" />
 				<exclude name="**/qa/**" />
@@ -44,7 +57,7 @@
 			<path refid="tanuki.classpath" />
 			<flattenmapper />
 		</pathconvert>
-		<jar destfile="${build.bin}/tanuki2.jar" basedir="${build.bin}">
+		<jar destfile="${build.bin.jar}/tanuki2.jar" basedir="${build.bin.javac}">
 			<manifest>
 				<attribute name="Main-Class" value="golly.tanuki2.Tanuki" />
 				<attribute name="Class-Path" value="${tanuki.classpath.txt}" />
@@ -52,5 +65,40 @@
 			</manifest>
 		</jar>
 	</target>
+
+	<!-- ================================================================== -->
+
+	<target name="package-${build}" depends="jar-${build}">
+		<mkdir dir="${build.bin.tmp}" />
+		<copy todir="${build.bin.tmp}">
+			<fileset file="${tanuki.doc}/*" />
+			<fileset file="${build.bin.jar}/*" />
+		</copy>
+		<delete dir="${build.bin.dist}" />
+		<mkdir dir="${build.bin.dist}" />
+	</target>
+
+	<macrodef name="package-linux-impl">
+		<sequential>
+			<tar tarfile="${linux.bin.tmp}/tanuki2.tar">
+				<tarfileset dir="${linux.bin.jar}">
+					<include name="*"/>
+				</tarfileset>
+			</tar>
+			<gzip zipfile="${linux.bin.dist}/tanuki2-${tanuki.version}-linux.tar.gz" src="${linux.bin.tmp}/tanuki2.tar"/>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="package-win32-impl">
+		<sequential>
+			<launch4j
+				configFile="launch4j-win32.xml"
+				jar="${win32.bin.tmp}/tanuki2.jar"
+				outfile="${win32.bin.tmp}/tanuki2.exe"
+			/>
+			<delete file="${win32.bin.tmp}/tanuki2.jar"/>
+			<zip destfile="${win32.bin.dist}/tanuki2-${tanuki.version}-win32.zip" basedir="${win32.bin.tmp}"/>
+		</sequential>
+	</macrodef>
 
 </project>
