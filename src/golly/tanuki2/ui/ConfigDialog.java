@@ -1,9 +1,9 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.res.TanukiImage;
-import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.UIHelpers;
 
 import java.util.ArrayList;
@@ -41,6 +41,7 @@ public class ConfigDialog {
 	private boolean firstWidget= true, updated= false;
 	private final LineStyleListener lineStyleListener;
 	private final Button btnAutoTitleCase, btnIntelligentTitleCase;
+	private final Button btnCheckVersionOnStartup;
 
 	public ConfigDialog(Shell parent) {
 		shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
@@ -61,6 +62,7 @@ public class ConfigDialog {
 		btnIntelligentTitleCase= new Button(g, SWT.CHECK);
 		btnIntelligentTitleCase.setText(I18n.l("config_btn_intelligentTitleCase")); //$NON-NLS-1$
 		btnIntelligentTitleCase.setSelection(RuntimeConfig.intelligentTitleCase);
+		// TODO Add a tooltip describing what intelligent title case is
 
 		// GROUP: Output
 		g= new Group(shell, SWT.SHADOW_ETCHED_IN);
@@ -85,6 +87,16 @@ public class ConfigDialog {
 		};
 		iwTargetDirFormat= addStyledText(g, "config_txt_targetDirFormat", RuntimeConfig.targetDirFormat); //$NON-NLS-1$
 		iwTargetAudioFileFormat= addStyledText(g, "config_txt_targetAudioFileFormat", RuntimeConfig.targetAudioFileFormat); //$NON-NLS-1$
+
+		// GROUP: Text
+		g= new Group(shell, SWT.SHADOW_ETCHED_IN);
+		g.setText(I18n.l("config_grp_other")); //$NON-NLS-1$
+		g.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
+		g.setLayout(UIHelpers.makeGridLayout(1, false, 4, 8));
+		// Check version on startup
+		btnCheckVersionOnStartup= new Button(g, SWT.CHECK);
+		btnCheckVersionOnStartup.setText(I18n.l("config_btn_checkVersionOnStartup")); //$NON-NLS-1$
+		btnCheckVersionOnStartup.setSelection(RuntimeConfig.checkVersionOnStartup);
 
 		// Ok and Cancel buttons
 		Composite composite= new Composite(shell, SWT.NONE);
@@ -170,6 +182,7 @@ public class ConfigDialog {
 		RuntimeConfig.intelligentTitleCase= btnIntelligentTitleCase.getSelection();
 		RuntimeConfig.targetAudioFileFormat= targetAudioFileFormat;
 		RuntimeConfig.targetDirFormat= targetDirFormat;
+		RuntimeConfig.checkVersionOnStartup= btnCheckVersionOnStartup.getSelection();
 
 		// Finished
 		updated= true;

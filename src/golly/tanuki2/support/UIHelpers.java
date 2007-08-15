@@ -232,6 +232,19 @@ public class UIHelpers {
 		return (Boolean) r.ret;
 	}
 
+	public static boolean showYesNoBox(Shell shell, final int iconType, final String title, final String message) {
+		final RunnableWithShell r= new RunnableWithShell() {
+			public void run(Shell shell) {
+				MessageBox m= new MessageBox(shell, iconType | SWT.YES | SWT.NO);
+				m.setText(title);
+				m.setMessage(message);
+				ret= (Boolean) (m.open() == SWT.YES);
+			}
+		};
+		runWithShell(shell, r);
+		return (Boolean) r.ret;
+	}
+
 	public static boolean disableShowMessageBox= false;
 
 	public static void showMessageBox(Shell shell, final int iconType, final String title, final String message) {

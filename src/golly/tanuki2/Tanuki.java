@@ -2,11 +2,12 @@ package golly.tanuki2;
 
 import golly.tanuki2.core.Engine;
 import golly.tanuki2.res.TanukiImage;
-import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Log;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.TanukiException;
 import golly.tanuki2.support.UIResourceManager;
+import golly.tanuki2.tasks.CheckForUpdatesTask;
 import golly.tanuki2.ui.AppWindow;
 
 import java.util.Locale;
@@ -26,8 +27,10 @@ public class Tanuki {
 	public void run() {
 		Display display= null;
 		Engine engine= null;
+		CheckForUpdatesTask checkForUpdatesTask= null;
 		try {
 
+			// Init
 			Log.init();
 			Log.logStartup();
 			I18n.setLocale(Locale.ENGLISH);
@@ -35,6 +38,12 @@ public class Tanuki {
 			display= new Display();
 			TanukiImage.setDisplay(display);
 			engine= new Engine();
+			
+			// Check for new version
+			if (RuntimeConfig.checkVersionOnStartup)
+				(checkForUpdatesTask= new CheckForUpdatesTask()).start();
+			
+			// Start app
 			new AppWindow(display, engine).show();
 
 		} catch (Throwable t) {
@@ -42,6 +51,8 @@ public class Tanuki {
 
 		} finally {
 			RuntimeConfig.tryToSave();
+			if (checkForUpdatesTask != null)
+				checkForUpdatesTask.stop();
 			UIResourceManager.disposeAll();
 			if (display != null)
 				display.dispose();

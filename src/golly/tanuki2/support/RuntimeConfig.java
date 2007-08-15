@@ -24,6 +24,7 @@ public class RuntimeConfig {
 	public static boolean intelligentTitleCase= false;
 	public static String targetDirFormat= Helpers.ensureCorrectDirSeperators("[:artist:]/[:year:] - [:album:]");
 	public static String targetAudioFileFormat= "[:tn:]. [:track:]";
+	public static boolean checkVersionOnStartup= true;
 
 	// =============================================================================================== //
 	private static final String FILENAME= "settings.xml";
