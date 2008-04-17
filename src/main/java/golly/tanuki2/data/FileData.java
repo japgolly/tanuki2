@@ -1,6 +1,6 @@
 package golly.tanuki2.data;
 
-import golly.tanuki2.res.TanukiImage;
+import golly.tanuki2.support.TanukiImage;
 
 import org.eclipse.swt.graphics.Image;
 

@@ -2,9 +2,9 @@ package golly.tanuki2.ui;
 
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.OSSpecific;
+import golly.tanuki2.support.TanukiImage;
 
 import java.util.HashSet;
 import java.util.Set;

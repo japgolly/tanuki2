@@ -5,7 +5,7 @@ import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.RankedObject;
 import golly.tanuki2.data.RankedObjectCollection;
-import golly.tanuki2.res.TanukiImage;
+import golly.tanuki2.support.TanukiImage;
 import golly.tanuki2.support.UIHelpers;
 
 import java.util.Set;

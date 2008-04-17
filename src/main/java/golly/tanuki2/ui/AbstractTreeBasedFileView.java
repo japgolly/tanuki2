@@ -6,9 +6,9 @@ import java.util.Set;
 
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.AutoResizeColumnsListener;
 import golly.tanuki2.support.Helpers;
+import golly.tanuki2.support.TanukiImage;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
 

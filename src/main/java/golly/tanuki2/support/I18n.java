@@ -10,7 +10,7 @@ import java.util.ResourceBundle;
  * @since 17/02/2007
  */
 public class I18n {
-	private static final String BUNDLE_ID= "golly.tanuki2.res.strings"; //$NON-NLS-1$
+	private static final String BUNDLE_ID= "strings"; //$NON-NLS-1$
 	private static ResourceBundle res= null;
 
 	public static void setLocale(Locale locale) {

@@ -1,11 +1,11 @@
 package golly.tanuki2;
 
 import golly.tanuki2.core.Engine;
-import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Log;
 import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.TanukiException;
+import golly.tanuki2.support.TanukiImage;
 import golly.tanuki2.support.UIResourceManager;
 import golly.tanuki2.tasks.CheckForUpdatesTask;
 import golly.tanuki2.ui.AppWindow;

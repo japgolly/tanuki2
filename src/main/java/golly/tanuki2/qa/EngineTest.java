@@ -7,9 +7,9 @@ import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.TrackPropertyMap;
-import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.Helpers;
+import golly.tanuki2.support.TanukiImage;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

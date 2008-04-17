@@ -1,6 +1,5 @@
-package golly.tanuki2.res;
+package golly.tanuki2.support;
 
-import golly.tanuki2.support.UIResourceManager;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
@@ -50,10 +49,10 @@ public enum TanukiImage {
 
 	public Image get() {
 		if (img == null) {
-			final String resID= TanukiImage.class.getCanonicalName() + filename;
+			final String resID= TanukiImage.class.getSimpleName() + filename;
 			img= (Image) UIResourceManager.get(resID);
 			if (img == null) {
-				img= new Image(display, TanukiImage.class.getResourceAsStream(filename));
+				img= new Image(display, Thread.currentThread().getContextClassLoader().getResourceAsStream(filename));
 				UIResourceManager.add(resID, img);
 			}
 		}

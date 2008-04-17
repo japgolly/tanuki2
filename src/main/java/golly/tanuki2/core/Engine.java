@@ -10,13 +10,13 @@ import golly.tanuki2.data.TrackPropertyType;
 import golly.tanuki2.modules.FilenameParser;
 import golly.tanuki2.modules.ID3V1TagReader;
 import golly.tanuki2.modules.ID3V2TagReader;
-import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.OSSpecific;
 import golly.tanuki2.support.RichRandomAccessFileCache;
 import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.TanukiException;
+import golly.tanuki2.support.TanukiImage;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.ui.YesNoToAllBox;
 

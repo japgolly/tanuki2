@@ -1,9 +1,9 @@
 package golly.tanuki2.ui;
 
-import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.RuntimeConfig;
+import golly.tanuki2.support.TanukiImage;
 import golly.tanuki2.support.UIHelpers;
 
 import java.util.ArrayList;

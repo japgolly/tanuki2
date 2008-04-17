@@ -1,8 +1,8 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.StaticConfig;
-import golly.tanuki2.res.TanukiImage;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.TanukiImage;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.WebBrowser;
 
