@@ -1,4 +1,4 @@
-package golly.tanuki2.qa;
+package golly.tanuki2;
 
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;

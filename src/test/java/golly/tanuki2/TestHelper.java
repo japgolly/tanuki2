@@ -1,4 +1,4 @@
-package golly.tanuki2.qa;
+package golly.tanuki2;
 
 import static golly.tanuki2.data.TrackPropertyType.ALBUM;
 import static golly.tanuki2.data.TrackPropertyType.ARTIST;
@@ -17,6 +17,7 @@ import golly.tanuki2.data.TrackPropertyMap;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,10 +59,14 @@ public abstract class TestHelper extends Assert {
 			fail("Expected TrackProperties not found.");
 		}
 	}
+	
+	static URL getTestResource(String name) {
+		return Thread.currentThread().getContextClassLoader().getResource(name);
+	}
 
-	static String getQAPath(String path) {
+	static String getTestResourcePath(String path) {
 		try {
-			return new File(ID3V2TagReaderTest.class.getResource(path).toURI()).getAbsolutePath();
+			return new File(getTestResource(path).toURI()).getAbsolutePath();
 		} catch (URISyntaxException e) {
 			throw new RuntimeException();
 		}

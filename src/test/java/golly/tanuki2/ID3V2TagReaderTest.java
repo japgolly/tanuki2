@@ -1,4 +1,4 @@
-package golly.tanuki2.qa;
+package golly.tanuki2;
 
 import golly.tanuki2.modules.ID3V2TagReader;
 import golly.tanuki2.support.RichRandomAccessFileCache;
@@ -15,7 +15,7 @@ import org.junit.Test;
  */
 @SuppressWarnings("nls")
 public class ID3V2TagReaderTest extends TestHelper {
-	private String DATA_DIR= getQAPath("tags");
+	private String DATA_DIR= getTestResourcePath("tags");
 	private ID3V2TagReader r= null;
 
 	@Before

@@ -1,4 +1,4 @@
-package golly.tanuki2.qa;
+package golly.tanuki2;
 
 import static golly.tanuki2.data.TrackPropertyType.ALBUM;
 import static golly.tanuki2.data.TrackPropertyType.ARTIST;

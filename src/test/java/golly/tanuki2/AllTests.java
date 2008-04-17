@@ -1,4 +1,4 @@
-package golly.tanuki2.qa;
+package golly.tanuki2;
 
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;

@@ -1,4 +1,4 @@
-package golly.tanuki2.qa;
+package golly.tanuki2;
 
 import static golly.tanuki2.support.Helpers.addPathElements;
 import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
@@ -533,7 +533,7 @@ public class EngineTest extends TestHelper {
 		File targetDir= new File(addPathElements(Helpers.getSystemTempDir(), "tanuki_test_da_voodoo", "source"));
 		if (targetDir.exists())
 			Helpers.rm_rf(targetDir);
-		Helpers.cp_r(new File(EngineTest.class.getResource(sampleDataDir).toURI()), targetDir, true, ".svn");
+		Helpers.cp_r(new File(getTestResource(sampleDataDir).toURI()), targetDir, true, ".svn");
 		return targetDir.toString();
 	}
 

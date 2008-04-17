@@ -1,4 +1,4 @@
-package golly.tanuki2.qa;
+package golly.tanuki2;
 
 import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
 import golly.tanuki2.support.Helpers;
