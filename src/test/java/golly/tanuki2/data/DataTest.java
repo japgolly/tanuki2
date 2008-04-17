@@ -1,8 +1,4 @@
-package golly.tanuki2;
-
-import golly.tanuki2.data.AlbumData;
-import golly.tanuki2.data.DirData;
-import golly.tanuki2.data.FileData;
+package golly.tanuki2.data;
 
 import java.util.HashSet;
 import java.util.Set;

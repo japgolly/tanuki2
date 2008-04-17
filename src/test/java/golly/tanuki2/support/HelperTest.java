@@ -1,7 +1,7 @@
-package golly.tanuki2;
+package golly.tanuki2.support;
 
 import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
-import golly.tanuki2.support.Helpers;
+import golly.tanuki2.TestHelper;
 import golly.tanuki2.support.Helpers.OptimisibleDirTreeNode;
 
 import java.util.HashMap;

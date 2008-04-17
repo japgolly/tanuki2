@@ -1,14 +1,14 @@
-package golly.tanuki2;
+package golly.tanuki2.core;
 
 import static golly.tanuki2.support.Helpers.addPathElements;
 import static golly.tanuki2.support.Helpers.ensureCorrectDirSeperators;
-import golly.tanuki2.core.Engine;
+import golly.tanuki2.TestHelper;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.TrackPropertyMap;
-import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.Helpers;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.TanukiImage;
 
 import java.io.BufferedReader;

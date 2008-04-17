@@ -1,14 +1,14 @@
-package golly.tanuki2;
+package golly.tanuki2.modules;
 
 import static golly.tanuki2.data.TrackPropertyType.ALBUM;
 import static golly.tanuki2.data.TrackPropertyType.ARTIST;
 import static golly.tanuki2.data.TrackPropertyType.TN;
 import static golly.tanuki2.data.TrackPropertyType.TRACK;
 import static golly.tanuki2.data.TrackPropertyType.YEAR;
+import golly.tanuki2.TestHelper;
 import golly.tanuki2.core.ITrackPropertyReader;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.TrackPropertyMap;
-import golly.tanuki2.modules.FilenameParser;
 import golly.tanuki2.modules.FilenameParser.SmartPattern;
 
 import java.util.List;

@@ -1,6 +1,6 @@
-package golly.tanuki2;
+package golly.tanuki2.modules;
 
-import golly.tanuki2.modules.ID3V2TagReader;
+import golly.tanuki2.TestHelper;
 import golly.tanuki2.support.RichRandomAccessFileCache;
 
 import java.net.URISyntaxException;

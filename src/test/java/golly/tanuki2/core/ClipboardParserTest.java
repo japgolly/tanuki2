@@ -1,6 +1,6 @@
-package golly.tanuki2;
+package golly.tanuki2.core;
 
-import golly.tanuki2.core.ClipboardParser;
+import golly.tanuki2.TestHelper;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.TrackPropertyMap;
 import golly.tanuki2.data.TrackPropertyType;
