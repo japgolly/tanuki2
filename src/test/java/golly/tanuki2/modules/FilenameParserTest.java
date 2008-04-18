@@ -33,18 +33,18 @@ public class FilenameParserTest extends TestHelper {
 	@Test
 	public void testSmartPattern() {
 		SmartPattern sp= new FilenameParser.SmartPattern("[:artist:]", "[:year:] - [:album:]", "[:tn:] - [:track:]");
-		assertEquals(sp.indexes.get(ARTIST), 1);
-		assertEquals(sp.indexes.get(YEAR), 2);
-		assertEquals(sp.indexes.get(ALBUM), 3);
-		assertEquals(sp.indexes.get(TN), 4);
-		assertEquals(sp.indexes.get(TRACK), 5);
+		assertEquals(1, sp.indexes.get(ARTIST).intValue());
+		assertEquals(2, sp.indexes.get(YEAR).intValue());
+		assertEquals(3, sp.indexes.get(ALBUM).intValue());
+		assertEquals(4, sp.indexes.get(TN).intValue());
+		assertEquals(5, sp.indexes.get(TRACK).intValue());
 
 		sp= new FilenameParser.SmartPattern("[:year:] [:artist:]", "[:year:] [:album:]", "[:track:]");
-		assertEquals(sp.indexes.get(ARTIST), 2);
-		assertEquals(sp.indexes.get(YEAR), 1);
-		assertEquals(sp.indexes.get(ALBUM), 3);
-		assertEquals(sp.indexes.get(TN), null);
-		assertEquals(sp.indexes.get(TRACK), 4);
+		assertEquals(1, sp.indexes.get(YEAR).intValue());
+		assertEquals(2, sp.indexes.get(ARTIST).intValue());
+		assertEquals(3, sp.indexes.get(ALBUM).intValue());
+		assertEquals(4, sp.indexes.get(TRACK).intValue());
+		assertNull(sp.indexes.get(TN));
 	}
 
 	@Test
