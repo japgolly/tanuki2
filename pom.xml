@@ -45,7 +45,7 @@
         <executions>
           <execution>
             <id>create-empty-directory</id>
-            <phase>process-classes</phase>
+            <phase>process-test-resources</phase>
             <goals>
               <goal>run</goal>
             </goals>
