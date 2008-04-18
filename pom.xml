@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <name>Tanuki 2</name>
+  <groupId>golly</groupId>
+  <artifactId>tanuki</artifactId>
+  <version>2.0-SNAPSHOT</version>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>golly.tanuki2.Tanuki2</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/AllTests.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+
+      <!-- This is due to a bug in the maven-resources plugin that wont copy empty directories -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>create-empty-directory</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <mkdir dir="${basedir}/target/test-classes/sample_data/other/empty" />
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+  </build>
+
+  <profiles>
+    <profile>
+      <id>org.eclipse.swt.win32</id>
+      <activation>
+        <os>
+          <name>windows xp</name>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt.win32.win32</groupId>
+          <artifactId>x86</artifactId>
+          <version>3.3.0-v3346</version>
+          <type>jar</type>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.4</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>
