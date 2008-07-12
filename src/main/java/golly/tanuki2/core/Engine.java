@@ -529,7 +529,7 @@ public class Engine implements ITextProcessor {
 						final String value= row.get(field);
 						if (value != null) {
 							final String newValue= Helpers.unicodeTrim(value);
-							if (newValue.isEmpty())
+							if (newValue.length() == 0)
 								row.remove(field);
 							else
 								row.put(field, newValue);

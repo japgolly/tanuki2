@@ -6,6 +6,8 @@ import golly.tanuki2.data.FileData;
 import golly.tanuki2.data.TrackPropertyMap;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,5 +71,21 @@ public abstract class AbstractTagReader implements ITrackPropertyReader {
 			if (buffer[offset + i] != ((byte) expected[i]))
 				return false;
 		return true;
+	}
+	
+	protected static String newString(byte[] bytes, Charset charset) {
+		try {
+			return new String(bytes, charset.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	protected static String newString(byte[] bytes, int offset, int length, Charset charset) {
+		try {
+			return new String(bytes, offset, length, charset.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }

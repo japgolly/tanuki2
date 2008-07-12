@@ -32,6 +32,6 @@ public class ID3V1TagReader extends AbstractTagReader {
 	}
 
 	private static String readValue(byte[] buf, int from, int to) {
-		return ID3V1_RTRIM.matcher(new String(buf, from, to - from + 1, ID3V1_CHARSET)).replaceFirst(""); //$NON-NLS-1$
+		return ID3V1_RTRIM.matcher(newString(buf, from, to - from + 1, ID3V1_CHARSET)).replaceFirst(""); //$NON-NLS-1$
 	}
 }

@@ -131,7 +131,7 @@ public class ID3V2TagReader extends AbstractTagReader {
 	private static String readString(byte[] buf, int len, boolean checkEncoding) {
 		String str= null;
 		if (!checkEncoding) {
-			str= new String(buf, 0, len, UTF8);
+			str= newString(buf, 0, len, UTF8);
 		} else {
 			final byte encoding= buf[0];
 			int offset= 1;
@@ -139,7 +139,7 @@ public class ID3V2TagReader extends AbstractTagReader {
 			switch (encoding) {
 			case 0:
 				// ISO-8859-1 [ISO-8859-1]. Terminated with $00.
-				str= new String(buf, offset, len, ISO_8859_1);
+				str= newString(buf, offset, len, ISO_8859_1);
 				break;
 			case 1:
 				// UTF-16 [UTF-16] encoded Unicode [UNICODE] with BOM. All strings in the same frame SHALL have the same byteorder. Terminated with $00 00.
@@ -147,18 +147,18 @@ public class ID3V2TagReader extends AbstractTagReader {
 				offset+= 2;
 				len-= 2;
 				if (buf[1] == 254 && buf[2] == 255)
-					str= new String(buf, offset, len, UTF16BE);
+					str= newString(buf, offset, len, UTF16BE);
 				else
-					str= new String(buf, offset, len, UTF16LE);
+					str= newString(buf, offset, len, UTF16LE);
 				break;
 			case 2:
 				// UTF-16BE [UTF-16] encoded Unicode [UNICODE] without BOM. Terminated with $00 00.
 				// Untested
-				str= new String(buf, offset, len, UTF16BE);
+				str= newString(buf, offset, len, UTF16BE);
 				break;
 			case 3:
 				// UTF-8 [UTF-8] encoded Unicode [UNICODE]. Terminated with $00.
-				str= new String(buf, offset, len, UTF8);
+				str= newString(buf, offset, len, UTF8);
 				break;
 			}
 		}
@@ -180,7 +180,7 @@ public class ID3V2TagReader extends AbstractTagReader {
 	}
 
 	private static TrackPropertyType tpt2sym(byte version, byte[] tag, boolean extendedTag) {
-		String tagStr= new String(tag, ASCII);
+		String tagStr= newString(tag, ASCII);
 		if (extendedTag)
 			return TPTXXX2SYM.get(tagStr);
 		else
