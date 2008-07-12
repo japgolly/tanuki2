@@ -1,0 +1,30 @@
+<assembly>
+	<id>win32</id>
+	<formats>
+		<format>dir</format>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>doc</directory>
+			<outputDirectory></outputDirectory>
+			<lineEnding>dos</lineEnding>
+		</fileSet>
+	</fileSets>
+	<files>
+		<file>
+			<source>${project.build.directory}/${exe.filename}</source>
+			<outputDirectory></outputDirectory>
+		</file>
+	</files>
+	<dependencySets>
+		<dependencySet>
+			<unpack>false</unpack>
+			<scope>runtime</scope>
+			<excludes>
+				<exclude>${project.groupId}:${project.artifactId}</exclude>
+			</excludes>
+		</dependencySet>
+	</dependencySets>
+</assembly>
