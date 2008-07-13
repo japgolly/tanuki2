@@ -4,6 +4,28 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<name>Tanuki 2</name>
+	<description>Tanuki 2 is a tool for renaming, moving and organising music files with a strong
+		emphasis on minimal time and effort from the user.</description>
+	<url>http://code.google.com/p/tanuki2/</url>
+	<licenses>
+		<license>
+			<name>GNU General Public License (GPL), Version 3</name>
+			<url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+		</license>
+	</licenses>
+    <developers>
+		<developer>
+			<name>David Barri</name>
+			<email>japgolly@gmail.com</email>
+			<timezone>10</timezone>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:svn:https://tanuki2.googlecode.com/svn/</connection>
+		<tag>HEAD</tag>
+		<url>http://tanuki2.googlecode.com/svn/</url>
+	</scm>
+	
 	<groupId>golly</groupId>
 	<artifactId>tanuki</artifactId>
 	<version>2.0-SNAPSHOT</version>
@@ -11,7 +33,7 @@
 	<properties>
 		<main.class>golly.tanuki2.Tanuki</main.class>
 		<version.abcd-style>2.0.0.0</version.abcd-style>
-		<copyright>(c) 2007-2008 David Barri</copyright>
+		<copyright>Copyright (c) 2007-2008 David Barri</copyright>
 		<java.version>1.5</java.version>
 	</properties>
 	
