@@ -224,7 +224,6 @@ public final class Helpers {
 	 * 
 	 * @see #inspect(Object, boolean, Field...)
 	 */
-	@SuppressWarnings("nls")
 	public static String inspect(final Object obj, boolean includeObjectId) {
 		return inspect(obj, includeObjectId, obj == null ? null : obj.getClass().getDeclaredFields());
 	}
@@ -238,7 +237,6 @@ public final class Helpers {
 	 * @param fields the fields to inspect.
 	 * @throws RuntimeException if any excxeption occurs.
 	 */
-	@SuppressWarnings("nls")
 	public static String inspect(final Object obj, boolean includeObjectId, Field... fields) {
 		if (obj == null)
 			return "null";
@@ -704,7 +702,6 @@ public final class Helpers {
 	 * Creates a regex string that is an OR combination of the arguents passed.<br>
 	 * eg. <code>regexOr("abc","def","asd")</code> returns <code>"(?:(?:abc)|(?:def)|(?:asd))"</code>.
 	 */
-	@SuppressWarnings("nls")
 	public static String regexOr(String... array) {
 		return "(?:" + join(map(array, "(?:", ")"), "|") + ")";
 	}

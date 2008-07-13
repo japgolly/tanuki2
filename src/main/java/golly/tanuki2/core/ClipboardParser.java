@@ -24,12 +24,11 @@ import org.eclipse.swt.dnd.TextTransfer;
  * @author Golly
  * @since 10/03/2007
  */
-@SuppressWarnings("nls")
 public class ClipboardParser {
-	private static final Pattern pCrapBeforeTnAndText= Pattern.compile("^\\D*\\s+?(\\d{1,3}[^\\p{javaLetterOrDigit}])");
-	private static final Pattern pTnAndText= Pattern.compile("^(\\d{1,3})[^\\p{javaLetterOrDigit}](.+)$");
-	private static final Pattern pQuotedText= Pattern.compile("^\"(.+)\"$");
-	private static final Pattern pFindNumber= Pattern.compile("(?<!\\p{javaLetterOrDigit})0*?([1-9]\\d*)(?!\\p{javaLetterOrDigit})");
+	private static final Pattern pCrapBeforeTnAndText= Pattern.compile("^\\D*\\s+?(\\d{1,3}[^\\p{javaLetterOrDigit}])"); //$NON-NLS-1$
+	private static final Pattern pTnAndText= Pattern.compile("^(\\d{1,3})[^\\p{javaLetterOrDigit}](.+)$"); //$NON-NLS-1$
+	private static final Pattern pQuotedText= Pattern.compile("^\"(.+)\"$"); //$NON-NLS-1$
+	private static final Pattern pFindNumber= Pattern.compile("(?<!\\p{javaLetterOrDigit})0*?([1-9]\\d*)(?!\\p{javaLetterOrDigit})"); //$NON-NLS-1$
 
 	public String getClipboardText(Clipboard cb) {
 		final TextTransfer transfer= TextTransfer.getInstance();
@@ -39,6 +38,7 @@ public class ClipboardParser {
 	/**
 	 * Parses text and returns a track_number-to-track_name map.
 	 */
+	@SuppressWarnings("nls")
 	public Map<Integer, String> parse(String txt) {
 		final Map<Integer, String> values= new HashMap<Integer, String>();
 
