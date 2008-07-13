@@ -7,6 +7,7 @@
 	<description>Tanuki 2 is a tool for renaming, moving and organising music files with a strong
 		emphasis on minimal time and effort from the user.</description>
 	<url>http://code.google.com/p/tanuki2/</url>
+	<inceptionYear>2007</inceptionYear>
 	<licenses>
 		<license>
 			<name>GNU General Public License (GPL), Version 3</name>
@@ -35,9 +36,11 @@
 		<version.abcd-style>2.0.0.0</version.abcd-style>
 		<copyright>Copyright (c) 2007-2008 David Barri</copyright>
 		<java.version>1.5</java.version>
+		<swt.version>3.3.0-v3346</swt.version>
 	</properties>
 	
 	<build>
+		<defaultGoal>package</defaultGoal>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -93,6 +96,11 @@
 	
 	<dependencies>
 		<dependency>
+			<groupId>${swt.group}</groupId>
+			<artifactId>${swt.artifact}</artifactId>
+			<version>${swt.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.4</version>
@@ -100,8 +108,8 @@
 		</dependency>
 	</dependencies>
 	
-	<!-- #################### WINDOWS VERSION #################### -->
 	<profiles>
+		<!-- #################### WINDOWS VERSION #################### -->
 		<profile>
 			<id>windows</id>
 			<activation>
@@ -111,15 +119,9 @@
 			</activation>
 			<properties>
 				<exe.filename>tanuki2.exe</exe.filename>
+				<swt.group>org.eclipse.swt.win32.win32</swt.group>
+				<swt.artifact>x86</swt.artifact>
 			</properties>
-			<dependencies>
-				<dependency>
-					<groupId>org.eclipse.swt.win32.win32</groupId>
-					<artifactId>x86</artifactId>
-					<version>3.3.0-v3346</version>
-					<type>jar</type>
-				</dependency>
-			</dependencies>
 			<repositories>
 				<repository>
 					<id>akathist-repository</id>
@@ -135,6 +137,7 @@
 				</pluginRepository>
 			</pluginRepositories>
 			<build>
+				<defaultGoal>assembly:assembly</defaultGoal>
 				<plugins>
 					<plugin>
 						<groupId>com.akathist.maven.plugins.launch4j</groupId>
@@ -186,5 +189,47 @@
 				</plugins>
 			</build>
 		</profile>
+		
+		<!-- #################### MAC VERSION #################### -->
+		<profile>
+			<id>macosx</id>
+			<activation>
+				<os>
+					<family>macosx</family>
+				</os>
+			</activation>
+			<properties>
+				<swt.group>org.eclipse.swt.carbon</swt.group>
+				<swt.artifact>macosx</swt.artifact>
+			</properties>
+		</profile>
+		
+		<!-- #################### LINUX X86 VERSION #################### -->
+		<profile>
+			<id>linux-x86</id>
+			<properties>
+				<swt.group>org.eclipse.swt.gtk.linux</swt.group>
+				<swt.artifact>x86</swt.artifact>
+			</properties>
+		</profile>
+		
+		<!-- #################### LINUX X86_64 VERSION #################### -->
+		<profile>
+			<id>linux-x86_64</id>
+			<properties>
+				<swt.group>org.eclipse.swt.gtk.linux</swt.group>
+				<swt.artifact>x86_64</swt.artifact>
+			</properties>
+		</profile>
+		
+		<!-- #################### LINUX PPC VERSION #################### -->
+		<profile>
+			<id>linux-ppc</id>
+			<properties>
+				<swt.group>org.eclipse.swt.gtk.linux</swt.group>
+				<swt.artifact>ppc</swt.artifact>
+			</properties>
+		</profile>
+		
 	</profiles>
 </project>
