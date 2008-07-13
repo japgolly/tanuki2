@@ -380,8 +380,8 @@ public final class Helpers {
 	}
 
 	/**
-	 * Works like <code>Array.map()</code> in Ruby although instead of using a closure, strings are simply added to
-	 * the beginning and end of array elements.
+	 * Works like <code>Array.map()</code> in Ruby although instead of using a closure, strings are simply added to the
+	 * beginning and end of array elements.
 	 */
 	public static String[] map(final String[] array, final String pre, final String post) {
 		int i= array.length;
@@ -407,6 +407,31 @@ public final class Helpers {
 					main.get(k).addAll(newContent.get(k));
 				else
 					main.put(k, newContent.get(k));
+	}
+
+	/**
+	 * Creates a directory and if it doesn't already exist.
+	 * 
+	 * @return <code>true</code> if the path was created successfully; <code>false</code> if the directory already
+	 *         exists.
+	 * @throws IOException if <code>File.mkdir()</code> fails, or if the dir already exists but isn't a directory.
+	 */
+	public static boolean mkdir(File dir) throws IOException {
+		if (!dir.exists()) {
+			if (!dir.mkdir())
+				throw new IOException("File.mkdir() failed.");
+			return true;
+		} else if (!dir.isDirectory())
+			throw new IOException("Cannot create path. " + dir.toString() + " already exists and is not a directory.");
+		else
+			return false;
+	}
+
+	/**
+	 * @See #mkdir(File)
+	 */
+	public static boolean mkdir(String dir) throws IOException {
+		return mkdir(new File(dir));
 	}
 
 	/**
@@ -497,7 +522,7 @@ public final class Helpers {
 	public static final String normalizeText(final String input, List<Integer> map) {
 		if (input == null)
 			return null;
-		
+
 		final StringBuilder sb= new StringBuilder();
 		final int inputLength= input.length() - 1;
 		boolean ignoreNextMapChar= false;

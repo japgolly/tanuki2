@@ -27,19 +27,23 @@ public class RuntimeConfig {
 	public static boolean checkVersionOnStartup= true;
 
 	// =============================================================================================== //
+	private static final String DIRECTORY= OSSpecific.getTanukiSettingsDirectory();
 	private static final String FILENAME= "settings.xml";
+	private static final String FULL_FILENAME= Helpers.addPathElements(DIRECTORY, FILENAME);
 	private static final String SETTINGS_DESC= "Tanuki2 Settings";
 
 	/**
 	 * Loads the saved configuration if it is available.
 	 */
 	public static void load() throws IOException {
+		// Open settings file
 		Properties prop= new Properties();
 		try {
-			prop.loadFromXML(new FileInputStream(FILENAME));
+			prop.loadFromXML(new FileInputStream(FULL_FILENAME));
 		} catch (FileNotFoundException e) {
 			return;
 		}
+		// Read in properties
 		for (Field f : RuntimeConfig.class.getFields())
 			readProperty(prop, f.getName());
 	}
@@ -48,11 +52,13 @@ public class RuntimeConfig {
 	 * Saves the current configuration so that it can be restored on next load.
 	 */
 	public static void save() throws IOException {
+		// Create properties
 		Properties prop= new Properties();
 		for (Field f : RuntimeConfig.class.getFields())
 			saveProperty(prop, f.getName());
 
-		FileOutputStream fos= new FileOutputStream(FILENAME);
+		// Save to settings file
+		FileOutputStream fos= new FileOutputStream(FULL_FILENAME);
 		prop.storeToXML(fos, SETTINGS_DESC);
 		fos.close();
 	}

@@ -46,6 +46,7 @@ public class Log {
 
 	private static Logger log= null;
 	private static final String FILENAME= "log.txt"; //$NON-NLS-1$
+	private static final String FULL_FILENAME= Helpers.addPathElements(OSSpecific.getTanukiSettingsDirectory(), FILENAME);
 	private static final String STARTUP_LOG_ENTRY= "==================== STARTING ===================="; //$NON-NLS-1$
 
 	private Log() {
@@ -56,20 +57,18 @@ public class Log {
 		log= Logger.getLogger(""); //$NON-NLS-1$
 		for (Handler h : log.getHandlers())
 			log.removeHandler(h);
-		FileHandler fh= new FileHandler(FILENAME, true);
+		
+		FileHandler fh= new FileHandler(FULL_FILENAME, true);
 		fh.setEncoding("UTF-8"); //$NON-NLS-1$
 		fh.setLevel(Level.ALL);
 		fh.setFormatter(new CustomFormatter());
+		
 		log.addHandler(fh);
 		log.setLevel(Level.ALL);
 	}
 
 	public static Logger get() {
 		return log;
-	}
-
-	public static String getFilename() {
-		return FILENAME;
 	}
 
 	public static void logStartup() {

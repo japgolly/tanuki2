@@ -87,7 +87,7 @@ public final class OSSpecific {
 			return "\n"; //$NON-NLS-1$
 		}
 	}
-	
+
 	public static OS getOS() {
 		return os;
 	}
@@ -171,6 +171,26 @@ public final class OSSpecific {
 		default:
 			unsupported();
 		}
+	}
+
+	@SuppressWarnings("nls")
+	public static String getTanukiSettingsDirectory() {
+		String dir= null;
+
+		// Windows APPDATA dir
+		if (OSSpecific.getOS() == OS.WIN32) {
+			dir= System.getenv("APPDATA");
+			if (dir != null)
+				return Helpers.addPathElements(dir, "Tanuki2");
+		}
+
+		// user.home
+		dir= System.getProperty("user.home");
+		if (dir != null)
+			return Helpers.addPathElements(dir, ".tanuki2");
+
+		// Still not found? Default to same dir as app
+		return ".";
 	}
 
 	private static void unsupported() {

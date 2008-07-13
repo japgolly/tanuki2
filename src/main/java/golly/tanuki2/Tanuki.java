@@ -1,8 +1,10 @@
 package golly.tanuki2;
 
 import golly.tanuki2.core.Engine;
+import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.Log;
+import golly.tanuki2.support.OSSpecific;
 import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.TanukiException;
 import golly.tanuki2.support.TanukiImage;
@@ -31,6 +33,7 @@ public class Tanuki {
 		try {
 
 			// Init
+			Helpers.mkdir(OSSpecific.getTanukiSettingsDirectory());
 			Log.init();
 			Log.logStartup();
 			I18n.setLocale(Locale.ENGLISH);
