@@ -33,6 +33,7 @@ public class ClipboardParser {
 	private static final Pattern pQuotedText= Pattern.compile("^\"(.+)\"$"); //$NON-NLS-1$
 	private static final Pattern pFindNumber= Pattern.compile("(?<!\\p{javaLetterOrDigit})0*?([1-9]\\d*)(?!\\p{javaLetterOrDigit})"); //$NON-NLS-1$
 	private static final Pattern pTrackListingDecl= Pattern.compile("^.*?track[^/:\r\n\t]+?list[^/:\r\n\t]*?:\\s*", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
+	private static final Pattern pNonContent= Pattern.compile("\\P{javaLetterOrDigit}+"); //$NON-NLS-1$
 
 	public String getClipboardText(Clipboard cb) {
 		final TextTransfer transfer= TextTransfer.getInstance();
@@ -158,23 +159,57 @@ public class ClipboardParser {
 	private void matchClipboardResultsUsingTrackName(Map<String, FileData> ddFiles, final Map<Integer, String> clipboardResults, final Map<String, TrackPropertyMap> completeMatches) {
 		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
 		for (Integer tn : clipboardResults.keySet()) {
-			final String nTrack= Helpers.normalizeText(clipboardResults.get(tn));
+			final String nClipboardText= normaliseForComparison(clipboardResults.get(tn));
 			final RankedObjectCollection<String> rankedMatches= new RankedObjectCollection<String>();
 			for (String filename : ddFiles.keySet())
 				if (ddFiles.get(filename).isAudio()) {
+
 					// Compare to filename
-					final String nFilename= Helpers.normalizeText(Helpers.removeFilenameExtension(filename));
-					double rank= -LevenshteinDistance.calculateDistance2(nFilename, nTrack);
+					final String nFilename= normaliseForComparison(Helpers.removeFilenameExtension(filename));
+					double rank= calculateFuzzyRank(nFilename, nClipboardText);
+
 					// Compare to FileData.track
 					final FileData fd= ddFiles.get(filename);
 					if (fd.getTrack() != null)
-						rank= Math.max(rank, -LevenshteinDistance.calculateDistance2(Helpers.normalizeText(fd.getTrack()), nTrack));
+						rank= Math.max(rank, calculateFuzzyRank(normaliseForComparison(fd.getTrack()), nClipboardText));
+
 					// Store
 					rankedMatches.add(filename, rank);
+//					System.out.printf("%6f\t%s\t%s\n", rank, nFilename, nClipboardText);
 				}
 			rankedMatchesPerResult.put(tn, rankedMatches);
 		}
 		assignBestResultMatches(clipboardResults, completeMatches, rankedMatchesPerResult);
+	}
+
+	private static String normaliseForComparison(String text) {
+		text= Helpers.normalizeText(text);
+		text= pNonContent.matcher(text).replaceAll(""); //$NON-NLS-1$
+		return text;
+	}
+
+	private static final int FUZZY_RANK_EXTRA_SAMPLE_LENGTH= 0;
+
+	private static double calculateFuzzyRank(String fileText, String clipboardText) {
+		double rank;
+		final int sampleLen= clipboardText.length() + FUZZY_RANK_EXTRA_SAMPLE_LENGTH;
+		final int sampleCount= fileText.length() - sampleLen + 1;
+		if (sampleCount > 1) {
+			int sum= 0;
+			for (int i= 0; i < sampleCount; i++) {
+				String sample= fileText.substring(i, i + sampleLen);
+				sum+= calculateSingleRank(sample, clipboardText);
+			}
+			rank= ((double) sum) / ((double) sampleCount);
+		} else {
+			rank= calculateSingleRank(fileText, clipboardText);
+		}
+		return rank;
+	}
+
+	private static int calculateSingleRank(final String fileText, final String clipboardText) {
+		int d= LevenshteinDistance.calculateDistance2(fileText, clipboardText);
+		return Math.max(0, clipboardText.length() - d);
 	}
 
 	private void matchClipboardResultsUsingTN(Map<String, FileData> ddFiles, final Map<Integer, String> clipboardResults, final Map<String, TrackPropertyMap> completeMatches) {

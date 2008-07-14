@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -204,8 +203,38 @@ public class ClipboardParserTest extends TestHelper {
 	}
 
 	@Test
-	@Ignore
-	public void testMatchingToFiles_barabara() {
+	public void testMatchingToFiles_fuzzy1() {
+		final String prefix= "Into Eternity - Buried in Oblivion - ";
+		final String f1= prefix + "Splintered_Visions.mp3"; // joined together by underscore 
+		final String f2= prefix + "Embraced-by-Desolation.mp3"; // joined together by dashes
+		final String f3= prefix + "Three Dimensional Aperture.mp3"; // first word is different
+		final String f4= prefix + "Beginning of the.mp3"; // missing words at end
+		final String f5= prefix + "Uncertainty.mp3"; // missing words at beginning
+		final String f6= prefix + "Spiralling into Depression.mp3"; // double L in sprialling
+		final String f7= prefix + "Isola.mp3"; // word cut short
+		final String f8= prefix + "Buried in Oblivion.mp3";
+		final String f9= prefix + "Black Sea of Agony.mp3";
+		final String f10= prefix + "Morose Seclusion.mp3";
+		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
+	}
+
+	@Test
+	public void testMatchingToFiles_fuzzy2() {
+		final String f1= "01. Splintered_Visions.mp3"; // joined together by underscore 
+		final String f2= "02. Embraced-by-Desolation.mp3"; // joined together by dashes
+		final String f3= "03. Three Dimensional Aperture.mp3"; // first word is different
+		final String f4= "04. Beginning of the.mp3"; // missing words at end
+		final String f5= "05. Uncertainty.mp3"; // missing words at beginning
+		final String f6= "06. Spiralling into Depression.mp3"; // double L in sprialling
+		final String f7= "07. Isola.mp3"; // word cut short
+		final String f8= "08. Buried in Oblivion.mp3";
+		final String f9= "09. Black Sea of Agony.mp3";
+		final String f10= "10. Morose Seclusion.mp3";
+		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
+	}
+
+	@Test
+	public void testMatchingToFiles_fuzzy3() {
 		final String prefix= "Into Eternity - Buried in Oblivion - ";
 		final String f1= prefix + "Splintered_Visions.mp3"; // joined together by underscore 
 		final String f2= prefix + "Embraced-by-Desolation.mp3"; // joined together by dashes
@@ -215,6 +244,28 @@ public class ClipboardParserTest extends TestHelper {
 		final String f6= "06 - Spiralling into Depression.mp3"; // double L in sprialling
 		final String f7= prefix + "Isola.mp3"; // word cut short
 		final String f8= prefix + "Buried in Oblivion.mp3";
+		final String f9= "Buried in Oblivion - 09 - Black Sea of Agony.mp3";
+		final String f10= prefix + "Morose Seclusion.mp3";
+		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
+	}
+
+	/**
+	 * This test differs to {@link #testMatchingToFiles_fuzzy3()} in that track #8 doesn't have a prefix. The
+	 * significance of this is that <tt>Buried in Oblivion</tt> appears in other filenames as the album and also appears
+	 * in track #8 as the song title, meaning it will only pass if the matching implementation handles weights of
+	 * matches in addition to simply looking for matches.
+	 */
+	@Test
+	public void testMatchingToFiles_fuzzy4() {
+		final String prefix= "Into Eternity - Buried in Oblivion - ";
+		final String f1= prefix + "Splintered_Visions.mp3"; // joined together by underscore 
+		final String f2= prefix + "Embraced-by-Desolation.mp3"; // joined together by dashes
+		final String f3= prefix + "Three Dimensional Aperture.mp3"; // first word is different
+		final String f4= "04 - Beginning of the.mp3"; // missing words at end
+		final String f5= "05 - Uncertainty.mp3"; // missing words at beginning
+		final String f6= "06 - Spiralling into Depression.mp3"; // double L in sprialling
+		final String f7= prefix + "Isola.mp3"; // word cut short
+		final String f8= "Buried in Oblivion.mp3";
 		final String f9= "Buried in Oblivion - 09 - Black Sea of Agony.mp3";
 		final String f10= prefix + "Morose Seclusion.mp3";
 		subtestMatching(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10);
