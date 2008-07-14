@@ -25,10 +25,14 @@ import org.eclipse.swt.dnd.TextTransfer;
  * @since 10/03/2007
  */
 public class ClipboardParser {
-	private static final Pattern pCrapBeforeTnAndText= Pattern.compile("^\\D*\\s+?(\\d{1,3}[^\\p{javaLetterOrDigit}])"); //$NON-NLS-1$
-	private static final Pattern pTnAndText= Pattern.compile("^(\\d{1,3})[^\\p{javaLetterOrDigit}](.+)$"); //$NON-NLS-1$
+
+	private static final String tnRegex= "\\d{1,3}"; //$NON-NLS-1$
+	private static final String tnSuffixRegex= "(?: *?[,.;:\t-])"; //$NON-NLS-1$
+	private static final Pattern pCrapBeforeTnAndText= Pattern.compile("^\\D*\\s+?(?=" + tnRegex + tnSuffixRegex + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern pTnAndText= Pattern.compile("^(" + tnRegex + ")" + tnSuffixRegex + "(.+)$"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	private static final Pattern pQuotedText= Pattern.compile("^\"(.+)\"$"); //$NON-NLS-1$
 	private static final Pattern pFindNumber= Pattern.compile("(?<!\\p{javaLetterOrDigit})0*?([1-9]\\d*)(?!\\p{javaLetterOrDigit})"); //$NON-NLS-1$
+	private static final Pattern pTrackListingDecl= Pattern.compile("^.*?track[^/:\r\n\t]+?list[^/:\r\n\t]*?:\\s*", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
 
 	public String getClipboardText(Clipboard cb) {
 		final TextTransfer transfer= TextTransfer.getInstance();
@@ -42,13 +46,36 @@ public class ClipboardParser {
 	public Map<Integer, String> parse(String txt) {
 		final Map<Integer, String> values= new HashMap<Integer, String>();
 
+		// STEP 1. PREPARE INPUT ==============================================
+
+		// Remove crap from the full text input
+		txt= pTrackListingDecl.matcher(txt).replaceFirst("");
+
+		// STEP 2. PARSE ======================================================
+
+		// Separate into lines
+		final int slashCount= Helpers.countOccurances(txt, "/");
+		final int crlfCount= Helpers.countOccurances(txt, "[\r\n]+");
+		String[] lines= (slashCount > crlfCount) ? txt.split("/") : txt.split("[\r\n]+");
+
 		// Extract tn+txt from each line
-		for (String line : txt.split("[\r\n]+")) {
-			line= pCrapBeforeTnAndText.matcher(line).replaceFirst("$1");
+		for (String line : lines) {
+			line= pCrapBeforeTnAndText.matcher(line).replaceFirst("");
 			Matcher m= pTnAndText.matcher(line);
 			if (m.matches())
 				values.put(Integer.parseInt(m.group(1)), m.group(2));
 		}
+
+		// If that didn't work, assume there are no track numbers and that each line is a track name
+		if (values.isEmpty()) {
+			int i= 0;
+			for (String line : lines) {
+				line= pCrapBeforeTnAndText.matcher(line).replaceFirst("");
+				values.put(++i, line);
+			}
+		}
+
+		// STEP 3. POST-PROCESS ===============================================
 
 		// Remove crap from beginnings and ends
 		removeCommonCrap(values, true);

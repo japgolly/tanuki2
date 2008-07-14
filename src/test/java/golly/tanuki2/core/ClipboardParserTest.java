@@ -147,14 +147,12 @@ public class ClipboardParserTest extends TestHelper {
 	}
 
 	@Test
-	@Ignore
 	public void testGood8() {
 		final String clipboardTxt= "Track list: Splintered Visions / Embraced By Desolation / 3 Dimensional Aperture / Beginning Of The End / Point Of Uncertainty / Spiraling Into Depression / Isolation / Buried In Oblivion / Black Sea Of Agony / Morose Seclusion\n";
 		subtest(clipboardTxt);
 	}
 
 	@Test
-	@Ignore
 	public void testGood9() {
 		final String clipboardTxt= "Track Listing: Splintered Visions (4:56) / Embraced By Desolation (4:08) / 3 Dimensional Aperture (4:47) / Beginning Of The End (4:39) / Point Of Uncertainty (3:45) / Spiraling Into Depression (3:36) / Isolation (4:59) / Buried In Oblivion (4:00) / Black Sea Of Agony (6:31) / Morose Seclusion (3:21)\n";
 		subtest(clipboardTxt);

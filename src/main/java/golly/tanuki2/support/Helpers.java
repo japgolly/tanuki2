@@ -119,6 +119,22 @@ public final class Helpers {
 		}
 		return false;
 	}
+	
+	/**
+	 * Counts the number of times a given expression is found in a given string.
+	 * 
+	 * @param text The string to scan.
+	 * @param regexToFind The expression to scan for.
+	 */
+	public static int countOccurances(String text, String regexToFind) {
+		if (text == null)
+			return 0;
+		Matcher m= Pattern.compile(regexToFind).matcher(text);
+		int count= 0;
+		while (m.find())
+			count++;
+		return count;
+	}
 
 	/**
 	 * Copies/renames a file.

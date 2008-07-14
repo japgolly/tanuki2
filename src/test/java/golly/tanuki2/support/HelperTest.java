@@ -143,4 +143,14 @@ public class HelperTest extends TestHelper {
 				}
 			}
 	}
+	
+	@Test
+	public void testCountOccurances() {
+		assertEquals(0, Helpers.countOccurances("wqe", "a"));
+		assertEquals(1, Helpers.countOccurances(" avd ", "a"));
+		assertEquals(3, Helpers.countOccurances("aavd a", "a"));
+		assertEquals(2, Helpers.countOccurances("abba bvd ab", "ab"));
+		assertEquals(6, Helpers.countOccurances("   abba bvd  ab", " "));
+		assertEquals(3, Helpers.countOccurances("   abba bvd  ab", " +"));
+	}
 }
