@@ -262,26 +262,24 @@ class TrackPropertySelectors {
 							rankedTrackPropertyMaps.increaseRank(row, 0.0001);
 			}
 
-//			// Compare the values in each row to the values in each row of lower rank
-//			// NOTE: After writing this and then realising I had a mistake in my test it turns out
-//			// that this might not be required after all.
-//			for (TrackPropertyType field : TrackPropertyType.values())
-//				for (RankedObject<TrackPropertyMap> outerRow : rankedTrackPropertyMaps) {
-//					final String v= Helpers.normalizeText(outerRow.data.get(field));
-//					if (v != null) {
-//						boolean found= false;
-//						for (RankedObject<TrackPropertyMap> innerRow : rankedTrackPropertyMaps) {
-//							if (!found) {
-//								if (innerRow == outerRow)
-//									found= true;
-//							} else {
-//								if (v.equals(Helpers.normalizeText(innerRow.data.get(field))))
-//									innerRow.increaseRank(outerRow.getRank() * 0.08);
-//							}
-//						}
-//					}
-//				}
-//			rankedTrackPropertyMaps.sort();
+			// Compare the values in each row to the values in each row of lower rank
+			for (TrackPropertyType field : TrackPropertyType.values())
+				for (RankedObject<TrackPropertyMap> outerRow : rankedTrackPropertyMaps) {
+					final String v= Helpers.normalizeText(outerRow.data.get(field));
+					if (v != null) {
+						boolean found= false;
+						for (RankedObject<TrackPropertyMap> innerRow : rankedTrackPropertyMaps) {
+							if (!found) {
+								if (innerRow == outerRow)
+									found= true;
+							} else {
+								if (v.equals(Helpers.normalizeText(innerRow.data.get(field))))
+									innerRow.increaseRank(outerRow.getRank() * 0.08);
+							}
+						}
+					}
+				}
+			rankedTrackPropertyMaps.sort();
 		}
 
 		private void populateEmptyProperty(final FileData fd, TrackPropertyType prop, final List<TrackPropertyMap> rows) {
