@@ -54,10 +54,14 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<archive>
+						<index>true</index>
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<mainClass>${main.class}</mainClass>
 						</manifest>
+						<manifestEntries>
+							<Sealed>true</Sealed>
+						</manifestEntries>
 					</archive>
 				</configuration>
 			</plugin>
