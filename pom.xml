@@ -35,7 +35,7 @@
 		<main.class>golly.tanuki2.Tanuki</main.class>
 		<version.abcd-style>2.0.0.0</version.abcd-style>
 		<copyright>Copyright (c) 2007-2008 David Barri</copyright>
-		<java.version>1.5</java.version>
+		<src.java.version>1.5</src.java.version>
 		<swt.version>3.3.0-v3346</swt.version>
 	</properties>
 	
@@ -45,8 +45,8 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+					<source>${src.java.version}</source>
+					<target>${src.java.version}</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
