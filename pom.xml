@@ -37,6 +37,8 @@
 		<copyright>Copyright (c) 2007-2008 David Barri</copyright>
 		<src.java.version>1.5</src.java.version>
 		<swt.version>3.3.0-v3346</swt.version>
+		<java.mem.initial>64</java.mem.initial>
+		<java.mem.max>256</java.mem.max>
 	</properties>
 	
 	<build>
@@ -163,8 +165,8 @@
 									</classPath>
 									<jre>
 										<minVersion>${java.version}.0</minVersion>
-										<initialHeapSize>64</initialHeapSize>
-										<maxHeapSize>256</maxHeapSize>
+										<initialHeapSize>${java.mem.initial}</initialHeapSize>
+										<maxHeapSize>${java.mem.max}</maxHeapSize>
 									</jre>
 									<versionInfo>
 										<txtProductVersion>${project.version}</txtProductVersion>
@@ -211,15 +213,41 @@
 		<!-- #################### LINUX X86 VERSION #################### -->
 		<profile>
 			<id>linux-x86</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<arch>i386</arch>
+				</os>
+			</activation>
 			<properties>
 				<swt.group>org.eclipse.swt.gtk.linux</swt.group>
 				<swt.artifact>x86</swt.artifact>
+				<lib.dir>lib</lib.dir>
 			</properties>
+			<build>
+				<defaultGoal>assembly:assembly</defaultGoal>
+				<plugins>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<configuration>
+							<descriptors>
+								<descriptor>src/assembly/linux-x86.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		
 		<!-- #################### LINUX X86_64 VERSION #################### -->
 		<profile>
 			<id>linux-x86_64</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
 			<properties>
 				<swt.group>org.eclipse.swt.gtk.linux</swt.group>
 				<swt.artifact>x86_64</swt.artifact>
@@ -229,6 +257,12 @@
 		<!-- #################### LINUX PPC VERSION #################### -->
 		<profile>
 			<id>linux-ppc</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<arch>ppc</arch>
+				</os>
+			</activation>
 			<properties>
 				<swt.group>org.eclipse.swt.gtk.linux</swt.group>
 				<swt.artifact>ppc</swt.artifact>
