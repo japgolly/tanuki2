@@ -32,17 +32,18 @@
 	<version>2.0-SNAPSHOT</version>
 	
 	<properties>
-		<main.class>golly.tanuki2.Tanuki</main.class>
-		<version.abcd-style>2.0.0.0</version.abcd-style>
 		<copyright>Copyright (c) 2007-2008 David Barri</copyright>
-		<src.java.version>1.5</src.java.version>
-		<swt.version>3.3.0-v3346</swt.version>
 		<java.mem.initial>64</java.mem.initial>
 		<java.mem.max>256</java.mem.max>
+		<lib.dir>lib</lib.dir> <!-- Not used for the win32 assembly -->
+		<main.class>golly.tanuki2.Tanuki</main.class>
+		<src.java.version>1.5</src.java.version>
+		<swt.version>3.3.0-v3346</swt.version>
+		<version.abcd-style>2.0.0.0</version.abcd-style>
 	</properties>
 	
 	<build>
-		<defaultGoal>package</defaultGoal>
+		<defaultGoal>assembly:assembly</defaultGoal>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -97,6 +98,14 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/assembly/${assembly.name}.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	
@@ -124,6 +133,7 @@
 				</os>
 			</activation>
 			<properties>
+				<assembly.name>win32</assembly.name>
 				<exe.filename>tanuki2.exe</exe.filename>
 				<swt.group>org.eclipse.swt.win32.win32</swt.group>
 				<swt.artifact>x86</swt.artifact>
@@ -143,7 +153,6 @@
 				</pluginRepository>
 			</pluginRepositories>
 			<build>
-				<defaultGoal>assembly:assembly</defaultGoal>
 				<plugins>
 					<plugin>
 						<groupId>com.akathist.maven.plugins.launch4j</groupId>
@@ -184,14 +193,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<configuration>
-							<descriptors>
-								<descriptor>src/assembly/win32.xml</descriptor>
-							</descriptors>
-						</configuration>
-					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -220,23 +221,10 @@
 				</os>
 			</activation>
 			<properties>
+				<assembly.name>linux-x86</assembly.name>
 				<swt.group>org.eclipse.swt.gtk.linux</swt.group>
 				<swt.artifact>x86</swt.artifact>
-				<lib.dir>lib</lib.dir>
 			</properties>
-			<build>
-				<defaultGoal>assembly:assembly</defaultGoal>
-				<plugins>
-					<plugin>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<configuration>
-							<descriptors>
-								<descriptor>src/assembly/linux-x86.xml</descriptor>
-							</descriptors>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 		
 		<!-- #################### LINUX X86_64 VERSION #################### -->
@@ -249,6 +237,7 @@
 				</os>
 			</activation>
 			<properties>
+				<assembly.name>linux-x86_64</assembly.name>
 				<swt.group>org.eclipse.swt.gtk.linux</swt.group>
 				<swt.artifact>x86_64</swt.artifact>
 			</properties>
@@ -264,6 +253,7 @@
 				</os>
 			</activation>
 			<properties>
+				<assembly.name>linux-ppc</assembly.name>
 				<swt.group>org.eclipse.swt.gtk.linux</swt.group>
 				<swt.artifact>ppc</swt.artifact>
 			</properties>

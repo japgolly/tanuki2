@@ -1,5 +1,5 @@
 <assembly>
-	<id>linux-x86</id>
+	<id>linux-x86_64</id>
 	<formats>
 		<format>dir</format>
 		<format>tar.gz</format>

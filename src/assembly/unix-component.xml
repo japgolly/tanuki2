@@ -1,0 +1,24 @@
+<component>
+	<fileSets>
+		<fileSet>
+			<directory>doc</directory>
+			<outputDirectory></outputDirectory>
+			<lineEnding>unix</lineEnding>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/bin</directory>
+			<excludes><exclude>*.bat</exclude></excludes>
+			<outputDirectory></outputDirectory>
+			<lineEnding>unix</lineEnding>
+			<fileMode>0755</fileMode>
+			<filtered>true</filtered>
+		</fileSet>
+	</fileSets>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>${lib.dir}</outputDirectory>
+			<unpack>false</unpack>
+			<scope>runtime</scope>
+		</dependencySet>
+	</dependencySets>
+</component>
