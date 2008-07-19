@@ -126,7 +126,7 @@
 	<profiles>
 		<!-- #################### WINDOWS VERSION #################### -->
 		<profile>
-			<id>windows</id>
+			<id>win32</id>
 			<activation>
 				<os>
 					<family>windows</family>
@@ -202,13 +202,34 @@
 			<id>macosx</id>
 			<activation>
 				<os>
-					<family>macosx</family>
+					<family>mac</family>
 				</os>
 			</activation>
 			<properties>
 				<swt.group>org.eclipse.swt.carbon</swt.group>
 				<swt.artifact>macosx</swt.artifact>
 			</properties>
+			<!--build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>osxappbundle-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>osxappbundle</id>
+								<phase>package</phase>
+								<goals>
+									<goal>bundle</goal>
+								</goals>
+								<configuration>
+									<mainClass>${main.class}</mainClass>
+									<jvmVersion>${src.java.version}+</jvmVersion>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build-->
 		</profile>
 		
 		<!-- #################### LINUX X86 VERSION #################### -->
