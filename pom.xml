@@ -124,6 +124,27 @@
 	</dependencies>
 	
 	<profiles>
+		<profile>
+			<id>production</id>
+			<activation>
+				<property>
+					<name>production</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<debug>false</debug>
+							<optimize>true</optimize>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	
 		<!-- #################### WINDOWS VERSION #################### -->
 		<profile>
 			<id>win32</id>
