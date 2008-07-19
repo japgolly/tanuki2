@@ -173,7 +173,7 @@
 										<addDependencies>false</addDependencies>
 									</classPath>
 									<jre>
-										<minVersion>${java.version}.0</minVersion>
+										<minVersion>${src.java.version}.0</minVersion>
 										<initialHeapSize>${java.mem.initial}</initialHeapSize>
 										<maxHeapSize>${java.mem.max}</maxHeapSize>
 									</jre>
