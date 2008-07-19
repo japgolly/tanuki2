@@ -38,7 +38,7 @@ public class AboutDialog {
 
 		l= new Label(shell, SWT.NONE);
 		l.setLayoutData(UIHelpers.makeGridData(2, true, SWT.LEFT));
-		l.setText(I18n.l("about_txt_copyright")); //$NON-NLS-1$
+		l.setText(StaticConfig.COPYRIGHT);
 
 		Link link= new Link(shell, SWT.NONE);
 		link.setLayoutData(UIHelpers.makeGridData(2, true, SWT.LEFT));

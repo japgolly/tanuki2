@@ -32,7 +32,7 @@
 	<version>2.0-SNAPSHOT</version>
 	
 	<properties>
-		<copyright>Copyright (c) 2007-2008 David Barri</copyright>
+		<copyright>Copyright (c) 2007-2008 David Barri.</copyright>
 		<java.mem.initial>64</java.mem.initial>
 		<java.mem.max>256</java.mem.max>
 		<lib.dir>lib</lib.dir> <!-- Not used for the win32 assembly -->
@@ -44,6 +44,21 @@
 	
 	<build>
 		<defaultGoal>assembly:assembly</defaultGoal>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*.properties</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/*.properties</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
