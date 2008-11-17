@@ -90,8 +90,8 @@ public class Engine implements ITextProcessor {
 	public Map<String, ProcessingCommands> createProcessingList(String targetBaseDir) {
 		if (targetBaseDir != null)
 			targetBaseDir= Helpers.ensureCorrectDirSeperators(targetBaseDir);
-		final String targetDirFormat= Helpers.ensureCorrectDirSeperators(RuntimeConfig.targetDirFormat);
-		final String targetAudioFileFormat= Helpers.ensureCorrectDirSeperators(RuntimeConfig.targetAudioFileFormat);
+		final String targetDirFormat= Helpers.ensureCorrectDirSeperators(RuntimeConfig.getInstance().targetDirFormat);
+		final String targetAudioFileFormat= Helpers.ensureCorrectDirSeperators(RuntimeConfig.getInstance().targetAudioFileFormat);
 
 		final Map<String, ProcessingCommands> processingList= new HashMap<String, ProcessingCommands>();
 		for (final String srcDir : dirs.keySet()) {
@@ -260,8 +260,8 @@ public class Engine implements ITextProcessor {
 
 	public String processText(String txt) {
 		if (txt != null) {
-			if (RuntimeConfig.autoTitleCase)
-				txt= Helpers.makeTitleCase(txt, RuntimeConfig.intelligentTitleCase);
+			if (RuntimeConfig.getInstance().autoTitleCase)
+				txt= Helpers.makeTitleCase(txt, RuntimeConfig.getInstance().intelligentTitleCase);
 		}
 		return txt;
 	}

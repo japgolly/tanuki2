@@ -84,15 +84,15 @@ public class AppWindow {
 		shell.setImage(TanukiImage.TANUKI.get());
 		shell.setText(I18n.l("general_app_title")); //$NON-NLS-1$
 		Display.setAppName(shell.getText());
-		if (RuntimeConfig.appwndHeight > 64 && RuntimeConfig.appwndWidth > 64 && RuntimeConfig.appwndX >= 0 && RuntimeConfig.appwndY >= 0) {
-			shell.setSize(RuntimeConfig.appwndWidth, RuntimeConfig.appwndHeight);
-			shell.setLocation(RuntimeConfig.appwndX, RuntimeConfig.appwndY);
+		if (RuntimeConfig.getInstance().appwndHeight > 64 && RuntimeConfig.getInstance().appwndWidth > 64 && RuntimeConfig.getInstance().appwndX >= 0 && RuntimeConfig.getInstance().appwndY >= 0) {
+			shell.setSize(RuntimeConfig.getInstance().appwndWidth, RuntimeConfig.getInstance().appwndHeight);
+			shell.setLocation(RuntimeConfig.getInstance().appwndX, RuntimeConfig.getInstance().appwndY);
 		} else {
 			Rectangle ca= display.getClientArea();
 			shell.setSize((int) (ca.width * .8), ((int) (ca.height * .8)));
 			shell.setLocation(ca.x + (int) (ca.width * .1), ca.y + ((int) (ca.height * .1)));
 		}
-		shell.setMaximized(RuntimeConfig.appwndMaximised);
+		shell.setMaximized(RuntimeConfig.getInstance().appwndMaximised);
 
 		// Create window menu
 		Menu bar= new Menu(shell, SWT.BAR);
@@ -230,7 +230,7 @@ public class AppWindow {
 		// target dir
 		iwTargetDir= new Text(g, SWT.BORDER | SWT.SINGLE);
 		iwTargetDir.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
-		iwTargetDir.setText(RuntimeConfig.targetDir);
+		iwTargetDir.setText(RuntimeConfig.getInstance().targetDir);
 		// target dir browse
 		btnTargetDirBrowse= new Button(g, SWT.PUSH);
 		btnTargetDirBrowse.setLayoutData(UIHelpers.makeGridData(1, false, SWT.RIGHT));
@@ -325,25 +325,25 @@ public class AppWindow {
 
 	protected void onAddFiles() {
 		FileDialog dlg= new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		if (RuntimeConfig.lastAddedDir != null)
-			dlg.setFilterPath(RuntimeConfig.lastAddedDir);
+		if (RuntimeConfig.getInstance().lastAddedDir != null)
+			dlg.setFilterPath(RuntimeConfig.getInstance().lastAddedDir);
 		String file= dlg.open();
 		if (file != null) {
 			File f= new File(file);
 			String dir= f.isDirectory() ? f.toString() : f.getParent();
-			RuntimeConfig.lastAddedDir= dir;
+			RuntimeConfig.getInstance().lastAddedDir= dir;
 			add(Helpers.map(dlg.getFileNames(), Helpers.addPathElements(dir, ""), "")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
 	protected void onAddFolder() {
 		DirectoryDialog dlg= new DirectoryDialog(shell);
-		if (RuntimeConfig.lastAddedDir != null)
-			dlg.setFilterPath(RuntimeConfig.lastAddedDir);
+		if (RuntimeConfig.getInstance().lastAddedDir != null)
+			dlg.setFilterPath(RuntimeConfig.getInstance().lastAddedDir);
 		dlg.setMessage(I18n.l("main_txt_selectFolderToAddMsg")); //$NON-NLS-1$
 		String dir= dlg.open();
 		if (dir != null) {
-			RuntimeConfig.lastAddedDir= dir;
+			RuntimeConfig.getInstance().lastAddedDir= dir;
 			add(dir);
 		}
 	}
@@ -411,13 +411,13 @@ public class AppWindow {
 	}
 
 	protected void updateConfig() {
-		RuntimeConfig.appwndMaximised= shell.getMaximized();
+		RuntimeConfig.getInstance().appwndMaximised= shell.getMaximized();
 		Rectangle b= shell.getBounds();
-		RuntimeConfig.appwndX= b.x;
-		RuntimeConfig.appwndY= b.y;
-		RuntimeConfig.appwndHeight= b.height;
-		RuntimeConfig.appwndWidth= b.width;
-		RuntimeConfig.targetDir= iwTargetDir.getText();
+		RuntimeConfig.getInstance().appwndX= b.x;
+		RuntimeConfig.getInstance().appwndY= b.y;
+		RuntimeConfig.getInstance().appwndHeight= b.height;
+		RuntimeConfig.getInstance().appwndWidth= b.width;
+		RuntimeConfig.getInstance().targetDir= iwTargetDir.getText();
 	}
 
 	// =============================================================================================== //

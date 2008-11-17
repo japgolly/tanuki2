@@ -39,7 +39,7 @@ public class EngineTest extends TestHelper {
 
 	@Before
 	public void setup() {
-		RuntimeConfig.autoTitleCase= false;
+		RuntimeConfig.getInstance().autoTitleCase= false;
 		mtpr= mtpr1= new MockTrackProprtyReader();
 		mtpr2= null;
 		engine= engine2= new Engine2(mtpr);
@@ -300,7 +300,7 @@ public class EngineTest extends TestHelper {
 		mtpr2.addMockResult("A/a2", makeTrackProperties("Machine Head", 2007, null, null, null));
 		mtpr2.addMockResult("A/a2", makeTrackProperties(null, null, null, "2", "MOURNING"));
 		
-		RuntimeConfig.autoTitleCase= true;
+		RuntimeConfig.getInstance().autoTitleCase= true;
 		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", makeTrackProperties("Machine Head", 2007, "The Blackening", "1", "Dissent"));
 		assertEngineTrackProperties("A/a2", makeTrackProperties("Machine Head", 2007, "The Blackening", "2", "Mourning"));

@@ -53,8 +53,8 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 			public void handleEvent(Event event) {
 				if (allowClose) {
 					final Point sz= shell.getSize();
-					RuntimeConfig.voodooWndWidth= sz.x;
-					RuntimeConfig.voodooWndHeight= sz.y;
+					RuntimeConfig.getInstance().voodooWndWidth= sz.x;
+					RuntimeConfig.getInstance().voodooWndHeight= sz.y;
 				} else
 					event.doit= false;
 			}
@@ -100,8 +100,8 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		lblOverallP.setText("xxxxx/xxxxx"); //$NON-NLS-1$
 		shell.pack();
 		final Rectangle dca= display.getClientArea();
-		int w= RuntimeConfig.voodooWndWidth;
-		int h= RuntimeConfig.voodooWndHeight;
+		int w= RuntimeConfig.getInstance().voodooWndWidth;
+		int h= RuntimeConfig.getInstance().voodooWndHeight;
 		if (w < 16)
 			w= (int) Math.min(1000, dca.width * .975);
 		else if (w > dca.width)

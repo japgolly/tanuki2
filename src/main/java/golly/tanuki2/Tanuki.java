@@ -43,7 +43,7 @@ public class Tanuki {
 			engine= new Engine();
 			
 			// Check for new version
-			if (RuntimeConfig.checkVersionOnStartup)
+			if (RuntimeConfig.getInstance().checkVersionOnStartup)
 				(checkForUpdatesTask= new CheckForUpdatesTask()).start();
 			
 			// Start app

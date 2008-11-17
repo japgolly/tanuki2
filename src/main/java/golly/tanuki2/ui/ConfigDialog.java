@@ -57,11 +57,11 @@ public class ConfigDialog {
 		// Auto title case button
 		btnAutoTitleCase= new Button(g, SWT.CHECK);
 		btnAutoTitleCase.setText(I18n.l("config_btn_autoTitleCase")); //$NON-NLS-1$
-		btnAutoTitleCase.setSelection(RuntimeConfig.autoTitleCase);
+		btnAutoTitleCase.setSelection(RuntimeConfig.getInstance().autoTitleCase);
 		// Intelligent title case button
 		btnIntelligentTitleCase= new Button(g, SWT.CHECK);
 		btnIntelligentTitleCase.setText(I18n.l("config_btn_intelligentTitleCase")); //$NON-NLS-1$
-		btnIntelligentTitleCase.setSelection(RuntimeConfig.intelligentTitleCase);
+		btnIntelligentTitleCase.setSelection(RuntimeConfig.getInstance().intelligentTitleCase);
 		// TODO Add a tooltip describing what intelligent title case is
 
 		// GROUP: Output
@@ -85,8 +85,8 @@ public class ConfigDialog {
 				event.styles= (StyleRange[]) styles.toArray(new StyleRange[styles.size()]);
 			}
 		};
-		iwTargetDirFormat= addStyledText(g, "config_txt_targetDirFormat", RuntimeConfig.targetDirFormat); //$NON-NLS-1$
-		iwTargetAudioFileFormat= addStyledText(g, "config_txt_targetAudioFileFormat", RuntimeConfig.targetAudioFileFormat); //$NON-NLS-1$
+		iwTargetDirFormat= addStyledText(g, "config_txt_targetDirFormat", RuntimeConfig.getInstance().targetDirFormat); //$NON-NLS-1$
+		iwTargetAudioFileFormat= addStyledText(g, "config_txt_targetAudioFileFormat", RuntimeConfig.getInstance().targetAudioFileFormat); //$NON-NLS-1$
 
 		// GROUP: Text
 		g= new Group(shell, SWT.SHADOW_ETCHED_IN);
@@ -96,7 +96,7 @@ public class ConfigDialog {
 		// Check version on startup
 		btnCheckVersionOnStartup= new Button(g, SWT.CHECK);
 		btnCheckVersionOnStartup.setText(I18n.l("config_btn_checkVersionOnStartup")); //$NON-NLS-1$
-		btnCheckVersionOnStartup.setSelection(RuntimeConfig.checkVersionOnStartup);
+		btnCheckVersionOnStartup.setSelection(RuntimeConfig.getInstance().checkVersionOnStartup);
 
 		// Ok and Cancel buttons
 		Composite composite= new Composite(shell, SWT.NONE);
@@ -178,11 +178,11 @@ public class ConfigDialog {
 		}
 
 		// Update config
-		RuntimeConfig.autoTitleCase= btnAutoTitleCase.getSelection();
-		RuntimeConfig.intelligentTitleCase= btnIntelligentTitleCase.getSelection();
-		RuntimeConfig.targetAudioFileFormat= targetAudioFileFormat;
-		RuntimeConfig.targetDirFormat= targetDirFormat;
-		RuntimeConfig.checkVersionOnStartup= btnCheckVersionOnStartup.getSelection();
+		RuntimeConfig.getInstance().autoTitleCase= btnAutoTitleCase.getSelection();
+		RuntimeConfig.getInstance().intelligentTitleCase= btnIntelligentTitleCase.getSelection();
+		RuntimeConfig.getInstance().targetAudioFileFormat= targetAudioFileFormat;
+		RuntimeConfig.getInstance().targetDirFormat= targetDirFormat;
+		RuntimeConfig.getInstance().checkVersionOnStartup= btnCheckVersionOnStartup.getSelection();
 
 		// Finished
 		updated= true;

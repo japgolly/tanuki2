@@ -392,11 +392,11 @@ public class AlbumEditor {
 	}
 
 	private static void makeTitleCase(Combo w) {
-		w.setText(Helpers.makeTitleCase(w.getText(), RuntimeConfig.intelligentTitleCase));
+		w.setText(Helpers.makeTitleCase(w.getText(), RuntimeConfig.getInstance().intelligentTitleCase));
 	}
 
 	private static void makeTitleCase(Text w) {
-		w.setText(Helpers.makeTitleCase(w.getText(), RuntimeConfig.intelligentTitleCase));
+		w.setText(Helpers.makeTitleCase(w.getText(), RuntimeConfig.getInstance().intelligentTitleCase));
 	}
 
 	private static String processWidgetText(String text) {
