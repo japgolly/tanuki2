@@ -1,0 +1,9 @@
+Make Maven insert the version in the one of the pre-compile phases
+
+Try with SWT 3.4
+
+Can't move files when dest dir ends in dots
+
+Blacklist for legal artist names
+
+automatically mark certain types of files for deletion
