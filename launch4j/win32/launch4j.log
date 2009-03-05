@@ -1,0 +1,75 @@
+
+
+CmdLine:	X:\personal\projects\tanuki2\launch4j\launch4jc.exe --l4j-debug
+WOW64:		no
+Check launcher:	 (n/a)
+64-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+32-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.5
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.5.0_15
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.6
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.6.0_12
+64-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+32-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.5
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.5.0_15
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.6
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.6.0_11
+Check launcher:	C:\Program Files\Java\jre6\bin\java.exe (OK)
+Unlink:		C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe
+Unlink:		C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe.manifest
+Copy:		C:\Program Files\Java\jre6\bin\java.exe -> C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe
+Launcher:	C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe
+Launcher args:	-jar "X:\personal\projects\tanuki2\launch4j\launch4j.jar"
+Args length:	57/32768 chars
+Exit code:	0
+
+
+CmdLine:	X:\personal\projects\tanuki2\launch4j\launch4jc.exe --l4j-debug launch4j.xml
+WOW64:		no
+Check launcher:	 (n/a)
+64-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+32-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.5
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.5.0_15
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.6
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.6.0_12
+64-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+32-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.5
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.5.0_15
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.6
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.6.0_11
+Check launcher:	C:\Program Files\Java\jre6\bin\java.exe (OK)
+Unlink:		C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe
+Unlink:		C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe.manifest
+Copy:		C:\Program Files\Java\jre6\bin\java.exe -> C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe
+Launcher:	C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe
+Launcher args:	-jar "X:\personal\projects\tanuki2\launch4j\launch4j.jar" launch4j.xml
+Args length:	70/32768 chars
+Exit code:	0
+
+
+CmdLine:	X:\personal\projects\tanuki2\launch4j\launch4jc.exe --l4j-debug launch4j.xml
+WOW64:		no
+Check launcher:	 (n/a)
+64-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+32-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.5
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.5.0_15
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.6
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.6.0_12
+64-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+32-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.5
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.5.0_15
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.6
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.6.0_11
+Check launcher:	C:\Program Files\Java\jre6\bin\java.exe (OK)
+Unlink:		C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe
+Unlink:		C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe.manifest
+Copy:		C:\Program Files\Java\jre6\bin\java.exe -> C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe
+Launcher:	C:\Program Files\Java\jre6\launch4j-tmp\launch4jc.exe
+Launcher args:	-jar "X:\personal\projects\tanuki2\launch4j\launch4j.jar" launch4j.xml
+Args length:	70/32768 chars
+Exit code:	0

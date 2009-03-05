@@ -14,7 +14,7 @@
 	</fileSets>
 	<files>
 		<file>
-			<source>${project.build.directory}/${exe.filename}</source>
+			<source>${exe.full_path}</source>
 			<outputDirectory></outputDirectory>
 		</file>
 	</files>

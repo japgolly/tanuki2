@@ -1,0 +1,26 @@
+<launch4jConfig>
+	<headerType>gui</headerType>
+	<dontWrapJar>false</dontWrapJar>
+	<jar>${project.build.directory}\${project.artifactId}-${project.version}.jar</jar>
+	<outfile>${exe.full_path}</outfile>
+	<icon>${project.build.outputDirectory}\tanuki.ico</icon>
+	<downloadUrl>http://java.com/download</downloadUrl>
+	<jre>
+		<minVersion>${src.java.version}.0</minVersion>
+		<initialHeapSize>${java.mem.initial}</initialHeapSize>
+		<maxHeapSize>${java.mem.max}</maxHeapSize>
+		<jdkPreference>preferJre</jdkPreference>
+	</jre>
+	<versionInfo>
+		<txtProductVersion>${project.version}</txtProductVersion>
+		<productName>${project.name}</productName>
+		<productVersion>${version.abcd-style}</productVersion>
+		<txtFileVersion>${project.version}</txtFileVersion>
+		<fileDescription>${project.name}</fileDescription>
+		<fileVersion>${version.abcd-style}</fileVersion>
+		<copyright>${copyright}</copyright>
+		<originalFilename>${exe.filename}</originalFilename>
+		<internalName>tanuki2</internalName>
+	</versionInfo>
+	<errTitle>Tanuki v${project.version}</errTitle>
+</launch4jConfig>

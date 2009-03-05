@@ -29,12 +29,13 @@
 	
 	<groupId>golly</groupId>
 	<artifactId>tanuki</artifactId>
-	<version>2.0-SNAPSHOT</version>
+	<version>2.0-SNAPSHOT</version> <!-- Update the version property below as well -->
 	
 	<properties>
 		<copyright>Copyright (c) 2007-2009 David Barri.</copyright>
 		<java.mem.initial>64</java.mem.initial>
 		<java.mem.max>256</java.mem.max>
+		<launch4j.basedir>${basedir}/launch4j</launch4j.basedir>
 		<lib.dir>lib</lib.dir> <!-- Not used for the win32 assembly -->
 		<main.class>golly.tanuki2.Tanuki</main.class>
 		<src.java.version>1.5</src.java.version>
@@ -57,6 +58,11 @@
 				<excludes>
 					<exclude>**/*.properties</exclude>
 				</excludes>
+			</resource>
+			<resource>
+				<directory>src/launch4j</directory>
+				<filtering>true</filtering>
+				<targetPath>../launch4j</targetPath>
 			</resource>
 		</resources>
 		<plugins>
@@ -176,60 +182,31 @@
 			<properties>
 				<assembly.name>win32</assembly.name>
 				<exe.filename>tanuki2.exe</exe.filename>
+				<exe.full_path>${project.build.directory}/launch4j/${exe.filename}</exe.full_path>
 				<swt.group>org.eclipse.swt.win32.win32</swt.group>
 				<swt.artifact>x86</swt.artifact>
 			</properties>
-			<repositories>
-				<repository>
-					<id>akathist-repository</id>
-					<name>Akathist Repository</name>
-					<url>http://www.9stmaryrd.com/maven</url>
-				</repository>
-			</repositories>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>akathist-repository</id>
-					<name>Akathist Repository</name>
-					<url>http://www.9stmaryrd.com/maven</url>
-				</pluginRepository>
-			</pluginRepositories>
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>com.akathist.maven.plugins.launch4j</groupId>
-						<artifactId>launch4j-maven-plugin</artifactId>
+						<artifactId>maven-antrun-plugin</artifactId>
 						<executions>
 							<execution>
 								<id>launch4j</id>
 								<phase>package</phase>
 								<goals>
-									<goal>launch4j</goal>
+									<goal>run</goal>
 								</goals>
 								<configuration>
-									<headerType>gui</headerType>
-									<outfile>${project.build.directory}/${exe.filename}</outfile>
-									<icon>${project.build.outputDirectory}/tanuki.ico</icon>
-									<classPath>
-										<mainClass>${main.class}</mainClass>
-										<addDependencies>false</addDependencies>
-									</classPath>
-									<jre>
-										<minVersion>${src.java.version}.0</minVersion>
-										<initialHeapSize>${java.mem.initial}</initialHeapSize>
-										<maxHeapSize>${java.mem.max}</maxHeapSize>
-									</jre>
-									<versionInfo>
-										<txtProductVersion>${project.version}</txtProductVersion>
-										<productName>${project.name}</productName>
-										<productVersion>${version.abcd-style}</productVersion>
-										<txtFileVersion>${project.version}</txtFileVersion>
-										<fileDescription>${project.name}</fileDescription>
-										<fileVersion>${version.abcd-style}</fileVersion>
-										<copyright>${copyright}</copyright>
-										<originalFilename>${exe.filename}</originalFilename>
-										<internalName>tanuki2</internalName>
-									</versionInfo>
-									<errTitle>Tanuki v${project.version}</errTitle>
+									<tasks>	
+										<property name="launch4j.dir" location="${launch4j.basedir}/win32"/>
+										<delete file="${exe.full_path}" quiet="true"/>
+										<exec dir="${project.build.directory}/launch4j" executable="${launch4j.dir}/launch4jc.exe" failonerror="true">
+											<arg line="conf.xml"/>
+										</exec>
+										<available file="${exe.full_path}" property="exe.exists" />
+										<fail unless="exe.exists" message="Launch4j failed to generate ${exe.filename}&#13;&#10;File not found: ${exe.full_path}"/>
+									</tasks>
 								</configuration>
 							</execution>
 						</executions>
