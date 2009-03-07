@@ -52,17 +52,17 @@ public class Log {
 	private Log() {
 		// Private constructor
 	}
-	
+
 	public static void init() throws SecurityException, IOException {
 		log= Logger.getLogger(""); //$NON-NLS-1$
 		for (Handler h : log.getHandlers())
 			log.removeHandler(h);
-		
+
 		FileHandler fh= new FileHandler(FULL_FILENAME, true);
 		fh.setEncoding("UTF-8"); //$NON-NLS-1$
 		fh.setLevel(Level.ALL);
 		fh.setFormatter(new CustomFormatter());
-		
+
 		log.addHandler(fh);
 		log.setLevel(Level.ALL);
 	}

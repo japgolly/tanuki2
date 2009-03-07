@@ -21,7 +21,7 @@ abstract class AbstractDataObject {
 		AbstractDataObject o2= (AbstractDataObject) obj;
 		return toString().equals(o2.toString());
 	}
-	
+
 	@Override
 	public int hashCode() {
 		if (toStringCache == null)

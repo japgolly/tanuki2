@@ -31,7 +31,7 @@ public final class StaticConfig {
 
 	private static Properties loadProperties() {
 		final String filename= "app.properties";
-		
+
 		// Open the properties file
 		InputStream fin= StaticConfig.class.getResourceAsStream("/" + filename);
 		if (fin == null)

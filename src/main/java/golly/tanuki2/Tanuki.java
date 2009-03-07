@@ -41,11 +41,11 @@ public class Tanuki {
 			display= new Display();
 			TanukiImage.setDisplay(display);
 			engine= new Engine();
-			
+
 			// Check for new version
 			if (RuntimeConfig.getInstance().checkVersionOnStartup)
 				(checkForUpdatesTask= new CheckForUpdatesTask()).start();
-			
+
 			// Start app
 			new AppWindow(display, engine).show();
 

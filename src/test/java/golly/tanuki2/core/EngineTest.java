@@ -272,7 +272,7 @@ public class EngineTest extends TestHelper {
 		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", makeTrackProperties("asd", 2006, "qwe", "2", "aahh"));
 	}
-	
+
 	@Test
 	public void multipleSources_prefersHighlyRankedRows_singleTrack() {
 		useTwoTrackReaders();
@@ -284,22 +284,22 @@ public class EngineTest extends TestHelper {
 		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", makeTrackProperties("asd", 2006, "qwe", "2", "AAHH"));
 	}
-	
+
 	@Test
 	public void multipleSources_prefersHighlyRankedRows_multipleTracks() {
 		useTwoTrackReaders();
 		addFakeDirsToEngine();
-		
+
 		mtpr1.addMockResult("A/a1", makeTrackProperties("machine head", null, "the blackening", null, "dissent"));
 		mtpr1.addMockResult("A/a1", makeTrackProperties("INCORRECT", 1995, "INCORRECT", "8", "INCORRECT"));
 		mtpr2.addMockResult("A/a1", makeTrackProperties("Machine Head", 2007, null, null, null));
 		mtpr2.addMockResult("A/a1", makeTrackProperties(null, null, null, "1", "DISSENT"));
-		
+
 		mtpr1.addMockResult("A/a2", makeTrackProperties("machine head", null, "the blackening", null, "mourning"));
 		mtpr1.addMockResult("A/a2", makeTrackProperties("INCORRECT", 1995, "INCORRECT", "8", "INCORRECT"));
 		mtpr2.addMockResult("A/a2", makeTrackProperties("Machine Head", 2007, null, null, null));
 		mtpr2.addMockResult("A/a2", makeTrackProperties(null, null, null, "2", "MOURNING"));
-		
+
 		RuntimeConfig.getInstance().autoTitleCase= true;
 		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", makeTrackProperties("Machine Head", 2007, "The Blackening", "1", "Dissent"));
@@ -313,7 +313,7 @@ public class EngineTest extends TestHelper {
 		engine2.readTrackProprties2();
 		assertEngineTrackProperties("A/a1", makeTrackProperties("asd hehe", 2006, null, "2", null));
 	}
-	
+
 	@Test
 	public void testTPSelectionMisc1() {
 		DirData dd= new DirData(ensureCorrectDirSeperators("X:\\music\\1. Fresh\\Hawaii - The Natives Are Restless (1985) 320 Kbps"));
@@ -543,7 +543,7 @@ public class EngineTest extends TestHelper {
 			Helpers.rm_rf(targetDir);
 		return targetDir.toString();
 	}
-	
+
 	private void useTwoTrackReaders() {
 		mtpr2= new MockTrackProprtyReader();
 		engine2.add(mtpr2);

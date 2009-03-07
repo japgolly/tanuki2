@@ -143,7 +143,7 @@ public class HelperTest extends TestHelper {
 				}
 			}
 	}
-	
+
 	@Test
 	public void testCountOccurances() {
 		assertEquals(0, Helpers.countOccurances("wqe", "a"));

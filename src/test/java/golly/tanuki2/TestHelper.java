@@ -52,7 +52,7 @@ public abstract class TestHelper extends Assert {
 			fail("Expected TrackProperties not found.");
 		}
 	}
-	
+
 	public static URL getTestResource(String name) {
 		return Thread.currentThread().getContextClassLoader().getResource(name);
 	}

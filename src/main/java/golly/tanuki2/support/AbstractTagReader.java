@@ -72,7 +72,7 @@ public abstract class AbstractTagReader implements ITrackPropertyReader {
 				return false;
 		return true;
 	}
-	
+
 	protected static String newString(byte[] bytes, Charset charset) {
 		try {
 			return new String(bytes, charset.name());

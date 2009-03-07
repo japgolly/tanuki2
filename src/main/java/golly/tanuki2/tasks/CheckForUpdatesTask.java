@@ -53,7 +53,7 @@ public class CheckForUpdatesTask implements Runnable {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
-		
+
 		// Alert user
 		if (UIHelpers.showYesNoBox(null, SWT.ICON_INFORMATION, I18n.l("autoUpdate_title_newVersionAvailable"), I18n.l("autoUpdate_txt_newVersionAvailable", StaticConfig.VERSION_VALUE.toString(), v.toString()))) { //$NON-NLS-1$ //$NON-NLS-2$
 			// Open website

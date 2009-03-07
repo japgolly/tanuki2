@@ -5,8 +5,8 @@ import golly.tanuki2.support.Helpers;
 /**
  * This is class holds an object and an integer that represents its rank.
  * <p>
- * <code>equals()</code> and <code>hashCode()</code> both delegate to the object so this class can be used in place
- * of the object in <code>Set</code>s etc.
+ * <code>equals()</code> and <code>hashCode()</code> both delegate to the object so this class can be used in place of
+ * the object in <code>Set</code>s etc.
  * </p>
  * <p>
  * This is also implements <code>Comparable</code> and sorts by rank. If the rank of both classes are equal then

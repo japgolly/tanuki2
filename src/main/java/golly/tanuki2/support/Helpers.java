@@ -119,7 +119,7 @@ public final class Helpers {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Counts the number of times a given expression is found in a given string.
 	 * 
