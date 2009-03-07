@@ -44,6 +44,7 @@ public class ConfigDialog {
 	private final Button btnCheckVersionOnStartup;
 
 	public ConfigDialog(Shell parent) {
+		final RuntimeConfig cfg= RuntimeConfig.getInstance();
 		shell= new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		shell.setLayout(UIHelpers.makeGridLayout(1, false, 4, 16));
 		shell.setText(I18n.l("config_title_window")); //$NON-NLS-1$
@@ -57,11 +58,11 @@ public class ConfigDialog {
 		// Auto title case button
 		btnAutoTitleCase= new Button(g, SWT.CHECK);
 		btnAutoTitleCase.setText(I18n.l("config_btn_autoTitleCase")); //$NON-NLS-1$
-		btnAutoTitleCase.setSelection(RuntimeConfig.getInstance().autoTitleCase);
+		btnAutoTitleCase.setSelection(cfg.autoTitleCase);
 		// Intelligent title case button
 		btnIntelligentTitleCase= new Button(g, SWT.CHECK);
 		btnIntelligentTitleCase.setText(I18n.l("config_btn_intelligentTitleCase")); //$NON-NLS-1$
-		btnIntelligentTitleCase.setSelection(RuntimeConfig.getInstance().intelligentTitleCase);
+		btnIntelligentTitleCase.setSelection(cfg.intelligentTitleCase);
 		// TODO Add a tooltip describing what intelligent title case is
 
 		// GROUP: Output
@@ -85,8 +86,8 @@ public class ConfigDialog {
 				event.styles= (StyleRange[]) styles.toArray(new StyleRange[styles.size()]);
 			}
 		};
-		iwTargetDirFormat= addStyledText(g, "config_txt_targetDirFormat", RuntimeConfig.getInstance().targetDirFormat); //$NON-NLS-1$
-		iwTargetAudioFileFormat= addStyledText(g, "config_txt_targetAudioFileFormat", RuntimeConfig.getInstance().targetAudioFileFormat); //$NON-NLS-1$
+		iwTargetDirFormat= addStyledText(g, "config_txt_targetDirFormat", cfg.targetDirFormat); //$NON-NLS-1$
+		iwTargetAudioFileFormat= addStyledText(g, "config_txt_targetAudioFileFormat", cfg.targetAudioFileFormat); //$NON-NLS-1$
 
 		// GROUP: Text
 		g= new Group(shell, SWT.SHADOW_ETCHED_IN);
@@ -96,7 +97,7 @@ public class ConfigDialog {
 		// Check version on startup
 		btnCheckVersionOnStartup= new Button(g, SWT.CHECK);
 		btnCheckVersionOnStartup.setText(I18n.l("config_btn_checkVersionOnStartup")); //$NON-NLS-1$
-		btnCheckVersionOnStartup.setSelection(RuntimeConfig.getInstance().checkVersionOnStartup);
+		btnCheckVersionOnStartup.setSelection(cfg.checkVersionOnStartup);
 
 		// Ok and Cancel buttons
 		Composite composite= new Composite(shell, SWT.NONE);
@@ -178,11 +179,12 @@ public class ConfigDialog {
 		}
 
 		// Update config
-		RuntimeConfig.getInstance().autoTitleCase= btnAutoTitleCase.getSelection();
-		RuntimeConfig.getInstance().intelligentTitleCase= btnIntelligentTitleCase.getSelection();
-		RuntimeConfig.getInstance().targetAudioFileFormat= targetAudioFileFormat;
-		RuntimeConfig.getInstance().targetDirFormat= targetDirFormat;
-		RuntimeConfig.getInstance().checkVersionOnStartup= btnCheckVersionOnStartup.getSelection();
+		final RuntimeConfig cfg= RuntimeConfig.getInstance();
+		cfg.autoTitleCase= btnAutoTitleCase.getSelection();
+		cfg.intelligentTitleCase= btnIntelligentTitleCase.getSelection();
+		cfg.targetAudioFileFormat= targetAudioFileFormat;
+		cfg.targetDirFormat= targetDirFormat;
+		cfg.checkVersionOnStartup= btnCheckVersionOnStartup.getSelection();
 
 		// Finished
 		updated= true;
