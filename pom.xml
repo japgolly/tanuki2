@@ -41,6 +41,7 @@
 		<src.java.version>1.5</src.java.version>
 		<swt.version>3.3.0-v3346</swt.version>
 		<version.abcd-style>2.0.0.0</version.abcd-style>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
 	<build>
@@ -71,7 +72,7 @@
 				<configuration>
 					<source>${src.java.version}</source>
 					<target>${src.java.version}</target>
-					<encoding>UTF-8</encoding>
+					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
