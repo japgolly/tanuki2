@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,6 +44,13 @@ public class EngineTest extends TestHelper {
 		mtpr= mtpr1= new MockTrackProprtyReader();
 		mtpr2= null;
 		engine= engine2= new Engine2(mtpr);
+	}
+
+	@After
+	public void teardown() throws IOException {
+		System.gc(); // Or else certain File objects can still be in memory causing deletes to fail because handles are still held :S 
+		removeDirectoryIfExists(getTestSourceDir());
+		removeDirectoryIfExists(getTestTargetDir());
 	}
 
 	@Test
@@ -327,16 +335,18 @@ public class EngineTest extends TestHelper {
 		final String fn8= "Hawaii - 08 - Omichan No Uta - The Natives Are Restless.mp3";
 		final String fn9= "Hawaii - 09 - Dynamite - The Natives Are Restless.mp3";
 		final String[] fnAll= new String[] {fn1, fn2, fn3, fn4, fn5, fn6, fn7, fn8, fn9};
-		for (String f : fnAll)
+		for (String f : fnAll) {
 			makeFileData(dd, f, true);
+		}
 		dd.files.put("Hawaii - 00 - The Natives Are Restless.nfo", makeFileData(dd, false));
 		dd.files.put("Hawaii - The Natives Are Restless.jpg", makeFileData(dd, false));
 
 		Engine3 engine3= new Engine3();
 		engine= engine3;
 		engine3.dirs.put(dd.dir, dd);
-		for (String f : fnAll)
+		for (String f : fnAll) {
 			engine3.files.put(addPathElements(dd.dir, f), dd.files.get(f));
+		}
 		engine3.addDirNeedingTrackProprties(dd);
 		engine3.readAndAssignTrackProprties2();
 		System.out.flush();
@@ -431,8 +441,9 @@ public class EngineTest extends TestHelper {
 		// Test source dir
 		assertDirContents(sourceDir, "asd.txt", "incomplete", "other", oldFilesRemain ? "complete" : null);
 		// complete/blah
-		if (oldFilesRemain)
+		if (oldFilesRemain) {
 			assertDirContents(addPathElements(sourceDir, "complete", "blah"), "01.mp3", "autotag.txt");
+		}
 		// incomplete
 		tdir= addPathElements(sourceDir, "incomplete");
 		assertDirContents(tdir, "1", "2");
@@ -480,8 +491,9 @@ public class EngineTest extends TestHelper {
 
 	private void assertDirContents(String dir, String... expectedFiles) {
 		File d= new File(dir);
-		if (!d.isDirectory())
+		if (!d.isDirectory()) {
 			fail("Directory " + dir + " expected but not found.");
+		}
 
 		Set<String> expectedFileSet= Helpers.arrayToSet(expectedFiles);
 		expectedFileSet.remove(null);
@@ -506,15 +518,18 @@ public class EngineTest extends TestHelper {
 			fail("assertEngineTrackProperties failed: key not found: " + filename);
 		}
 		TrackPropertyMap test= TrackPropertyMap.fromFileData(fd);
-		if (expected1.equals(test))
+		if (expected1.equals(test)) {
 			return;
-		if (expected2 != null && expected2.equals(test))
+		}
+		if (expected2 != null && expected2.equals(test)) {
 			return;
+		}
 
 		System.err.println("assertEngineTrackProperties failed.");
 		System.err.println("  expected: " + expected1);
-		if (expected2 != null)
+		if (expected2 != null) {
 			System.err.println("  expected: " + expected2);
+		}
 		System.err.println("  found   : " + test);
 		fail("assertEngineTrackProperties failed.");
 	}
@@ -522,26 +537,39 @@ public class EngineTest extends TestHelper {
 	private void createFile(String filename, String content) throws IOException {
 		File f= new File(filename);
 		Helpers.mkdir_p(f.getParentFile());
-		if (f.isFile())
+		if (f.isFile()) {
 			f.delete();
+		}
 		BufferedWriter out= new BufferedWriter(new FileWriter(f));
 		out.write(content);
 		out.close();
 	}
 
+	private void removeDirectoryIfExists(File dir) throws IOException {
+		if (dir.exists()) {
+			Helpers.rm_rf(dir);
+		}
+	}
+
 	private String prepareVoodooTestSourceDir(String sampleDataDir) throws IOException, URISyntaxException {
-		File targetDir= new File(addPathElements(Helpers.getSystemTempDir(), "tanuki_test_da_voodoo", "source"));
-		if (targetDir.exists())
-			Helpers.rm_rf(targetDir);
-		Helpers.cp_r(new File(getTestResource(sampleDataDir).toURI()), targetDir, true, ".svn");
-		return targetDir.toString();
+		File dir= getTestSourceDir();
+		removeDirectoryIfExists(dir);
+		Helpers.cp_r(new File(getTestResource(sampleDataDir).toURI()), dir, true, ".svn");
+		return dir.toString();
+	}
+
+	private File getTestSourceDir() {
+		return new File(addPathElements(Helpers.getSystemTempDir(), "tanuki_test_da_voodoo", "source"));
 	}
 
 	private String prepareVoodooTestTargetDir() throws IOException {
-		File targetDir= new File(addPathElements(Helpers.getSystemTempDir(), "tanuki_test_da_voodoo", "target"));
-		if (targetDir.exists())
-			Helpers.rm_rf(targetDir);
+		File targetDir= getTestTargetDir();
+		removeDirectoryIfExists(targetDir);
 		return targetDir.toString();
+	}
+
+	private File getTestTargetDir() {
+		return new File(addPathElements(Helpers.getSystemTempDir(), "tanuki_test_da_voodoo", "target"));
 	}
 
 	private void useTwoTrackReaders() {
