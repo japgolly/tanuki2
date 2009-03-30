@@ -1,0 +1,33 @@
+<assembly>
+	<id>win64</id>
+	<formats>
+		<format>dir</format>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>doc</directory>
+			<outputDirectory></outputDirectory>
+			<lineEnding>dos</lineEnding>
+		</fileSet>
+		<fileSet>
+			<directory>${swt.output.dir}</directory>
+			<outputDirectory></outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>src/bin/win64</directory>
+			<outputDirectory></outputDirectory>
+			<filtered>true</filtered>
+		</fileSet>
+	</fileSets>
+	<dependencySets>
+		<dependencySet>
+			<unpack>false</unpack>
+			<scope>runtime</scope>
+			<excludes>
+				<exclude>${swt.group}:${swt.artifact}</exclude>
+			</excludes>
+		</dependencySet>
+	</dependencySets>
+</assembly>
