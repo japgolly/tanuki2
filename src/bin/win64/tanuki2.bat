@@ -57,8 +57,9 @@ if "%JRE_HOME%" == "" if exist "%JAVA_HOME%\bin\javac.exe" (set JRE_HOME=%JAVA_H
 set _RUNJAVA="%JRE_HOME%\bin\java"
 set _RUNJAVAW="%JRE_HOME%\bin\javaw"
 
-@rem Run Tanuki2
-%_RUNJAVAW% -jar ${project.artifactId}-${project.version}.jar
+
+@rem Run ${name}
+start /b "" %_RUNJAVAW% -Xms${java.mem.initial}m -Xmx${java.mem.max}m -jar ${project.artifactId}-${project.version}.jar
 
 :end
 
