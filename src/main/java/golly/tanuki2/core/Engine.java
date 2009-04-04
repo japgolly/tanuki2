@@ -78,18 +78,20 @@ public class Engine implements ITextProcessor {
 	public void add(String... filesAndDirs) {
 		for (String filename : filesAndDirs) {
 			File f= new File(filename);
-			if (f.isDirectory())
+			if (f.isDirectory()) {
 				addFolder(f);
-			else
+			} else {
 				addFile(f);
+			}
 		}
 		readAndAssignTrackProprties();
 		removeEmptyDirs();
 	}
 
 	public Map<String, ProcessingCommands> createProcessingList(String targetBaseDir) {
-		if (targetBaseDir != null)
+		if (targetBaseDir != null) {
 			targetBaseDir= Helpers.ensureCorrectDirSeperators(targetBaseDir);
+		}
 		final String targetDirFormat= Helpers.ensureCorrectDirSeperators(RuntimeConfig.getInstance().targetDirFormat);
 		final String targetAudioFileFormat= Helpers.ensureCorrectDirSeperators(RuntimeConfig.getInstance().targetAudioFileFormat);
 
@@ -103,7 +105,7 @@ public class Engine implements ITextProcessor {
 			if (dd.hasAudioContent(false)) {
 				AlbumData ad= null;
 				boolean processThisDir= true;
-				for (FileData fd : ddFiles.values())
+				for (FileData fd : ddFiles.values()) {
 					if (fd.isAudio() && !fd.isMarkedForDeletion()) {
 						// make sure all audio files are complete
 						if (!fd.isComplete(false) || fd.getAlbumData() == null) {
@@ -111,15 +113,17 @@ public class Engine implements ITextProcessor {
 							break;
 						}
 						// make sure all album data in sync
-						if (ad == null)
+						if (ad == null) {
 							ad= fd.getAlbumData();
-						else if (!ad.equals(fd.getAlbumData())) {
+						} else if (!ad.equals(fd.getAlbumData())) {
 							processThisDir= false;
 							break;
 						}
 					}
-				if (ad == null || !ad.isComplete())
+				}
+				if (ad == null || !ad.isComplete()) {
 					processThisDir= false;
+				}
 
 				// Process this dir
 				if (processThisDir) {
@@ -127,29 +131,28 @@ public class Engine implements ITextProcessor {
 					for (String f : ddFiles.keySet()) {
 						final FileData fd= ddFiles.get(f);
 						// delete files marked for deletion
-						if (fd.isMarkedForDeletion())
+						if (fd.isMarkedForDeletion()) {
 							pc.deletions.add(f);
-						// move all files not marked for deletion
-						else {
+						} else {
 							final String targetFilename;
-							if (fd.isAudio())
+							if (fd.isAudio()) {
 								targetFilename= formatFilename(targetAudioFileFormat, fd) + Helpers.getFileExtention(f, true).toLowerCase(Locale.ENGLISH);
-							else
+							} else {
 								targetFilename= f;
+							}
 							pc.moves.put(f, targetFilename);
 						}
 					}
 				}
-			}
-
-			// If the dir doesn't have any audio content
-			else
+			} else {
 				for (String f : ddFiles.keySet()) {
 					final FileData fd= ddFiles.get(f);
 					// delete files marked for deletion
-					if (fd.isMarkedForDeletion())
+					if (fd.isMarkedForDeletion()) {
 						pc.deletions.add(f);
+					}
 				}
+			}
 
 			// Add to processing list
 			if (pc.getCommandCount() != 0) {
@@ -176,8 +179,9 @@ public class Engine implements ITextProcessor {
 		// Make processing list
 		final Map<String, ProcessingCommands> processingList= createProcessingList(targetBaseDir);
 		int totalCommands= 0;
-		for (ProcessingCommands pc : processingList.values())
+		for (ProcessingCommands pc : processingList.values()) {
 			totalCommands+= pc.getCommandCount();
+		}
 
 		progressDlg.starting(processingList.size(), totalCommands);
 		boolean aborted= false;
@@ -185,8 +189,9 @@ public class Engine implements ITextProcessor {
 			try {
 
 				// Make target base dir
-				if (!PRETEND_MODE)
+				if (!PRETEND_MODE) {
 					Helpers.mkdir_p(targetBaseDir);
+				}
 
 				// Start processing
 				final Set<String> removeList= new HashSet<String>();
@@ -198,13 +203,15 @@ public class Engine implements ITextProcessor {
 
 						// Move files
 						if (!pc.moves.isEmpty()) {
-							if (!PRETEND_MODE)
+							if (!PRETEND_MODE) {
 								Helpers.mkdir_p(pc.targetDirectory);
+							}
 							for (String sourceFilename : Helpers.sort(pc.moves.keySet())) {
 								final String sourceFullFilename= addPathElements(srcDir, sourceFilename);
 								progressDlg.nextFile();
-								if (moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename))))
+								if (moveFile(progressDlg, sourceFullFilename, addPathElements(pc.targetDirectory, pc.moves.get(sourceFilename)))) {
 									removeList.add(sourceFullFilename);
+								}
 							}
 						}
 
@@ -212,28 +219,32 @@ public class Engine implements ITextProcessor {
 						for (String f : Helpers.sort(pc.deletions)) {
 							final String sourceFullFilename= addPathElements(srcDir, f);
 							progressDlg.nextFile();
-							if (deleteFile(progressDlg, sourceFullFilename))
+							if (deleteFile(progressDlg, sourceFullFilename)) {
 								removeList.add(sourceFullFilename);
+							}
 						}
 
 						// remove empty dirs from HD
 						List<File> removedDirs= new ArrayList<File>();
-						if (!PRETEND_MODE)
+						if (!PRETEND_MODE) {
 							Helpers.rmdirPath(new File(srcDir), removedDirs);
+						}
 						progressDlg.rmdirs(removedDirs);
 					}
 				} finally {
 					// Remove processed files
-					for (String f : removeList)
+					for (String f : removeList) {
 						remove(f);
+					}
 					removeEmptyDirs();
 				}
 
 			} catch (Throwable t) {
-				if (t instanceof VoodooAborted)
+				if (t instanceof VoodooAborted) {
 					aborted= true;
-				else
+				} else {
 					TanukiException.showErrorDialog(t);
+				}
 			}
 		} // end if (!progressDlg.isCancelled())
 
@@ -246,22 +257,25 @@ public class Engine implements ITextProcessor {
 	 */
 	public RankedObjectCollection<String> getRankedArtists(boolean normalizeArtistNames) {
 		final RankedObjectCollection<String> rankedArtists= new RankedObjectCollection<String>();
-		for (FileData fd : this.files.values())
+		for (FileData fd : this.files.values()) {
 			if (fd.getAlbumData() != null) {
 				String artist= fd.getAlbumData().getArtist();
 				if (artist != null) {
-					if (normalizeArtistNames)
+					if (normalizeArtistNames) {
 						artist= Helpers.normalizeText(artist);
+					}
 					rankedArtists.increaseRank(artist, 1);
 				}
 			}
+		}
 		return rankedArtists;
 	}
 
 	public String processText(String txt) {
 		if (txt != null) {
-			if (RuntimeConfig.getInstance().autoTitleCase)
+			if (RuntimeConfig.getInstance().autoTitleCase) {
 				txt= Helpers.makeTitleCase(txt, RuntimeConfig.getInstance().intelligentTitleCase);
+			}
 		}
 		return txt;
 	}
@@ -286,8 +300,9 @@ public class Engine implements ITextProcessor {
 		final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData= new HashMap<DirData, Map<String, List<TrackPropertyMap>>>();
 		for (DirData dd : dirsToProcess) {
 			final Map<String, List<TrackPropertyMap>> trackPropertyMap= new HashMap<String, List<TrackPropertyMap>>();
-			for (ITrackPropertyReader reader : trackProprtyReaders)
+			for (ITrackPropertyReader reader : trackProprtyReaders) {
 				Helpers.mergeListMap(trackPropertyMap, reader.readMultipleTrackProperties(dd));
+			}
 			unassignedData.put(dd, trackPropertyMap);
 		}
 		postTrackPropertyReading(unassignedData);
@@ -303,21 +318,26 @@ public class Engine implements ITextProcessor {
 			DirData dd= files.get(item).getDirData();
 			dd.files.remove(new File(item).getName());
 			files.remove(item);
-			if (dd.files.isEmpty())
+			if (dd.files.isEmpty()) {
 				removeDir(dd.dir);
-			else
+			} else {
 				dd.autoSetHasAudioContent();
+			}
 		} else {
 			// Remove dir
-			if (dirs.containsKey(item))
+			if (dirs.containsKey(item)) {
 				removeDir(item);
+			}
 			final Pattern p= Pattern.compile("^" + Pattern.quote(item) + "[\\\\/].+$"); //$NON-NLS-1$ //$NON-NLS-2$
 			final Set<String> matchingDirs= new HashSet<String>();
-			for (String dir : dirs.keySet())
-				if (p.matcher(dir).matches())
+			for (String dir : dirs.keySet()) {
+				if (p.matcher(dir).matches()) {
 					matchingDirs.add(dir);
-			for (String dir : matchingDirs)
+				}
+			}
+			for (String dir : matchingDirs) {
 				removeDir(dir);
+			}
 		}
 	}
 
@@ -326,11 +346,14 @@ public class Engine implements ITextProcessor {
 	 */
 	public void removeEmptyDirs() {
 		final Set<String> emptyDirs= new HashSet<String>();
-		for (String dir : dirs.keySet())
-			if (dirs.get(dir).files.isEmpty())
+		for (String dir : dirs.keySet()) {
+			if (dirs.get(dir).files.isEmpty()) {
 				emptyDirs.add(dir);
-		for (String dir : emptyDirs)
+			}
+		}
+		for (String dir : emptyDirs) {
 			dirs.remove(dir);
+		}
 	}
 
 	// =============================================================================================== //
@@ -339,11 +362,13 @@ public class Engine implements ITextProcessor {
 
 	private void addFolder(File sourceFolder) {
 		final DirData dd= getOrCreateDirData(sourceFolder.getAbsolutePath());
-		for (File f : sourceFolder.listFiles())
-			if (f.isDirectory())
+		for (File f : sourceFolder.listFiles()) {
+			if (f.isDirectory()) {
 				addFolder(f);
-			else
+			} else {
 				addFile(dd, f);
+			}
+		}
 		afterAddingFilesToDir(dd);
 	}
 
@@ -357,8 +382,9 @@ public class Engine implements ITextProcessor {
 		// Create or get FileData
 		final String fullFilename= f.getAbsolutePath();
 		FileData fd= files.get(fullFilename);
-		if (fd == null)
+		if (fd == null) {
 			files.put(fullFilename, fd= new FileData(dd));
+		}
 		dd.files.put(f.getName(), fd);
 
 		// Check file extension
@@ -366,10 +392,11 @@ public class Engine implements ITextProcessor {
 		if (patAudio.matcher(f.getName()).matches()) {
 			fd.setMimeImage(TanukiImage.MIME_AUDIO);
 			fd.setAudio(true);
-		} else if (patImage.matcher(f.getName()).matches())
+		} else if (patImage.matcher(f.getName()).matches()) {
 			fd.setMimeImage(TanukiImage.MIME_IMAGE);
-		else if (patText.matcher(f.getName()).matches())
+		} else if (patText.matcher(f.getName()).matches()) {
 			fd.setMimeImage(TanukiImage.MIME_TEXT);
+		}
 
 		// Get file size
 		fd.setSize(f.length());
@@ -380,21 +407,24 @@ public class Engine implements ITextProcessor {
 		dd.autoSetHasAudioContent();
 
 		// Place in dirsNeedingTrackProprties
-		if (dd.hasAudioContent(true))
+		if (dd.hasAudioContent(true)) {
 			dirsNeedingTrackProprties.add(dd);
+		}
 	}
 
 	private static Map<DirData, Map<String, List<TrackPropertyMap>>> copy(Map<DirData, Map<String, List<TrackPropertyMap>>> src) {
 		final Map<DirData, Map<String, List<TrackPropertyMap>>> copy= new HashMap<DirData, Map<String, List<TrackPropertyMap>>>(src.size());
-		for (Map.Entry<DirData, Map<String, List<TrackPropertyMap>>> e : src.entrySet())
+		for (Map.Entry<DirData, Map<String, List<TrackPropertyMap>>> e : src.entrySet()) {
 			copy.put(e.getKey(), copy2(e.getValue()));
+		}
 		return copy;
 	}
 
 	private static Map<String, List<TrackPropertyMap>> copy2(Map<String, List<TrackPropertyMap>> src) {
 		final Map<String, List<TrackPropertyMap>> copy= new HashMap<String, List<TrackPropertyMap>>(src.size());
-		for (Map.Entry<String, List<TrackPropertyMap>> e : src.entrySet())
+		for (Map.Entry<String, List<TrackPropertyMap>> e : src.entrySet()) {
 			copy.put(e.getKey(), copy(e.getValue()));
+		}
 		return copy;
 	}
 
@@ -410,12 +440,14 @@ public class Engine implements ITextProcessor {
 		try {
 			final File f= new File(sourceFilename);
 			progressDlg.deleting(f);
-			if (PRETEND_MODE)
+			if (PRETEND_MODE) {
 				return true;
+			}
 			while (true) {
 				try {
-					if (f.delete())
+					if (f.delete()) {
 						return true;
+					}
 				} catch (Throwable t) {
 				}
 				switch (UIHelpers.showAbortIgnoreRetryBox(progressDlg.getShell(), I18n.l("general_error_title"), I18n.l("voodoo_err_deleteFailedPrompt", sourceFilename))) {//$NON-NLS-1$ //$NON-NLS-2$
@@ -434,8 +466,9 @@ public class Engine implements ITextProcessor {
 
 	private DirData getOrCreateDirData(String dir) {
 		DirData dd= dirs.get(dir);
-		if (dd == null)
+		if (dd == null) {
 			dirs.put(dir, dd= new DirData(dir));
+		}
 		return dd;
 	}
 
@@ -459,13 +492,14 @@ public class Engine implements ITextProcessor {
 			File source= new File(sourceFilename);
 			File target= new File(targetFilename);
 
-			if (source.equals(target))
+			if (source.equals(target)) {
 				return true;
+			}
 
 			// Target file already exists
 			if (target.isFile()) {
 				final boolean overwrite;
-				if (overwriteAll == null)
+				if (overwriteAll == null) {
 					switch (YesNoToAllBox.show(progressDlg.getShell(), I18n.l("voodoo_txt_overwritePrompt", targetFilename), YesNoToAllBox.Value.NO)) { //$NON-NLS-1$
 					case NO:
 						overwrite= false;
@@ -482,8 +516,9 @@ public class Engine implements ITextProcessor {
 					default:
 						throw new RuntimeException(); // This is just to shut up the compiler.
 					}
-				else
+				} else {
 					overwrite= overwriteAll;
+				}
 				if (!overwrite) {
 					completionStatus= IVoodooProgressMonitor.SKIPPED;
 					return false;
@@ -492,8 +527,9 @@ public class Engine implements ITextProcessor {
 
 			// Move file (and overwrite if neccessary)
 			progressDlg.moving(source, target);
-			if (PRETEND_MODE)
+			if (PRETEND_MODE) {
 				return true;
+			}
 			while (true) {
 				try {
 					Helpers.mv(source, target);
@@ -522,19 +558,23 @@ public class Engine implements ITextProcessor {
 		RichRandomAccessFileCache.getInstance().clear();
 
 		// Trim all values and remove if empty
-		for (final Map<String, List<TrackPropertyMap>> tpm : data.values())
-			for (final List<TrackPropertyMap> rows : tpm.values())
-				for (final TrackPropertyMap row : rows)
+		for (final Map<String, List<TrackPropertyMap>> tpm : data.values()) {
+			for (final List<TrackPropertyMap> rows : tpm.values()) {
+				for (final TrackPropertyMap row : rows) {
 					for (final TrackPropertyType field : new HashSet<TrackPropertyType>(row.keySet())) {
 						final String value= row.get(field);
 						if (value != null) {
 							final String newValue= Helpers.unicodeTrim(value);
-							if (newValue.length() == 0)
+							if (newValue.length() == 0) {
 								row.remove(field);
-							else
+							} else {
 								row.put(field, newValue);
+							}
 						}
 					}
+				}
+			}
+		}
 
 		// Remove empty containers
 		removeEmptyContainers(data);
@@ -552,12 +592,14 @@ public class Engine implements ITextProcessor {
 			// Find out which to delete
 			for (String f : trackPropertyMap.keySet()) {
 				FileData fd= dd.files.get(f);
-				if (fd.isMarkedForDeletion() || !fd.isEmpty())
+				if (fd.isMarkedForDeletion() || !fd.isEmpty()) {
 					removeList.add(f);
+				}
 			}
 			// Delete them
-			for (String f : removeList)
+			for (String f : removeList) {
 				trackPropertyMap.remove(f);
+			}
 			removeList.clear();
 		}
 
@@ -574,24 +616,30 @@ public class Engine implements ITextProcessor {
 
 	private static RankedObjectCollection<String> rankUnconfirmedArtists(Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData) {
 		final RankedObjectCollection<String> x= new RankedObjectCollection<String>();
-		for (Map<String, List<TrackPropertyMap>> map : unassignedData.values())
-			for (List<TrackPropertyMap> props : map.values())
-				for (TrackPropertyMap tp : props)
-					if (tp.get(TrackPropertyType.ARTIST) != null)
+		for (Map<String, List<TrackPropertyMap>> map : unassignedData.values()) {
+			for (List<TrackPropertyMap> props : map.values()) {
+				for (TrackPropertyMap tp : props) {
+					if (tp.get(TrackPropertyType.ARTIST) != null) {
 						x.increaseRank(Helpers.normalizeText(tp.get(TrackPropertyType.ARTIST)), 1);
+					}
+				}
+			}
+		}
 		return x;
 	}
 
 	private void removeDir(String dir) {
 		DirData dd= dirs.get(dir);
-		for (String file : dd.files.keySet())
+		for (String file : dd.files.keySet()) {
 			files.remove(addPathElements(dir, file));
+		}
 		dirs.remove(dir);
 	}
 
 	static void removeEmptyContainers(final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData) {
-		for (Map<String, List<TrackPropertyMap>> tpm : unassignedData.values())
+		for (Map<String, List<TrackPropertyMap>> tpm : unassignedData.values()) {
 			Helpers.removeEmptyCollections(tpm);
+		}
 		Helpers.removeEmptyMaps(unassignedData);
 	}
 }
