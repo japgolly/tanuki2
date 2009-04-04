@@ -22,8 +22,9 @@ public class Version implements Comparable<Version> {
 
 	public Version(final String versionStr) {
 		Matcher m= VERSION_STRING_PATTERN.matcher(versionStr.trim());
-		if (!m.matches())
+		if (!m.matches()) {
 			throw new IllegalArgumentException();
+		}
 		this.major= Integer.parseInt(m.group(1));
 		this.minor= Integer.parseInt(m.group(2));
 		this.tiny= Integer.parseInt(m.group(3));
@@ -36,17 +37,21 @@ public class Version implements Comparable<Version> {
 	}
 
 	public int compareTo(Version v2) {
-		if (major != v2.major)
+		if (major != v2.major) {
 			return major > v2.major ? 1 : -1;
+		}
 
-		if (minor != v2.minor)
+		if (minor != v2.minor) {
 			return minor > v2.minor ? 1 : -1;
+		}
 
-		if (tiny != v2.tiny)
+		if (tiny != v2.tiny) {
 			return tiny > v2.tiny ? 1 : -1;
+		}
 
-		if (tiny2 != v2.tiny2)
+		if (tiny2 != v2.tiny2) {
 			return tiny2 > v2.tiny2 ? 1 : -1;
+		}
 
 		return 0;
 	}
@@ -64,21 +69,28 @@ public class Version implements Comparable<Version> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		final Version other= (Version) obj;
-		if (major != other.major)
+		if (major != other.major) {
 			return false;
-		if (minor != other.minor)
+		}
+		if (minor != other.minor) {
 			return false;
-		if (tiny != other.tiny)
+		}
+		if (tiny != other.tiny) {
 			return false;
-		if (tiny2 != other.tiny2)
+		}
+		if (tiny2 != other.tiny2) {
 			return false;
+		}
 		return true;
 	}
 

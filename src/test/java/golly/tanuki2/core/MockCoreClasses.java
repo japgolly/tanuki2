@@ -27,8 +27,9 @@ class Engine2 extends Engine {
 	}
 
 	public void add(ITrackPropertyReader... trackReaders) {
-		for (ITrackPropertyReader tr : trackReaders)
+		for (ITrackPropertyReader tr : trackReaders) {
 			trackProprtyReaders.add(tr);
+		}
 	}
 
 	public void addFakeDir(String path, String... filenames) {
@@ -77,22 +78,25 @@ class MockTrackProprtyReader extends TestHelper implements ITrackPropertyReader 
 	public void addMockResult(String filename, TrackPropertyMap tp) {
 		filename= ensureCorrectDirSeperators(filename) + ".mp3"; //$NON-NLS-1$
 		List<TrackPropertyMap> l= mockResults.get(filename);
-		if (l == null)
+		if (l == null) {
 			mockResults.put(filename, l= new ArrayList<TrackPropertyMap>());
+		}
 		l.add(tp);
 	}
 
 	public Map<String, List<TrackPropertyMap>> readMultipleTrackProperties(DirData dd) {
 		final Map<String, List<TrackPropertyMap>> r= new HashMap<String, List<TrackPropertyMap>>();
-		for (String f : dd.files.keySet())
+		for (String f : dd.files.keySet()) {
 			r.put(f, readTrackProperties(addPathElements(dd.dir, f)));
+		}
 		return r;
 	}
 
 	public List<TrackPropertyMap> readTrackProperties(String filename) {
 		List<TrackPropertyMap> r= new ArrayList<TrackPropertyMap>();
-		if (mockResults.containsKey(filename))
+		if (mockResults.containsKey(filename)) {
 			r.addAll(mockResults.get(filename));
+		}
 		return r;
 	}
 
@@ -153,8 +157,9 @@ class NoisyMockVoodooProgressMonitor implements IVoodooProgressMonitor {
 
 	public void nextDir(String srcDir, String targetDir, int fileCount) {
 		System.out.println("Next dir: " + srcDir);
-		if (targetDir != null)
+		if (targetDir != null) {
 			System.out.println("Target dir: " + targetDir);
+		}
 	}
 
 	public void nextFile() {
@@ -169,8 +174,9 @@ class NoisyMockVoodooProgressMonitor implements IVoodooProgressMonitor {
 	}
 
 	public void rmdirs(List<File> removedDirs) {
-		for (File f : removedDirs)
+		for (File f : removedDirs) {
 			System.out.println("  rmdir " + f.toString());
+		}
 	}
 
 	public void finished(boolean aborted) {

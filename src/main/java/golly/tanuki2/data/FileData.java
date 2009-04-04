@@ -55,8 +55,9 @@ public class FileData extends AbstractDataObject {
 	}
 
 	public boolean isComplete(boolean checkAlbumDataToo) {
-		if (tn == null || track == null)
+		if (tn == null || track == null) {
 			return false;
+		}
 		return checkAlbumDataToo ? (albumData != null && albumData.isComplete()) : true;
 	}
 
@@ -97,7 +98,7 @@ public class FileData extends AbstractDataObject {
 	}
 
 	public void setTn(String tn) {
-		setTn((Integer) (tn == null ? null : Integer.parseInt(tn)));
+		setTn((tn == null ? null : Integer.parseInt(tn)));
 	}
 
 	public void setTrack(String track) {

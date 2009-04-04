@@ -16,16 +16,18 @@ abstract class AbstractDataObject {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof AbstractDataObject))
+		if (obj == null || !(obj instanceof AbstractDataObject)) {
 			return false;
+		}
 		AbstractDataObject o2= (AbstractDataObject) obj;
 		return toString().equals(o2.toString());
 	}
 
 	@Override
 	public int hashCode() {
-		if (toStringCache == null)
+		if (toStringCache == null) {
 			toString();
+		}
 		return hashcode;
 	}
 

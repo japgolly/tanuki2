@@ -30,8 +30,9 @@ public class AutoResizeColumnsListener implements Listener {
 	}
 
 	public void handleEvent(Event event) {
-		if (enabled && event != null && event.widget.equals(c) && c.isVisible())
+		if (enabled && event != null && event.widget.equals(c) && c.isVisible()) {
 			resizeColumns();
+		}
 	}
 
 	public void resizeColumns() {
@@ -43,20 +44,23 @@ public class AutoResizeColumnsListener implements Listener {
 
 		if (availableWidth > 8 && columnCount != 0) {
 
-			if (disableRedraw)
+			if (disableRedraw) {
 				c.setRedraw(false);
+			}
 
 			// Calculate total column width (packed)
 			int i= columnCount;
 			int currentTotalWidth= 0;
 			final int[] widths= new int[i];
-			if (wwc.isEmpty())
-				while (i-- > 0)
+			if (wwc.isEmpty()) {
+				while (i-- > 0) {
 					currentTotalWidth+= (widths[i]= 0);
-			else {
+				}
+			} else {
 				wwc.packAllColumns();
-				while (i-- > 0)
+				while (i-- > 0) {
 					currentTotalWidth+= (widths[i]= wwc.getColumnWidth(i));
+				}
 			}
 
 			// Resize columns if columns dont fill available space
@@ -64,15 +68,16 @@ public class AutoResizeColumnsListener implements Listener {
 				i= columnCount;
 				int remainingExtra= availableWidth - currentTotalWidth;
 				while (i-- > 0) {
-					final int x= (int) (((double) widths[i]) / ((double) currentTotalWidth) * ((double) remainingExtra));
+					final int x= (int) (((double) widths[i]) / ((double) currentTotalWidth) * (remainingExtra));
 					wwc.setColumnWidth(i, widths[i] + x);
 					currentTotalWidth-= widths[i];
 					remainingExtra-= x;
 				}
 			}
 
-			if (disableRedraw)
+			if (disableRedraw) {
 				c.setRedraw(true);
+			}
 		}
 		this.enabled= wasEnabled;
 	}
@@ -113,8 +118,9 @@ public class AutoResizeColumnsListener implements Listener {
 		}
 
 		public void packAllColumns() {
-			for (TableColumn c : w.getColumns())
+			for (TableColumn c : w.getColumns()) {
 				c.pack();
+			}
 		}
 
 		public void setColumnWidth(int column, int width) {
@@ -150,8 +156,9 @@ public class AutoResizeColumnsListener implements Listener {
 		}
 
 		public void packAllColumns() {
-			for (TreeColumn c : w.getColumns())
+			for (TreeColumn c : w.getColumns()) {
 				c.pack();
+			}
 		}
 
 		public void setColumnWidth(int column, int width) {

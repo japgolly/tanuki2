@@ -28,8 +28,9 @@ public class RankedObject<T> extends AbstractDataObject implements Comparable<Ra
 	}
 
 	public int compareTo(RankedObject<T> b) {
-		if (rank != b.rank)
+		if (rank != b.rank) {
 			return rank > b.rank ? -1 : 1;
+		}
 		return hashCodeThis() > b.hashCodeThis() ? -1 : 1;
 	}
 
@@ -37,10 +38,11 @@ public class RankedObject<T> extends AbstractDataObject implements Comparable<Ra
 	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 		if (obj instanceof RankedObject) {
-			if (data == null)
+			if (data == null) {
 				return ((RankedObject) obj).data == null;
-			else
+			} else {
 				return data.equals(((RankedObject) obj).data);
+			}
 		}
 		return data.equals(obj);
 	}

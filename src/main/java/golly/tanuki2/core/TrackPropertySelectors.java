@@ -31,6 +31,7 @@ class TrackPropertySelectors {
 	 * Assigns result if only one exists.
 	 */
 	public static class AssignSingleRows extends AbstractTrackPropertySelector {
+		@Override
 		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackPropertyMap>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
 			for (String filename : trackPropertyMap.keySet()) {
 				final List<TrackPropertyMap> resultArray= trackPropertyMap.get(filename);
@@ -63,13 +64,14 @@ class TrackPropertySelectors {
 			this.firstPass= firstPass;
 		}
 
+		@Override
 		public void run(Map<String, FileData> ddFiles, Map<String, List<TrackPropertyMap>> trackPropertyMap, RankedObjectCollection<AlbumData> sharedAlbumData, Set<String> successfulFiles) {
 			final Map<TrackPropertyType, RankedObjectCollection<String>> rankedIndividualAlbumProperties= new HashMap<TrackPropertyType, RankedObjectCollection<String>>();
 			// STEP 1: Create individual, ranked album properties
 			for (TrackPropertyType propType : TrackPropertyType.albumTypes) {
 				final RankedObjectCollection<String> roc= new RankedObjectCollection<String>();
 				rankedIndividualAlbumProperties.put(propType, roc);
-				for (String filename : trackPropertyMap.keySet())
+				for (String filename : trackPropertyMap.keySet()) {
 					for (TrackPropertyMap tp : trackPropertyMap.get(filename)) {
 						String x= tp.get(propType);
 						if (x != null) {
@@ -77,15 +79,18 @@ class TrackPropertySelectors {
 							roc.increaseRank(x, 0.01);
 						}
 					}
+				}
 			}
 			// STEP 2: Also check artists in other dirs (including "undecided"s)
 			final RankedObjectCollection<String> artists= rankedIndividualAlbumProperties.get(TrackPropertyType.ARTIST);
 			for (RankedObject<String> a : artists) {
 				final String na= Helpers.normalizeText(a.data);
-				if (rankedConfirmedArtists.contains(na))
+				if (rankedConfirmedArtists.contains(na)) {
 					artists.increaseRank(na, 100 * rankedConfirmedArtists.getRank(na));
-				if (rankedUnconfirmedArtists.contains(a.data))
+				}
+				if (rankedUnconfirmedArtists.contains(a.data)) {
 					artists.increaseRank(na, rankedUnconfirmedArtists.getRank(na));
+				}
 			}
 
 			// STEP 3: Rank each tp
@@ -96,8 +101,9 @@ class TrackPropertySelectors {
 					for (TrackPropertyType propType : TrackPropertyType.albumTypes) {
 						final RankedObjectCollection<String> roc= rankedIndividualAlbumProperties.get(propType);
 						String x= tp.get(propType);
-						if (x != null)
+						if (x != null) {
 							rank+= roc.getRank(Helpers.normalizeText(x));
+						}
 					}
 					rankedTPs.add(tp, rank);
 				}
@@ -115,8 +121,9 @@ class TrackPropertySelectors {
 						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.ALBUM));
 						penaliseUnlikelySubstrings(i, i.data.get(TrackPropertyType.TRACK));
 						// Increase rank of those with TN set
-						if (i.data.get(TrackPropertyType.TN) != null)
+						if (i.data.get(TrackPropertyType.TN) != null) {
 							i.increaseRank(0.001);
+						}
 					}
 					rankedTPs.sort();
 					// select one of the winners
@@ -124,11 +131,12 @@ class TrackPropertySelectors {
 					assignTrackPropertiesToFile(ddFiles.get(filename), winner, sharedAlbumData);
 					successfulFiles.add(filename);
 					// and increase the rank of all album properties found in the winner
-					for (TrackPropertyType propType : TrackPropertyType.albumTypes)
+					for (TrackPropertyType propType : TrackPropertyType.albumTypes) {
 						if (winner.get(propType) != null) {
 							final String x= Helpers.normalizeText(winner.get(propType));
 							rankedIndividualAlbumProperties.get(propType).increaseRank(x, 0.0001);
 						}
+					}
 				}
 			}
 		}
@@ -136,8 +144,9 @@ class TrackPropertySelectors {
 		private void penaliseUnlikelySubstrings(RankedObject<TrackPropertyMap> i, String a) {
 			if (a != null) {
 				final Matcher m= pUnlikely.matcher(a);
-				while (m.find())
+				while (m.find()) {
 					i.increaseRank(-0.0001);
+				}
 			}
 		}
 	}
@@ -194,8 +203,9 @@ class TrackPropertySelectors {
 		}
 
 		private static void removeSuccessfulTrackProperties(final Map<String, List<TrackPropertyMap>> trackPropertyMap, final Set<String> successfulFiles) {
-			for (String filename : successfulFiles)
+			for (String filename : successfulFiles) {
 				trackPropertyMap.remove(filename);
+			}
 			successfulFiles.clear();
 		}
 	}
@@ -226,14 +236,16 @@ class TrackPropertySelectors {
 					final List<TrackPropertyMap> rows= trackPropertyMap.get(filename);
 					if (rows.size() > 1) {
 						final FileData fd= ddFiles.get(filename);
-						for (TrackPropertyType field : TrackPropertyType.values())
+						for (TrackPropertyType field : TrackPropertyType.values()) {
 							if (field.getValue(fd) == null) {
 
 								// Found an empty field
-								if (rankedTrackPropertyMaps == null)
+								if (rankedTrackPropertyMaps == null) {
 									rankEachRow(fd, rows);
+								}
 								populateEmptyProperty(fd, field, rows);
 							}
+						}
 					}
 					rankedTrackPropertyMaps= null;
 				}
@@ -248,46 +260,55 @@ class TrackPropertySelectors {
 			rankedTrackPropertyMaps= new RankedObjectCollection<TrackPropertyMap>();
 
 			// Assign every row an initial score of 1
-			for (TrackPropertyMap tpm : rows)
+			for (TrackPropertyMap tpm : rows) {
 				rankedTrackPropertyMaps.add(tpm, 1);
+			}
 
 			// Compare the values in the rows to the values in the FileData
 			for (TrackPropertyType field : TrackPropertyType.values()) {
 				final String v= Helpers.normalizeText(field.getValue(fd));
-				if (v != null)
-					for (TrackPropertyMap row : rows)
-						if (v.equals(Helpers.normalizeText(row.get(field))))
+				if (v != null) {
+					for (TrackPropertyMap row : rows) {
+						if (v.equals(Helpers.normalizeText(row.get(field)))) {
 							rankedTrackPropertyMaps.increaseRank(row, 1);
-						else if (row.get(field) != null)
+						} else if (row.get(field) != null) {
 							rankedTrackPropertyMaps.increaseRank(row, 0.0001);
+						}
+					}
+				}
 			}
 
 			// Compare the values in each row to the values in each row of lower rank
-			for (TrackPropertyType field : TrackPropertyType.values())
+			for (TrackPropertyType field : TrackPropertyType.values()) {
 				for (RankedObject<TrackPropertyMap> outerRow : rankedTrackPropertyMaps) {
 					final String v= Helpers.normalizeText(outerRow.data.get(field));
 					if (v != null) {
 						boolean found= false;
 						for (RankedObject<TrackPropertyMap> innerRow : rankedTrackPropertyMaps) {
 							if (!found) {
-								if (innerRow == outerRow)
+								if (innerRow == outerRow) {
 									found= true;
+								}
 							} else {
-								if (v.equals(Helpers.normalizeText(innerRow.data.get(field))))
+								if (v.equals(Helpers.normalizeText(innerRow.data.get(field)))) {
 									innerRow.increaseRank(outerRow.getRank() * 0.08);
+								}
 							}
 						}
 					}
 				}
+			}
 			rankedTrackPropertyMaps.sort();
 		}
 
 		private void populateEmptyProperty(final FileData fd, TrackPropertyType prop, final List<TrackPropertyMap> rows) {
 			// Rank each row
 			final RankedNormalisedStringCollection rankedValues= new RankedNormalisedStringCollection();
-			for (TrackPropertyMap row : rows)
-				if (row.containsKey(prop))
+			for (TrackPropertyMap row : rows) {
+				if (row.containsKey(prop)) {
 					rankedValues.increaseRank(row.get(prop), rankedTrackPropertyMaps.getRank(row) + 1);
+				}
+			}
 
 			// Populate
 			prop.setValue(fd, rankedValues.getWinner(), textProcessor);

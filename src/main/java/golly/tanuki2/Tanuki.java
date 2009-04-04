@@ -43,8 +43,9 @@ public class Tanuki {
 			engine= new Engine();
 
 			// Check for new version
-			if (RuntimeConfig.getInstance().checkVersionOnStartup)
+			if (RuntimeConfig.getInstance().checkVersionOnStartup) {
 				(checkForUpdatesTask= new CheckForUpdatesTask()).start();
+			}
 
 			// Start app
 			new AppWindow(display, engine).show();
@@ -54,11 +55,13 @@ public class Tanuki {
 
 		} finally {
 			RuntimeConfig.tryToSave();
-			if (checkForUpdatesTask != null)
+			if (checkForUpdatesTask != null) {
 				checkForUpdatesTask.stop();
+			}
 			UIResourceManager.disposeAll();
-			if (display != null)
+			if (display != null) {
 				display.dispose();
+			}
 		}
 	}
 }

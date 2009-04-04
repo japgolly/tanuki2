@@ -1,8 +1,8 @@
 package golly.tanuki2.ui;
 
 import golly.tanuki2.core.IVoodooProgressMonitor;
-import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIResourceManager;
 import golly.tanuki2.support.UIHelpers.TwoColours;
@@ -55,8 +55,9 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 					final Point sz= shell.getSize();
 					RuntimeConfig.getInstance().voodooWndWidth= sz.x;
 					RuntimeConfig.getInstance().voodooWndHeight= sz.y;
-				} else
+				} else {
 					event.doit= false;
+				}
 			}
 		});
 
@@ -102,14 +103,16 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		final Rectangle dca= display.getClientArea();
 		int w= RuntimeConfig.getInstance().voodooWndWidth;
 		int h= RuntimeConfig.getInstance().voodooWndHeight;
-		if (w < 16)
+		if (w < 16) {
 			w= (int) Math.min(1000, dca.width * .975);
-		else if (w > dca.width)
+		} else if (w > dca.width) {
 			w= dca.width;
-		if (h < 16)
+		}
+		if (h < 16) {
 			h= (int) Math.min(652, dca.height * .975);
-		else if (h > dca.height)
+		} else if (h > dca.height) {
 			h= dca.height;
+		}
 		shell.setSize(w, h);
 		UIHelpers.centerInFrontOfParent(display, shell, parent.getBounds());
 		lblOverallP.setText(""); //$NON-NLS-1$
@@ -135,9 +138,9 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 
 	public void starting(final int dirCount, final int totalFiles_) {
 		this.totalFiles= totalFiles_;
-		if (totalFiles == 0)
+		if (totalFiles == 0) {
 			UIHelpers.showTanukiError(shell, "voodoo_err_nothingToProcess"); //$NON-NLS-1$
-		else
+		} else {
 			display.syncExec(new Runnable() {
 				public void run() {
 					currentFileNumber= 0;
@@ -150,6 +153,7 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 					}
 				}
 			});
+		}
 	}
 
 	public void nextDir(final String srcDir, final String targetDir, final int fileCount) {
@@ -157,8 +161,9 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 			public void run() {
 				consoleWriteLn();
 				consoleWriteLn(false, "voodoo_consoletxt_dirSource", srcDir, clrDirSource, true); //$NON-NLS-1$
-				if (targetDir != null)
+				if (targetDir != null) {
 					consoleWriteLn(true, "voodoo_consoletxt_dirTarget", targetDir, clrDirTarget, true); //$NON-NLS-1$
+				}
 				console.setTopIndex(consoleLines);
 			}
 		});
@@ -213,8 +218,9 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	public void rmdirs(final List<File> removedDirs) {
 		display.syncExec(new Runnable() {
 			public void run() {
-				for (File dir : removedDirs)
+				for (File dir : removedDirs) {
 					consoleWriteLn(true, "voodoo_consoletxt_rmdir", dir.toString(), clrRmdir, false); //$NON-NLS-1$
+				}
 				console.setTopIndex(consoleLines);
 			}
 		});
@@ -230,15 +236,17 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 					shell.setDefaultButton(btnClose);
 					btnClose.setFocus();
 					consoleWriteLn();
-					if (aborted)
+					if (aborted) {
 						consoleWriteLn(I18n.l("voodoo_consoletxt_aborted")); //$NON-NLS-1$
-					else
+					} else {
 						consoleWriteLn(I18n.l("voodoo_consoletxt_finished")); //$NON-NLS-1$
+					}
 					console.setTopIndex(consoleLines);
 				}
 				allowClose= true;
-				if (totalFiles == 0)
+				if (totalFiles == 0) {
 					shell.close();
+				}
 			}
 		});
 	}
@@ -299,13 +307,16 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 		final StyleRange style= new StyleRange();
 		style.start= consoleIndex + txt.indexOf(selection);
 		style.length= selection.length();
-		if (bold)
+		if (bold) {
 			style.fontStyle= SWT.BOLD;
+		}
 		if (colours != null) {
-			if (colours.background != null)
+			if (colours.background != null) {
 				style.background= colours.background;
-			if (colours.foreground != null)
+			}
+			if (colours.foreground != null) {
 				style.foreground= colours.foreground;
+			}
 		}
 		console.setStyleRange(style);
 	}
@@ -313,8 +324,9 @@ public class VoodooProgressDialog implements IVoodooProgressMonitor {
 	private String makeFakeString(String arg) {
 		int i= arg.length();
 		char[] tmp= new char[i];
-		while (i-- > 0)
+		while (i-- > 0) {
 			tmp[i]= '_';
+		}
 		return new String(tmp);
 	}
 }

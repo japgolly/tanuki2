@@ -83,7 +83,7 @@ public class ConfigDialog {
 					sr.foreground= tagInFormatStringColour;
 					styles.add(sr);
 				}
-				event.styles= (StyleRange[]) styles.toArray(new StyleRange[styles.size()]);
+				event.styles= styles.toArray(new StyleRange[styles.size()]);
 			}
 		};
 		iwTargetDirFormat= addStyledText(g, "config_txt_targetDirFormat", cfg.targetDirFormat); //$NON-NLS-1$
@@ -110,6 +110,7 @@ public class ConfigDialog {
 		btnOk.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
 		shell.setDefaultButton(btnOk);
 		btnOk.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onOk();
 			}
@@ -119,6 +120,7 @@ public class ConfigDialog {
 		UIHelpers.setButtonText(btnCancel, "general_btn_cancel"); //$NON-NLS-1$
 		btnCancel.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
 		btnCancel.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				shell.close();
 			}
@@ -142,10 +144,11 @@ public class ConfigDialog {
 	private StyledText addStyledText(Composite parent, String label, String value) {
 		Label l= new Label(parent, SWT.NONE);
 		GridData gd= UIHelpers.makeGridData(1, true, SWT.FILL);
-		if (firstWidget)
+		if (firstWidget) {
 			firstWidget= false;
-		else
+		} else {
 			gd.verticalIndent= 10;
+		}
 		l.setLayoutData(gd);
 		l.setText(I18n.l(label));
 
@@ -167,10 +170,12 @@ public class ConfigDialog {
 			iwTargetDirFormat.selectAll();
 			return;
 		}
-		if (!validateTagsInFormatString(targetAudioFileFormat, iwTargetAudioFileFormat))
+		if (!validateTagsInFormatString(targetAudioFileFormat, iwTargetAudioFileFormat)) {
 			return;
-		if (!validateTagsInFormatString(targetDirFormat, iwTargetDirFormat))
+		}
+		if (!validateTagsInFormatString(targetDirFormat, iwTargetDirFormat)) {
 			return;
+		}
 		if (!targetAudioFileFormat.contains("[:tn:]") && !targetAudioFileFormat.contains("[:track:]")) { //$NON-NLS-1$ //$NON-NLS-2$
 			UIHelpers.showTanukiError(shell, "config_err_targetFileFormat_doesntContainTrackTags"); //$NON-NLS-1$
 			iwTargetAudioFileFormat.setFocus();
@@ -195,11 +200,12 @@ public class ConfigDialog {
 		Matcher m= pTagInFormatString.matcher(fmtStr);
 		while (m.find()) {
 			boolean ok= false;
-			for (String t : supportedTags)
+			for (String t : supportedTags) {
 				if (t.equals(m.group())) {
 					ok= true;
 					break;
 				}
+			}
 			if (!ok) {
 				UIHelpers.showTanukiError(shell, "config_err_targetFormat_containsInvalidTag", m.group(), Helpers.join(Helpers.map(supportedTags, "  ", ""), "\n")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				widget.setFocus();

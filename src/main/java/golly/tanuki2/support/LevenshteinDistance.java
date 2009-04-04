@@ -12,10 +12,12 @@ public final class LevenshteinDistance {
 	 */
 	private static int minimum(final int a, final int b, final int c) {
 		int mi= a;
-		if (b < mi)
+		if (b < mi) {
 			mi= b;
-		if (c < mi)
+		}
+		if (c < mi) {
 			mi= c;
+		}
 		return mi;
 	}
 
@@ -38,17 +40,21 @@ public final class LevenshteinDistance {
 		// Step 1
 		n= s.length();
 		m= t.length();
-		if (n == 0)
+		if (n == 0) {
 			return m;
-		if (m == 0)
+		}
+		if (m == 0) {
 			return n;
+		}
 		d= new int[n + 1][m + 1];
 
 		// Step 2
-		for (i= 0; i <= n; i++)
+		for (i= 0; i <= n; i++) {
 			d[i][0]= i;
-		for (j= 0; j <= m; j++)
+		}
+		for (j= 0; j <= m; j++) {
 			d[0][j]= j;
+		}
 
 		// Step 3
 		for (i= 1; i <= n; i++) {
@@ -59,10 +65,11 @@ public final class LevenshteinDistance {
 				t_j= t.charAt(j - 1);
 
 				// Step 5
-				if (s_i == t_j)
+				if (s_i == t_j) {
 					cost= 0;
-				else
+				} else {
 					cost= 1;
+				}
 
 				// Step 6
 				d[i][j]= minimum(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
@@ -106,10 +113,11 @@ public final class LevenshteinDistance {
 		int n= s.length(); // length of s
 		int m= t.length(); // length of t
 
-		if (n == 0)
+		if (n == 0) {
 			return m;
-		else if (m == 0)
+		} else if (m == 0) {
 			return n;
+		}
 
 		int p[]= new int[n + 1]; //'previous' cost array, horizontally
 		int d[]= new int[n + 1]; // cost array, horizontally
@@ -121,8 +129,9 @@ public final class LevenshteinDistance {
 		char t_j; // jth character of t
 		int cost; // cost
 
-		for (i= 0; i <= n; i++)
+		for (i= 0; i <= n; i++) {
 			p[i]= i;
+		}
 
 		for (j= 1; j <= m; j++) {
 			t_j= t.charAt(j - 1);

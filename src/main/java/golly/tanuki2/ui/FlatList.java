@@ -62,6 +62,7 @@ public class FlatList extends AbstractFileView {
 		miCopyFilenames.setText(I18n.l("main_contextMenu_copyFilenames") + "\tCtrl+C"); //$NON-NLS-1$ //$NON-NLS-2$
 		selectionRequiredMenuItems.add(miCopyFilenames);
 		miCopyFilenames.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onCopyFilenames();
 			}
@@ -69,6 +70,7 @@ public class FlatList extends AbstractFileView {
 
 		// Add table listeners
 		table.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.stateMask == SWT.CTRL) {
 					// CTRL-C
@@ -80,9 +82,11 @@ public class FlatList extends AbstractFileView {
 			}
 		});
 		table.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (e.detail == SWT.CHECK)
+				if (e.detail == SWT.CHECK) {
 					onCheck(e);
+				}
 			}
 		});
 		this.autoColumnResizer= UIHelpers.createAutoResizeColumnsListener(table);
@@ -115,18 +119,23 @@ public class FlatList extends AbstractFileView {
 				ti.setImage(fd.getImage());
 				ti.setText(INDEX_FILENAME, dir2 + file);
 				if (fd.isAudio()) {
-					if (fd.getTn() != null)
+					if (fd.getTn() != null) {
 						ti.setText(INDEX_TN, fd.getTn().toString());
-					if (fd.getTrack() != null)
+					}
+					if (fd.getTrack() != null) {
 						ti.setText(INDEX_TRACK, fd.getTrack());
+					}
 					final AlbumData ad= fd.getAlbumData();
 					if (ad != null) {
-						if (ad.getAlbum() != null)
+						if (ad.getAlbum() != null) {
 							ti.setText(INDEX_ALBUM, ad.getAlbum());
-						if (ad.getArtist() != null)
+						}
+						if (ad.getArtist() != null) {
 							ti.setText(INDEX_ARTIST, ad.getArtist());
-						if (ad.getYear() != null)
+						}
+						if (ad.getYear() != null) {
 							ti.setText(INDEX_YEAR, ad.getYear().toString());
+						}
 					}
 				}
 				ti.setChecked(!fd.isMarkedForDeletion());
@@ -157,22 +166,27 @@ public class FlatList extends AbstractFileView {
 		sharedUIResources.clipboard.setContents(new Object[] {sb.toString()}, new Transfer[] {TextTransfer.getInstance()});
 	}
 
+	@Override
 	protected void onDelete() {
 		String[] files= new String[table.getSelectionCount()];
 		int i= 0;
-		for (TableItem ti : table.getSelection())
+		for (TableItem ti : table.getSelection()) {
 			files[i++]= ti.getText();
+		}
 		sharedUIResources.appUIShared.removeFiles(files);
 	}
 
+	@Override
 	protected DirData onEdit_getDirData() {
 		final FileData fd= getSelectedFileData();
-		if (fd.isAudio() && !fd.isMarkedForDeletion())
+		if (fd.isAudio() && !fd.isMarkedForDeletion()) {
 			return fd.getDirData();
-		else
+		} else {
 			return null;
+		}
 	}
 
+	@Override
 	protected void selectAll() {
 		table.selectAll();
 	}
@@ -186,10 +200,12 @@ public class FlatList extends AbstractFileView {
 		return table.getColumnCount() - 1;
 	}
 
+	@Override
 	protected Set<DirData> getAllSelectedDirData() {
 		final Set<DirData> r= new HashSet<DirData>();
-		for (TableItem ti : table.getSelection())
+		for (TableItem ti : table.getSelection()) {
 			r.add(getData(ti).getDirData());
+		}
 		return r;
 	}
 
@@ -201,22 +217,27 @@ public class FlatList extends AbstractFileView {
 		return table.getSelection()[0];
 	}
 
+	@Override
 	protected String getSelectedDir() {
 		return getSelectedFileData().getDirData().dir;
 	}
 
+	@Override
 	protected FileData getSelectedFileData() {
 		return getData(getSelected());
 	}
 
+	@Override
 	protected String getSelectedFullFilename() {
 		return getSelected().getText();
 	}
 
+	@Override
 	protected int getSelectionCount() {
 		return table.getSelectionCount();
 	}
 
+	@Override
 	protected boolean isFileSelected() {
 		return true;
 	}

@@ -84,28 +84,32 @@ public class FilenameParser implements ITrackPropertyReader {
 				index++;
 				final String name= m.group(1);
 				TrackPropertyType tp= null;
-				for (TrackPropertyType i : TrackPropertyType.values())
+				for (TrackPropertyType i : TrackPropertyType.values()) {
 					if (i.name.equals(name)) {
 						tp= i;
 						break;
 					}
-				if (tp == null)
+				}
+				if (tp == null) {
 					throw new RuntimeException("Unrecognised field: " + m.group());
+				}
 				if (indexes.containsKey(tp)) {
 					index--;
 					patternStringWithBackReferences.append(patternString.substring(charsCopiesFromPatternString, m.start()));
 					patternStringWithBackReferences.append('\\');
 					patternStringWithBackReferences.append(indexes.get(tp).toString());
 					charsCopiesFromPatternString= m.end();
-				} else
+				} else {
 					indexes.put(tp, index);
+				}
 			}
 			patternStringWithBackReferences.append(patternString.substring(charsCopiesFromPatternString));
 			patternString= patternStringWithBackReferences.toString();
 
 			// Replace track property macros with regex
-			for (TrackPropertyType i : TrackPropertyType.values())
+			for (TrackPropertyType i : TrackPropertyType.values()) {
 				patternString= patternString.replace("[:" + i.name + ":]", trackPropertyPatterns.get(i));
+			}
 
 			// Create pattern
 			pat= Pattern.compile(patternString, Pattern.CASE_INSENSITIVE);
@@ -155,21 +159,23 @@ public class FilenameParser implements ITrackPropertyReader {
 		Map<String, String> processedFilenameMap= new HashMap<String, String>();
 		String processedDir= dd.dir;
 		StringBuilder allFilenames= new StringBuilder();
-		for (Map.Entry<String, FileData> e : dd.files.entrySet())
+		for (Map.Entry<String, FileData> e : dd.files.entrySet()) {
 			if (e.getValue().isAudio()) {
 				final String shortFilename= e.getKey();
 				allFilenames.append(Helpers.removeFilenameExtension(shortFilename));
 				allFilenames.append('/');
 				processedFilenameMap.put(shortFilename, shortFilename);
 			}
+		}
 
 		// PRE-PROCESS DIR: If all audio files end in the same string, remove it and try to remove it from the dir too
 		if (processedFilenameMap.size() > 1) {
 			Matcher m= patCrapSuffix.matcher(allFilenames);
 			if (m.matches()) {
 				Pattern p= Pattern.compile(Pattern.quote(m.group(1)) + "\\.[^.]+$", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
-				for (String f : processedFilenameMap.keySet())
+				for (String f : processedFilenameMap.keySet()) {
 					processedFilenameMap.put(f, p.matcher(processedFilenameMap.get(f)).replaceFirst(".x")); //$NON-NLS-1$
+				}
 				processedDir= Pattern.compile(Pattern.quote(m.group(1)) + "$", Pattern.CASE_INSENSITIVE).matcher(processedDir).replaceFirst(""); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
@@ -182,29 +188,33 @@ public class FilenameParser implements ITrackPropertyReader {
 					spacesFound= true;
 					break;
 				}
-				if (!underscoresFound)
-					if (processedFilename.indexOf('_') != -1)
+				if (!underscoresFound) {
+					if (processedFilename.indexOf('_') != -1) {
 						underscoresFound= true;
+					}
+				}
 			}
 			if (underscoresFound && !spacesFound) {
 				// Convert underscores in filenames
-				for (String f : processedFilenameMap.keySet())
+				for (String f : processedFilenameMap.keySet()) {
 					processedFilenameMap.put(f, processedFilenameMap.get(f).replace('_', ' '));
+				}
 				// Convert underscores in directories
 				String[] de= patDirSep.split(processedDir);
 				int i= de.length;
 				while (i-- > 0) {
-					if (de[i].indexOf(' ') == -1)
+					if (de[i].indexOf(' ') == -1) {
 						de[i]= de[i].replace('_', ' ');
-					else
+					} else {
 						break;
+					}
 				}
 				processedDir= Helpers.join(de, File.separator);
 			}
 		}
 
 		// PRE-PROCESS DIR: Remove artist/album from filename if found in all files
-		if (processedFilenameMap.size() > 1)
+		if (processedFilenameMap.size() > 1) {
 			for (SmartPattern p : dirPatterns) {
 				boolean failed= false;
 				Matcher m= null;
@@ -220,10 +230,12 @@ public class FilenameParser implements ITrackPropertyReader {
 					removeValueFromAllFiles(processedFilenameMap, m.group(p.indexes.get(TrackPropertyType.ARTIST)));
 				}
 			}
+		}
 
 		// Read track properties for each file
-		for (Map.Entry<String, String> e : processedFilenameMap.entrySet())
+		for (Map.Entry<String, String> e : processedFilenameMap.entrySet()) {
 			r.put(e.getKey(), readTrackProperties(Helpers.addPathElements(processedDir, e.getValue())));
+		}
 
 		return r;
 	}
@@ -232,15 +244,19 @@ public class FilenameParser implements ITrackPropertyReader {
 		List<TrackPropertyMap> r= new ArrayList<TrackPropertyMap>();
 		Integer i;
 		Matcher m;
-		for (SmartPattern sp : patterns)
+		for (SmartPattern sp : patterns) {
 			if ((m= sp.pat.matcher(filename)).matches()) {
 				TrackPropertyMap tp= new TrackPropertyMap();
-				for (TrackPropertyType k : TrackPropertyType.values())
-					if ((i= sp.indexes.get(k)) != null)
-						if (m.group(i) != null)
+				for (TrackPropertyType k : TrackPropertyType.values()) {
+					if ((i= sp.indexes.get(k)) != null) {
+						if (m.group(i) != null) {
 							tp.put(k, Helpers.unicodeTrim(m.group(i)));
+						}
+					}
+				}
 				r.add(tp);
 			}
+		}
 		return r;
 	}
 
@@ -274,8 +290,9 @@ public class FilenameParser implements ITrackPropertyReader {
 	private String makeRegexWithLenientSpacing(String value) {
 		String[] valueWords= patMakeRegexWithLenientSpacing_sep.split(value);
 		int i= valueWords.length;
-		while (i-- > 0)
+		while (i-- > 0) {
 			valueWords[i]= Pattern.quote(valueWords[i]);
+		}
 		return Helpers.join(valueWords, strMakeRegexWithLenientSpacing_sep + "*");
 	}
 
@@ -305,10 +322,12 @@ public class FilenameParser implements ITrackPropertyReader {
 					while (oc-- > 0) {
 						if (b > mins[oc] && a < maxs[oc]) {
 							added= true;
-							if (a < mins[oc])
+							if (a < mins[oc]) {
 								mins[oc]= a;
-							if (b > maxs[oc])
+							}
+							if (b > maxs[oc]) {
 								maxs[oc]= b;
+							}
 							break;
 						}
 					}
@@ -326,22 +345,24 @@ public class FilenameParser implements ITrackPropertyReader {
 				for (String processedFilename : processedFilenameMap.values()) {
 					boolean foundInFile= false;
 					m= patValue.matcher(processedFilename);
-					while (m.find())
+					while (m.find()) {
 						if (m.start(1) >= mins[oc] && m.end(1) <= maxs[oc]) {
 							foundInFile= true;
 							break;
 						}
+					}
 					if (!foundInFile) {
 						foundInAll= false;
 						break;
 					}
 				} // for file
-				if (!foundInAll)
+				if (!foundInAll) {
 					valid[oc]= false;
+				}
 			}
 			// If found, remove it from all files
 			oc= occuranceCount;
-			while (oc-- > 0)
+			while (oc-- > 0) {
 				if (valid[oc]) {
 					final int min= mins[oc], max= maxs[oc];
 					for (String shortFilename : processedFilenameMap.keySet()) {
@@ -362,6 +383,7 @@ public class FilenameParser implements ITrackPropertyReader {
 						processedFilenameMap.put(shortFilename, f);
 					}
 				}
+			}
 		}
 	}
 }

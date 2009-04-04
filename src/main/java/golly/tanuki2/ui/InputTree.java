@@ -42,11 +42,13 @@ public class InputTree extends AbstractTreeBasedFileView {
 	private static String formatInfo(String fmt, Object... args) {
 		boolean foundNonNull= false;
 		int i= args.length;
-		while (i-- > 0)
-			if (args[i] == null)
+		while (i-- > 0) {
+			if (args[i] == null) {
 				args[i]= I18n.l("inputTree_txt_nullInfoValue"); //$NON-NLS-1$
-			else
+			} else {
 				foundNonNull= true;
+			}
+		}
 		return foundNonNull ? String.format(fmt, args) : ""; //$NON-NLS-1$
 	}
 
@@ -63,9 +65,11 @@ public class InputTree extends AbstractTreeBasedFileView {
 		new TreeColumn(tree, SWT.LEFT);
 
 		tree.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (e.detail == SWT.CHECK)
+				if (e.detail == SWT.CHECK) {
 					onCheck(e);
+				}
 			}
 		});
 	}
@@ -77,8 +81,9 @@ public class InputTree extends AbstractTreeBasedFileView {
 	@Override
 	protected void addFilesToTree(TreeItem parent, String path) {
 		final DirData dd= dirs.get(path);
-		if (dd == null || dd.files.isEmpty())
+		if (dd == null || dd.files.isEmpty()) {
 			parent.setChecked(dirsWithNoFilesHaveCheck);
+		}
 		if (dd != null) {
 			final Map<String, FileData> files= dd.files;
 			if (!files.isEmpty()) {
@@ -93,20 +98,22 @@ public class InputTree extends AbstractTreeBasedFileView {
 					setFileItemColor(ti, fd);
 				}
 				// Update parent
-				if (dd.hasAudioContent(false))
+				if (dd.hasAudioContent(false)) {
 					updateAlbumDirItem(parent, dd);
+				}
 			}
 		}
 	}
 
 	@Override
 	protected void getAllSelectedDirData(final Set<DirData> r, TreeItem ti) {
-		if (ti.getData() instanceof FileData)
+		if (ti.getData() instanceof FileData) {
 			r.add(((FileData) ti.getData()).getDirData());
-		else {
-			r.add(engine.dirs.get((String) ti.getData()));
-			for (TreeItem c : ti.getItems())
+		} else {
+			r.add(engine.dirs.get(ti.getData()));
+			for (TreeItem c : ti.getItems()) {
 				getAllSelectedDirData(r, c);
+			}
 		}
 	}
 
@@ -117,10 +124,11 @@ public class InputTree extends AbstractTreeBasedFileView {
 
 	@Override
 	protected String getSelectedDir() {
-		if (isFileSelected())
+		if (isFileSelected()) {
 			return getSelectedFileData().getDirData().dir;
-		else
+		} else {
 			return (String) getSelected().getData();
+		}
 	}
 
 	@Override
@@ -138,8 +146,9 @@ public class InputTree extends AbstractTreeBasedFileView {
 	protected void onDelete() {
 		String[] files= new String[tree.getSelectionCount()];
 		int i= 0;
-		for (TreeItem ti : tree.getSelection())
+		for (TreeItem ti : tree.getSelection()) {
 			files[i++]= getFullFilename(ti);
+		}
 		sharedUIResources.appUIShared.removeFiles(files);
 	}
 
@@ -147,15 +156,17 @@ public class InputTree extends AbstractTreeBasedFileView {
 	protected DirData onEdit_getDirData() {
 		// If selected item is a file
 		FileData fd= getSelectedFileData();
-		if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion())
+		if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
 			return fd.getDirData();
-		else
+		} else {
 			// Or if directory, get the first audio child-item, and use its DirData
 			for (TreeItem i : getSelected().getItems()) {
 				fd= i.getData() instanceof FileData ? (FileData) i.getData() : null;
-				if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion())
+				if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
 					return fd.getDirData();
+				}
 			}
+		}
 		return null;
 	}
 
@@ -165,20 +176,23 @@ public class InputTree extends AbstractTreeBasedFileView {
 
 		// Remember which dirs are collapsed
 		collapsedDirs.clear();
-		for (TreeItem i : tree.getItems())
+		for (TreeItem i : tree.getItems()) {
 			recordCollapsedTreeItems(i);
+		}
 
 		// Remember current selection
 		int i= tree.getSelectionCount();
 		String[] selected= new String[i];
 		TreeItem[] currentlySelectedTreeItems= tree.getSelection();
-		while (i-- > 0)
+		while (i-- > 0) {
 			selected[i]= getFullFilename(currentlySelectedTreeItems[i]);
+		}
 
 		// Create a virtual representation of the tree
 		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTree= new HashMap<String, OptimisibleDirTreeNode>();
-		for (String dir : dirs.keySet())
+		for (String dir : dirs.keySet()) {
 			Helpers.addDirToUnoptimisedDirTree(unoptimisedDirTree, dir, !dirs.get(dir).files.isEmpty());
+		}
 		final Map<String, Map> optimisedDirTree= Helpers.optimiseDirTree(unoptimisedDirTree);
 
 		// Populate the tree
@@ -187,10 +201,12 @@ public class InputTree extends AbstractTreeBasedFileView {
 
 		// Expand items and re-select previously selected
 		List<TreeItem> newSelectedTreeItems= new ArrayList<TreeItem>();
-		for (TreeItem ti : tree.getItems())
+		for (TreeItem ti : tree.getItems()) {
 			restorePreviousTreeItemState(ti, selected, newSelectedTreeItems);
-		if (tree.getItemCount() > 0)
+		}
+		if (tree.getItemCount() > 0) {
 			tree.showItem(tree.getItem(0));
+		}
 		if (!newSelectedTreeItems.isEmpty()) {
 			tree.setSelection(newSelectedTreeItems.toArray(new TreeItem[newSelectedTreeItems.size()]));
 			tree.showSelection();
@@ -202,10 +218,11 @@ public class InputTree extends AbstractTreeBasedFileView {
 	// =============================================================================================== //
 
 	private String getFullFilename(TreeItem ti) {
-		if (ti.getData() instanceof FileData)
+		if (ti.getData() instanceof FileData) {
 			return Helpers.addPathElements(((FileData) ti.getData()).getDirData().dir, ti.getText());
-		else
+		} else {
 			return (String) ti.getData();
+		}
 	}
 
 	private void onCheck(SelectionEvent e) {
@@ -227,7 +244,7 @@ public class InputTree extends AbstractTreeBasedFileView {
 				e.doit= false;
 			} else {
 				final boolean delete= !ti.getChecked();
-				for (TreeItem i : ti.getItems())
+				for (TreeItem i : ti.getItems()) {
 					if (i.getData() instanceof FileData) {
 						FileData fd= (FileData) i.getData();
 						i.setChecked(!delete);
@@ -235,6 +252,7 @@ public class InputTree extends AbstractTreeBasedFileView {
 						setFileItemInfoText(i, fd);
 						setFileItemColor(i, fd);
 					}
+				}
 				updateAlbumDirItem(ti, dd);
 			}
 		}
@@ -242,33 +260,39 @@ public class InputTree extends AbstractTreeBasedFileView {
 
 	private void recordCollapsedTreeItems(TreeItem ti) {
 		if (ti.getItemCount() > 0) {
-			if (!ti.getExpanded())
+			if (!ti.getExpanded()) {
 				collapsedDirs.add((String) ti.getData());
-			for (TreeItem i : ti.getItems())
+			}
+			for (TreeItem i : ti.getItems()) {
 				recordCollapsedTreeItems(i);
+			}
 		}
 	}
 
 	private void restorePreviousTreeItemState(TreeItem ti, String[] filenamesToSelect, List<TreeItem> newSelectedTreeItems) {
 		// Find new TIs that should be selected
-		for (String s : filenamesToSelect)
-			if (s.equals(getFullFilename(ti)))
+		for (String s : filenamesToSelect) {
+			if (s.equals(getFullFilename(ti))) {
 				newSelectedTreeItems.add(ti);
+			}
+		}
 		// Expand/collapse tree
 		if (ti.getItemCount() > 0) {
-			ti.setExpanded(!collapsedDirs.contains((String) ti.getData()));
-			for (TreeItem i : ti.getItems())
+			ti.setExpanded(!collapsedDirs.contains(ti.getData()));
+			for (TreeItem i : ti.getItems()) {
 				restorePreviousTreeItemState(i, filenamesToSelect, newSelectedTreeItems);
+			}
 		}
 	}
 
 	private void setFileItemInfoText(TreeItem ti, final FileData fd) {
-		if (fd.isMarkedForDeletion())
+		if (fd.isMarkedForDeletion()) {
 			ti.setText(1, I18n.l("inputTree_txt_markedForDeletion")); //$NON-NLS-1$
-		else if (fd.isAudio())
+		} else if (fd.isAudio()) {
 			ti.setText(1, formatInfo(trackInfoFmt, fd.getTn(), fd.getTrack()));
-		else
+		} else {
 			ti.setText(1, I18n.l("general_txt_sizeInBytes", fd.getSize())); //$NON-NLS-1$
+		}
 	}
 
 	private void updateAlbumDirItem(TreeItem parent, DirData dd) {
@@ -278,9 +302,11 @@ public class InputTree extends AbstractTreeBasedFileView {
 		// If contains audio content not marked for deletion
 		if (dd.hasAudioContent(true)) {
 			final Set<AlbumData> albumDataSet= new HashSet<AlbumData>();
-			for (FileData fd : dd.files.values())
-				if (!fd.isMarkedForDeletion() && fd.isAudio())
+			for (FileData fd : dd.files.values()) {
+				if (!fd.isMarkedForDeletion() && fd.isAudio()) {
 					albumDataSet.add(fd.getAlbumData());
+				}
+			}
 			// Album data not in sync
 			if (albumDataSet.size() > 1) {
 				txt= I18n.l("inputTree_txt_multiAlbumInfos"); //$NON-NLS-1$
@@ -289,8 +315,9 @@ public class InputTree extends AbstractTreeBasedFileView {
 			// Album data in sync or empty
 			else {
 				AlbumData ad= albumDataSet.isEmpty() ? null : albumDataSet.iterator().next();
-				if (ad == null)
+				if (ad == null) {
 					ad= new AlbumData();
+				}
 				txt= formatInfo(albumInfoFmt, ad.getArtist(), ad.getYear(), ad.getAlbum());
 				c= ad.isComplete() ? sharedUIResources.itemCompleteColours : sharedUIResources.itemIncompleteColours;
 			}
@@ -306,11 +333,12 @@ public class InputTree extends AbstractTreeBasedFileView {
 
 		// Update check
 		boolean nonDelete= false;
-		for (FileData fd : dd.files.values())
+		for (FileData fd : dd.files.values()) {
 			if (!fd.isMarkedForDeletion()) {
 				nonDelete= true;
 				break;
 			}
+		}
 		parent.setChecked(nonDelete);
 	}
 }

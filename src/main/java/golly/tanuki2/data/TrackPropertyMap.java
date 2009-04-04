@@ -21,27 +21,31 @@ public class TrackPropertyMap extends HashMap<TrackPropertyType, String> {
 		if (ad != null) {
 			tp.put(ARTIST, ad.getArtist());
 			tp.put(ALBUM, ad.getAlbum());
-			if (ad.getYear() != null)
+			if (ad.getYear() != null) {
 				tp.put(YEAR, ad.getYear().toString());
+			}
 		}
-		if (fd.getTn() != null)
+		if (fd.getTn() != null) {
 			tp.put(TN, fd.getTn().toString());
+		}
 		tp.put(TRACK, fd.getTrack());
 		return tp;
 	}
 
 	@Override
 	public String put(TrackPropertyType key, String value) {
-		if (value == null)
+		if (value == null) {
 			return remove(key);
-		else
+		} else {
 			return super.put(key, value);
+		}
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof TrackPropertyMap))
+		if (obj == null || !(obj instanceof TrackPropertyMap)) {
 			return false;
+		}
 		return super.equals(obj);
 	}
 

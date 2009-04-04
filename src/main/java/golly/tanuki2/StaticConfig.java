@@ -34,8 +34,9 @@ public final class StaticConfig {
 
 		// Open the properties file
 		InputStream fin= StaticConfig.class.getResourceAsStream("/" + filename);
-		if (fin == null)
+		if (fin == null) {
 			throw new IllegalStateException("File not found: " + filename);
+		}
 
 		// Read and return
 		final Properties p= new Properties();

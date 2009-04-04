@@ -18,6 +18,7 @@ public class Log {
 	private static class CustomFormatter extends Formatter {
 		private final SimpleDateFormat datefmt= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS"); //$NON-NLS-1$
 
+		@Override
 		public String format(LogRecord rec) {
 			StringBuffer buf= new StringBuffer(1000);
 			buf.append(rec.getLevel().getName().charAt(0));
@@ -55,8 +56,9 @@ public class Log {
 
 	public static void init() throws SecurityException, IOException {
 		log= Logger.getLogger(""); //$NON-NLS-1$
-		for (Handler h : log.getHandlers())
+		for (Handler h : log.getHandlers()) {
 			log.removeHandler(h);
+		}
 
 		FileHandler fh= new FileHandler(FULL_FILENAME, true);
 		fh.setEncoding("UTF-8"); //$NON-NLS-1$

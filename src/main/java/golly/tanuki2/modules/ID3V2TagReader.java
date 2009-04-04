@@ -45,13 +45,15 @@ public class ID3V2TagReader extends AbstractTagReader {
 		TAG2TPT= new StringToTrackPropertyTypeMap[i];
 		while (i-- > 0) {
 			TAG2TPT[i]= new StringToTrackPropertyTypeMap();
-			for (Map.Entry<TrackPropertyType, String[]> e : TPT2TAG.entrySet())
+			for (Map.Entry<TrackPropertyType, String[]> e : TPT2TAG.entrySet()) {
 				TAG2TPT[i].put(e.getValue()[i], e.getKey());
+			}
 		}
 
 		TPTXXX2SYM= new HashMap<String, TrackPropertyType>();
-		for (Map.Entry<TrackPropertyType, String> e : TPT2TAGXXX.entrySet())
+		for (Map.Entry<TrackPropertyType, String> e : TPT2TAGXXX.entrySet()) {
 			TPTXXX2SYM.put(e.getValue(), e.getKey());
+		}
 	}
 
 	@SuppressWarnings("nls")
@@ -63,13 +65,16 @@ public class ID3V2TagReader extends AbstractTagReader {
 		TPT2TAG.put(TrackPropertyType.YEAR, new String[] {"TYE", "TYER", "TDRC"});
 	}
 
+	@Override
 	protected void readTags(final List<TrackPropertyMap> results) throws IOException {
 		fin.seekTo(0).readFully(10);
-		if (!compare(buf, 0, 'I', 'D', '3'))
+		if (!compare(buf, 0, 'I', 'D', '3')) {
 			return;
+		}
 		final byte version= buf[3];
-		if (version < (byte) 2 || version > (byte) (2 + TAG2TPT.length - 1))
+		if (version < (byte) 2 || version > (byte) (2 + TAG2TPT.length - 1)) {
 			return;
+		}
 		final boolean ver2= (version == (byte) 2);
 		final boolean useSynchsafe= (version >= (byte) 4);
 		// Doesn't support extended headers
@@ -95,8 +100,9 @@ public class ID3V2TagReader extends AbstractTagReader {
 				fin.readFully(flags);
 				pos+= 10;
 			}
-			if (compare(id, 0, zeroId) || pos > totalTagSize)
+			if (compare(id, 0, zeroId) || pos > totalTagSize) {
 				break;
+			}
 			pos+= size;
 
 			// Read value
@@ -111,8 +117,9 @@ public class ID3V2TagReader extends AbstractTagReader {
 				//          else
 			} else {
 				final TrackPropertyType type= tpt2sym(version, id, false);
-				if (type != null)
+				if (type != null) {
 					tpm.put(type, value);
+				}
 			}
 		}
 
@@ -124,8 +131,9 @@ public class ID3V2TagReader extends AbstractTagReader {
 	}
 
 	private static void unmerge(TrackPropertyMap tpm, TrackPropertyType type) {
-		if (tpm.containsKey(type))
+		if (tpm.containsKey(type)) {
 			tpm.put(type, MERGED_VALUES_PATTERN.matcher(tpm.get(type)).replaceFirst("$1")); //$NON-NLS-1$
+		}
 	}
 
 	private static String readString(byte[] buf, int len, boolean checkEncoding) {
@@ -146,10 +154,11 @@ public class ID3V2TagReader extends AbstractTagReader {
 				// Unicode strings must begin with the Unicode BOM ($FF FE or $FE FF) to identify the byte order.
 				offset+= 2;
 				len-= 2;
-				if (buf[1] == 254 && buf[2] == 255)
+				if (buf[1] == 254 && buf[2] == 255) {
 					str= newString(buf, offset, len, UTF16BE);
-				else
+				} else {
 					str= newString(buf, offset, len, UTF16LE);
+				}
 				break;
 			case 2:
 				// UTF-16BE [UTF-16] encoded Unicode [UNICODE] without BOM. Terminated with $00 00.
@@ -162,8 +171,9 @@ public class ID3V2TagReader extends AbstractTagReader {
 				break;
 			}
 		}
-		if (str != null)
+		if (str != null) {
 			str= ID3V2_RTRIM.matcher(str).replaceFirst(""); //$NON-NLS-1$
+		}
 		return str;
 	}
 
@@ -181,10 +191,11 @@ public class ID3V2TagReader extends AbstractTagReader {
 
 	private static TrackPropertyType tpt2sym(byte version, byte[] tag, boolean extendedTag) {
 		String tagStr= newString(tag, ASCII);
-		if (extendedTag)
+		if (extendedTag) {
 			return TPTXXX2SYM.get(tagStr);
-		else
+		} else {
 			return TAG2TPT[(version) - 2].get(tagStr);
+		}
 	}
 
 	private static long readInt3(RichRandomAccessFile fin) throws IOException {
@@ -200,13 +211,14 @@ public class ID3V2TagReader extends AbstractTagReader {
 	}
 
 	private static long readInt(boolean synchsafe, byte[] buffer, int from) {
-		final long x0= (long) buffer[from];
-		final long x1= (long) buffer[from + 1];
-		final long x2= (long) buffer[from + 2];
-		final long x3= (long) buffer[from + 3];
-		if (synchsafe)
+		final long x0= buffer[from];
+		final long x1= buffer[from + 1];
+		final long x2= buffer[from + 2];
+		final long x3= buffer[from + 3];
+		if (synchsafe) {
 			return (x3 & 127) | ((x2 & 127) << 7) | ((x1 & 127) << 14) | ((x0 & 127) << 21);
-		else
+		} else {
 			return x3 | (x2 << 8) | (x1 << 16) | (x0 << 24);
+		}
 	}
 }

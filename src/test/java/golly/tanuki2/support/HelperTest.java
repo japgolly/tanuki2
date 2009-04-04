@@ -101,8 +101,9 @@ public class HelperTest extends TestHelper {
 
 	private void assertDirTreeNode(Map<String, ?> map, String... keys) {
 		assertEquals(keys.length, map.size());
-		for (String key : keys)
+		for (String key : keys) {
 			assertTrue(map.containsKey(ensureCorrectDirSeperators(key)));
+		}
 	}
 
 	private OptimisibleDirTreeNode addOptimisibleDirTreeNode(OptimisibleDirTreeNode parent, String name) {
@@ -128,20 +129,21 @@ public class HelperTest extends TestHelper {
 
 	private static void debugDirTree(String prefix, Map<String, Map> node) {
 		prefix+= "| ";
-		if (node == null)
+		if (node == null) {
 			System.out.println(prefix + "null");
-		else
+		} else {
 			for (String s : Helpers.sort(node.keySet())) {
 				Map<String, Map> x= node.get(s);
 				System.out.print(prefix + "\"" + s + "\" => ");
-				if (x == null)
+				if (x == null) {
 					System.out.println("null");
-				else {
+				} else {
 					System.out.println("{");
 					debugDirTree(prefix, x);
 					System.out.println(prefix + "},");
 				}
 			}
+		}
 	}
 
 	@Test

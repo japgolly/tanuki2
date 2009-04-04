@@ -80,8 +80,9 @@ public class YesNoToAllBox {
 		// Add listener to block pre-mature close
 		shell.addListener(SWT.Close, new Listener() {
 			public void handleEvent(Event event) {
-				if (ret == null)
+				if (ret == null) {
 					event.doit= false;
+				}
 			}
 		});
 	}
@@ -111,7 +112,8 @@ public class YesNoToAllBox {
 				shell.close();
 			}
 		});
-		if (defaultButtonValue == value)
+		if (defaultButtonValue == value) {
 			defaultButton= b;
+		}
 	}
 }

@@ -45,13 +45,17 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 
 	public RankedObject<T> get(T o) {
 		if (o == null) {
-			for (RankedObject<T> i : this)
-				if (i.data == null)
+			for (RankedObject<T> i : this) {
+				if (i.data == null) {
 					return i;
+				}
+			}
 		} else {
-			for (RankedObject<T> i : this)
-				if (o.equals(i.data))
+			for (RankedObject<T> i : this) {
+				if (o.equals(i.data)) {
 					return i;
+				}
+			}
 		}
 		return null;
 	}
@@ -73,24 +77,28 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 	 * Determines the highest rank and returns the number of objects that have that rank.
 	 */
 	public int getWinnerCount() {
-		if (collection.isEmpty())
+		if (collection.isEmpty()) {
 			return 0;
+		}
 
-		if (collection.size() == 1)
+		if (collection.size() == 1) {
 			return 1;
+		}
 
 		boolean first= true;
 		double highest= 0;
 		int count= 1;
-		for (RankedObject<T> ro : collection)
+		for (RankedObject<T> ro : collection) {
 			if (first) {
 				first= false;
 				highest= ro.getRank();
 			} else {
-				if (highest != ro.getRank())
+				if (highest != ro.getRank()) {
 					break;
+				}
 				count++;
 			}
+		}
 		return count;
 	}
 
@@ -100,8 +108,9 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 		RankedObject<T>[] winners= new RankedObject[i];
 		for (RankedObject<T> ro : collection) {
 			winners[--i]= ro;
-			if (i == 0)
+			if (i == 0) {
 				break;
+			}
 		}
 		return winners;
 	}
@@ -123,9 +132,9 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 	 */
 	public RankedObject<T> increaseRank(final T data, double incRank) {
 		final RankedObject<T> ro= get(data);
-		if (ro == null)
+		if (ro == null) {
 			return add(data, incRank);
-		else {
+		} else {
 			ro.increaseRank(incRank);
 			sort();
 			return ro;
@@ -142,9 +151,9 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 
 	public boolean remove(T data) {
 		RankedObject<T> ro= get(data);
-		if (ro == null)
+		if (ro == null) {
 			return false;
-		else {
+		} else {
 			collection.remove(ro);
 			sort();
 			return true;

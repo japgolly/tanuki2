@@ -17,6 +17,7 @@ public class ID3V1TagReader extends AbstractTagReader {
 	private static final Charset ID3V1_CHARSET= Charset.forName("ASCII"); //$NON-NLS-1$
 	private static final Pattern ID3V1_RTRIM= Pattern.compile("[\0 ]+$"); //$NON-NLS-1$
 
+	@Override
 	protected void readTags(final List<TrackPropertyMap> results) throws IOException {
 		fin.seekTo(128).readFully(128);
 		if (compare(buf, 0, 'T', 'A', 'G')) {
@@ -25,8 +26,9 @@ public class ID3V1TagReader extends AbstractTagReader {
 			tpm.put(TrackPropertyType.ARTIST, readValue(buf, 33, 62));
 			tpm.put(TrackPropertyType.ALBUM, readValue(buf, 63, 92));
 			tpm.put(TrackPropertyType.YEAR, readValue(buf, 93, 96));
-			if (buf[125] == 0)
-				tpm.put(TrackPropertyType.TN, String.valueOf((int) buf[126]));
+			if (buf[125] == 0) {
+				tpm.put(TrackPropertyType.TN, String.valueOf(buf[126]));
+			}
 			results.add(tpm);
 		}
 	}

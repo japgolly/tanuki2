@@ -79,19 +79,23 @@ public final class Helpers {
 			}
 			t= latestNode.children;
 		}
-		if (latestNode != null && hasFiles)
+		if (latestNode != null && hasFiles) {
 			latestNode.hasFiles= true;
+		}
 		return latestNode;
 	}
 
 	public static String addPathElements(final String path, final String... elements) {
 		StringBuilder sb= new StringBuilder();
-		if (path != null)
+		if (path != null) {
 			sb.append(path);
+		}
 		for (String e : elements) {
-			if (sb.length() != 0)
-				if (!(sb.length() == 1 && sb.charAt(0) == File.separatorChar))
+			if (sb.length() != 0) {
+				if (!(sb.length() == 1 && sb.charAt(0) == File.separatorChar)) {
 					sb.append(File.separatorChar);
+				}
+			}
 			sb.append(e);
 		}
 		return sb.toString();
@@ -99,8 +103,9 @@ public final class Helpers {
 
 	public static <T> Set<T> arrayToSet(T[] array) {
 		final Set<T> r= new HashSet<T>(array.length);
-		for (T e : array)
+		for (T e : array) {
 			r.add(e);
+		}
 		return r;
 	}
 
@@ -109,13 +114,17 @@ public final class Helpers {
 	 */
 	public static boolean contains(Object[] collection, Object x) {
 		if (x == null) {
-			for (Object c : collection)
-				if (c == null)
+			for (Object c : collection) {
+				if (c == null) {
 					return true;
+				}
+			}
 		} else {
-			for (Object c : collection)
-				if (x.equals(c))
+			for (Object c : collection) {
+				if (x.equals(c)) {
 					return true;
+				}
+			}
 		}
 		return false;
 	}
@@ -127,12 +136,14 @@ public final class Helpers {
 	 * @param regexToFind The expression to scan for.
 	 */
 	public static int countOccurances(String text, String regexToFind) {
-		if (text == null)
+		if (text == null) {
 			return 0;
+		}
 		Matcher m= Pattern.compile(regexToFind).matcher(text);
 		int count= 0;
-		while (m.find())
+		while (m.find()) {
 			count++;
+		}
 		return count;
 	}
 
@@ -140,9 +151,11 @@ public final class Helpers {
 	 * Copies/renames a file.
 	 */
 	public static void cp(String srcFile, String destFile, boolean overwrite) throws FileNotFoundException, IOException {
-		if (!overwrite)
-			if (new File(destFile).isFile())
+		if (!overwrite) {
+			if (new File(destFile).isFile()) {
 				return;
+			}
+		}
 		FileChannel srcChannel= new FileInputStream(srcFile).getChannel();
 		FileChannel dstChannel= new FileOutputStream(destFile).getChannel();
 		dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
@@ -160,13 +173,15 @@ public final class Helpers {
 	public static void cp_r(File srcDir, File destDir, boolean overwrite, Set<String> exceptions) throws IOException {
 		final String destDirPrefix= destDir.getPath() + File.separator;
 		mkdir_p(destDir);
-		for (File f : srcDir.listFiles())
+		for (File f : srcDir.listFiles()) {
 			if (!exceptions.contains(f.getName())) {
-				if (f.isFile())
+				if (f.isFile()) {
 					cp(f.toString(), destDirPrefix + f.getName(), overwrite);
-				else if (f.isDirectory())
+				} else if (f.isDirectory()) {
 					cp_r(f, new File(destDirPrefix + f.getName()), overwrite, exceptions);
+				}
 			}
+		}
 	}
 
 	/**
@@ -180,10 +195,11 @@ public final class Helpers {
 	 * Replaces all forward-slashes with backward-slashes or vice-versa depending on the OS.
 	 */
 	public static String ensureCorrectDirSeperators(String filename) {
-		if (File.separatorChar == '/')
+		if (File.separatorChar == '/') {
 			return filename.replace('\\', '/');
-		else
+		} else {
 			return filename.replace('/', '\\');
+		}
 	}
 
 	/**
@@ -208,10 +224,11 @@ public final class Helpers {
 
 	public static String getFileExtention(String filename, boolean returnDotToo) {
 		final Matcher m= pGetFileExtention.matcher(filename);
-		if (!m.matches())
+		if (!m.matches()) {
 			return "";
-		else
+		} else {
 			return returnDotToo ? "." + m.group(1) : m.group(1);
+		}
 	}
 
 	/**
@@ -221,17 +238,21 @@ public final class Helpers {
 	 */
 	public static String getSystemTempDir() {
 		String tmpDir= System.getenv("TEMP");
-		if (tmpDir == null)
+		if (tmpDir == null) {
 			tmpDir= System.getenv("TMP");
+		}
 		if (tmpDir == null && OSSpecific.getOS() != OS.WIN32) {
 			File f= new File("/tmp");
-			if (f.isDirectory() && f.canWrite())
+			if (f.isDirectory() && f.canWrite()) {
 				tmpDir= "/tmp";
+			}
 		}
-		if (tmpDir == null)
+		if (tmpDir == null) {
 			throw new RuntimeException("Could determine temp dir.");
-		if (!(new File(tmpDir).isDirectory()))
+		}
+		if (!(new File(tmpDir).isDirectory())) {
 			throw new RuntimeException(tmpDir + " either doesn't exist or is not a directory.");
+		}
 		return tmpDir;
 	}
 
@@ -254,12 +275,14 @@ public final class Helpers {
 	 * @throws RuntimeException if any excxeption occurs.
 	 */
 	public static String inspect(final Object obj, boolean includeObjectId, Field... fields) {
-		if (obj == null)
+		if (obj == null) {
 			return "null";
+		}
 		try {
 			final HashMap<String, Field> fieldMap= new HashMap<String, Field>();
-			for (Field f : fields)
+			for (Field f : fields) {
 				fieldMap.put(f.getName(), f);
+			}
 
 			StringBuilder sb= new StringBuilder();
 			sb.append('{');
@@ -273,9 +296,9 @@ public final class Helpers {
 			boolean first= true;
 			for (String fn : Helpers.sort(fieldMap.keySet())) {
 				final Field f= fieldMap.get(fn);
-				if (first)
+				if (first) {
 					first= false;
-				else {
+				} else {
 					sb.append(',');
 					sb.append(' ');
 				}
@@ -287,14 +310,15 @@ public final class Helpers {
 				f.setAccessible(true);
 				final Class<?> cls= f.getType();
 				final Object o= f.get(obj);
-				if (o == null)
+				if (o == null) {
 					sb.append("null");
-				else if (String.class.equals(cls)) {
+				} else if (String.class.equals(cls)) {
 					sb.append('\"');
 					sb.append(((String) o).replace("\\", "\\\\").replace("\"", "\\\""));
 					sb.append('\"');
-				} else
+				} else {
 					sb.append(o.toString());
+				}
 			}
 			sb.append('}');
 			return sb.toString();
@@ -317,13 +341,16 @@ public final class Helpers {
 	 * @see #inspect(Object, boolean, Field...)
 	 */
 	public static String inspectExcept(final Object obj, boolean includeObjectId, String... fieldNames) {
-		if (obj == null)
+		if (obj == null) {
 			return inspect(null, includeObjectId);
+		}
 
 		Set<Field> fields= new HashSet<Field>();
-		for (Field f : obj.getClass().getDeclaredFields())
-			if (!contains(fieldNames, f.getName()))
+		for (Field f : obj.getClass().getDeclaredFields()) {
+			if (!contains(fieldNames, f.getName())) {
 				fields.add(f);
+			}
+		}
 		return inspect(obj, includeObjectId, fields.toArray(new Field[fields.size()]));
 	}
 
@@ -340,8 +367,9 @@ public final class Helpers {
 	public static String join(final String[] array, final String joinWith) {
 		StringBuilder sb= new StringBuilder();
 		for (String a : array) {
-			if (sb.length() != 0 && joinWith != null)
+			if (sb.length() != 0 && joinWith != null) {
 				sb.append(joinWith);
+			}
 			sb.append(a);
 		}
 		return sb.toString();
@@ -355,8 +383,9 @@ public final class Helpers {
 	 */
 	public static String makeTitleCase(String text, boolean intelligentTitleCase) {
 		final Matcher m= pTitleCase_prepost.matcher(text);
-		if (!m.matches())
+		if (!m.matches()) {
 			return text;
+		}
 		String[] b= pTitleCase_b.split(m.group(2).toLowerCase());
 		if (b[0].length() == 0) {
 			String[] b2= new String[b.length - 1];
@@ -369,16 +398,17 @@ public final class Helpers {
 		int i= -1;
 		for (String w : b) {
 			i++;
-			if ((i != lastIndex && w.length() == 1 && ".".equals(b[i + 1])) || isRomanNumeral(w))
+			if ((i != lastIndex && w.length() == 1 && ".".equals(b[i + 1])) || isRomanNumeral(w)) {
 				t[i]= w.toUpperCase();
-			else if (i == 0 || i == lastIndex)
+			} else if (i == 0 || i == lastIndex) {
 				t[i]= makeTitleCase_iCap(w);
-			else if (intelligentTitleCase && setTitleCase_exceptions.contains(w))
+			} else if (intelligentTitleCase && setTitleCase_exceptions.contains(w)) {
 				t[i]= w;
-			else if ((i > 1) && "'".equals(b[i - 1]) && pTitleCase_hasw.matcher(b[i - 2]).matches())
+			} else if ((i > 1) && "'".equals(b[i - 1]) && pTitleCase_hasw.matcher(b[i - 2]).matches()) {
 				t[i]= w;
-			else
+			} else {
 				t[i]= makeTitleCase_iCap(w);
+			}
 		}
 		return m.group(1) + join(t, null) + m.group(3);
 	}
@@ -389,8 +419,9 @@ public final class Helpers {
 			char[] chars= w.toCharArray();
 			chars[m.start(1)]= Character.toUpperCase(chars[m.start(1)]);
 			return new String(chars);
-		} else
+		} else {
 			return w;
+		}
 	}
 
 	/**
@@ -400,27 +431,34 @@ public final class Helpers {
 	public static String[] map(final String[] array, final String pre, final String post) {
 		int i= array.length;
 		String[] x= new String[i];
-		while (i-- > 0)
+		while (i-- > 0) {
 			x[i]= pre + array[i] + post;
+		}
 		return x;
 	}
 
 	public static <K, V> void mergeCollectionMap(Map<K, Collection<V>> main, Map<K, Collection<V>> newContent) {
-		if (newContent != null)
-			for (K k : newContent.keySet())
-				if (main.containsKey(k))
+		if (newContent != null) {
+			for (K k : newContent.keySet()) {
+				if (main.containsKey(k)) {
 					main.get(k).addAll(newContent.get(k));
-				else
+				} else {
 					main.put(k, newContent.get(k));
+				}
+			}
+		}
 	}
 
 	public static <K, V> void mergeListMap(Map<K, List<V>> main, Map<K, List<V>> newContent) {
-		if (newContent != null)
-			for (K k : newContent.keySet())
-				if (main.containsKey(k))
+		if (newContent != null) {
+			for (K k : newContent.keySet()) {
+				if (main.containsKey(k)) {
 					main.get(k).addAll(newContent.get(k));
-				else
+				} else {
 					main.put(k, newContent.get(k));
+				}
+			}
+		}
 	}
 
 	/**
@@ -432,13 +470,15 @@ public final class Helpers {
 	 */
 	public static boolean mkdir(File dir) throws IOException {
 		if (!dir.exists()) {
-			if (!dir.mkdir())
+			if (!dir.mkdir()) {
 				throw new IOException("File.mkdir() failed.");
+			}
 			return true;
-		} else if (!dir.isDirectory())
+		} else if (!dir.isDirectory()) {
 			throw new IOException("Cannot create path. " + dir.toString() + " already exists and is not a directory.");
-		else
+		} else {
 			return false;
+		}
 	}
 
 	/**
@@ -457,13 +497,15 @@ public final class Helpers {
 	 */
 	public static boolean mkdir_p(File dir) throws IOException {
 		if (!dir.exists()) {
-			if (!dir.mkdirs())
+			if (!dir.mkdirs()) {
 				throw new IOException("File.mkdirs() failed.");
+			}
 			return true;
-		} else if (!dir.isDirectory())
+		} else if (!dir.isDirectory()) {
 			throw new IOException("Cannot create path. " + dir.toString() + " already exists and is not a directory.");
-		else
+		} else {
 			return false;
+		}
 	}
 
 	/**
@@ -479,32 +521,40 @@ public final class Helpers {
 	 * @throws IOException if anything goes wrong.
 	 */
 	public static void mv(File source, File target) throws IOException {
-		if (source.equals(target))
+		if (source.equals(target)) {
 			return;
-		if (target.exists() && !target.canWrite())
+		}
+		if (target.exists() && !target.canWrite()) {
 			throw new IOException("Cannot move file. Target is read-only. (\"" + target.toString() + "\")");
+		}
 		File tmp= new File(addPathElements(target.getParent(), "golly_java_mvhelper_tempfile_7816452937.tmp"));
-		if (tmp.exists())
+		if (tmp.exists()) {
 			tmp.delete();
+		}
 
 		boolean normalRenameWorked= false;
 		try {
-			if (source.renameTo(tmp))
+			if (source.renameTo(tmp)) {
 				normalRenameWorked= true;
-			else
+			} else {
 				cp(source.toString(), tmp.toString(), true);
-			if (target.exists())
-				if (!target.delete())
+			}
+			if (target.exists()) {
+				if (!target.delete()) {
 					throw new IOException("Failed to delete " + target.toString());
+				}
+			}
 			tmp.renameTo(target);
-			if (!normalRenameWorked)
+			if (!normalRenameWorked) {
 				source.delete();
+			}
 		} finally {
 			if (tmp.exists()) {
-				if (normalRenameWorked)
+				if (normalRenameWorked) {
 					tmp.renameTo(source);
-				else
+				} else {
 					tmp.delete();
+				}
 			}
 		}
 	}
@@ -534,8 +584,9 @@ public final class Helpers {
 	 * </ul>
 	 */
 	public static final String normalizeText(final String input, List<Integer> map) {
-		if (input == null)
+		if (input == null) {
 			return null;
+		}
 
 		final StringBuilder sb= new StringBuilder();
 		final int inputLength= input.length() - 1;
@@ -547,38 +598,37 @@ public final class Helpers {
 
 			if (!Character.isWhitespace(c)) {
 
-				if (c >= 'Ａ' && c <= 'Ｚ') // 全角大文字
+				if (c >= 'Ａ' && c <= 'Ｚ') {
 					c-= ('Ａ' - 'A');
-
-				else if (c >= 'ａ' && c <= 'ｚ') // 全角小文字
+				} else if (c >= 'ａ' && c <= 'ｚ') {
 					c-= ('ａ' - 'A');
-
-				else if (c >= '０' && c <= '９') // 全角数字
+				} else if (c >= '０' && c <= '９') {
 					c-= ('０' - '0');
-
-				else if (c >= 0x3041 && c <= 0x3096) // ひらがな
+				} else if (c >= 0x3041 && c <= 0x3096) {
 					c-= (0x3041 - 0x30A1);
-
-				else if (c > 0xFF60 && c < 0xFFA0) { // 半角ｶﾀｶﾅ
+				} else if (c > 0xFF60 && c < 0xFFA0) { // 半角ｶﾀｶﾅ
 					// 全角ｶﾀｶﾅに変換
 					int index= KATAKANA_HALF.indexOf(c);
-					if (index >= 0)
+					if (index >= 0) {
 						c= KATAKANA_FULL.charAt(index);
+					}
 					// ﾃﾝﾃﾝ
 					if (c == '゛') {
 						final int sblen= sb.length() - 1;
 						c= sb.charAt(sblen);
-						if (KATAKANA_TENTEN.indexOf(c) != -1)
+						if (KATAKANA_TENTEN.indexOf(c) != -1) {
 							c++;
-						else if (c == 'ウ')
+						} else if (c == 'ウ') {
 							c= 'ヴ';
-						else if (c == 'ワ')
+						} else if (c == 'ワ') {
 							c= 0x30f7;
-						else
+						} else {
 							continue;
+						}
 						sb.deleteCharAt(sblen);
-						if (map != null)
+						if (map != null) {
 							ignoreNextMapChar= true;
+						}
 					}
 					// ﾏﾙ
 					else if (c == '゜') {
@@ -588,28 +638,33 @@ public final class Helpers {
 							c++;
 							c++;
 							sb.deleteCharAt(sblen);
-							if (map != null)
+							if (map != null) {
 								ignoreNextMapChar= true;
-						} else
+							}
+						} else {
 							continue;
+						}
 					}
 
-				} else
+				} else {
 					c= Character.toUpperCase(c);
+				}
 
 				sb.append(c);
 				if (map != null) {
 					lastNonWhitespacePos= i;
-					if (ignoreNextMapChar)
+					if (ignoreNextMapChar) {
 						ignoreNextMapChar= false;
-					else
+					} else {
 						map.add(i);
+					}
 				}
 			}
 		}
 
-		if (map != null)
+		if (map != null) {
 			map.add(lastNonWhitespacePos);
+		}
 
 		assert (map == null ? true : map.size() == sb.length() + 1);
 		return sb.toString();
@@ -685,15 +740,17 @@ public final class Helpers {
 			// Has more than one child
 			// Create node in target and add children to it
 			Map<String, Map> currentNode;
-			if (path.length() == 0)
+			if (path.length() == 0) {
 				currentNode= target;
-			else {
+			} else {
 				currentNode= target.get(path);
-				if (currentNode == null)
+				if (currentNode == null) {
 					target.put(path, currentNode= new HashMap<String, Map>());
+				}
 			}
-			for (String name : sourceNodes.keySet())
+			for (String name : sourceNodes.keySet()) {
 				optimiseDirTree_add(name, currentNode, sourceNodes.get(name));
+			}
 			break;
 		}
 		}
@@ -702,16 +759,18 @@ public final class Helpers {
 	@SuppressWarnings("unchecked")
 	private static void optimiseDirTree_add(String path, Map<String, Map> target, OptimisibleDirTreeNode node) {
 		if (node.hasFiles) {
-			if (node.children.size() == 0)
+			if (node.children.size() == 0) {
 				target.put(path, null);
-			else {
+			} else {
 				Map<String, Map> currentNode= target.get(path);
-				if (currentNode == null)
+				if (currentNode == null) {
 					target.put(path, currentNode= new HashMap<String, Map>());
+				}
 				optimiseDirTree("", currentNode, node.children);
 			}
-		} else
+		} else {
 			optimiseDirTree(path, target, node.children);
+		}
 	}
 
 	/**
@@ -724,16 +783,20 @@ public final class Helpers {
 
 	public static void removeEmptyCollections(Map<?, ? extends Collection<?>> map) {
 		Object[] keys= map.keySet().toArray();
-		for (Object k : keys)
-			if (map.get(k) == null || map.get(k).isEmpty())
+		for (Object k : keys) {
+			if (map.get(k) == null || map.get(k).isEmpty()) {
 				map.remove(k);
+			}
+		}
 	}
 
 	public static void removeEmptyMaps(Map<?, ? extends Map<?, ?>> map) {
 		Object[] keys= map.keySet().toArray();
-		for (Object k : keys)
-			if (map.get(k) == null || map.get(k).isEmpty())
+		for (Object k : keys) {
+			if (map.get(k) == null || map.get(k).isEmpty()) {
 				map.remove(k);
+			}
+		}
 	}
 
 	public static String removeFilenameExtension(String filename) {
@@ -744,14 +807,18 @@ public final class Helpers {
 	 * Removes a directory and all its contents.
 	 */
 	public static void rm_rf(File dir) throws IOException {
-		for (File f : dir.listFiles())
+		for (File f : dir.listFiles()) {
 			if (f.isFile()) {
-				if (!f.delete())
+				if (!f.delete()) {
 					throw new IOException("Delete failed. (\"" + f + "\")");
-			} else if (f.isDirectory())
+				}
+			} else if (f.isDirectory()) {
 				rm_rf(f);
-		if (!dir.delete())
+			}
+		}
+		if (!dir.delete()) {
 			throw new IOException("Delete failed. (\"" + dir + "\")");
+		}
 	}
 
 	/**
@@ -775,14 +842,17 @@ public final class Helpers {
 	 */
 	public static void rmdirPath(File path, List<File> removedFiles) throws IOException {
 		if (path.isDirectory() && path.list().length == 0) {
-			if (!path.delete())
+			if (!path.delete()) {
 				throw new IOException("rmdir failed. (\"" + path + "\")");
-			if (removedFiles != null)
+			}
+			if (removedFiles != null) {
 				removedFiles.add(path);
+			}
 
 			final File parent= path.getParentFile();
-			if (parent != null)
+			if (parent != null) {
 				rmdirPath(parent, removedFiles);
+			}
 		}
 	}
 

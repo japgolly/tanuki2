@@ -142,18 +142,21 @@ public class FilenameParserTest extends TestHelper {
 		String[] insertValues= new String[] {"", "black label society", "black label society-shot to hell",
 				"shot TO   HELL", "Black-Label-Society   SHOT-TO-HELL"};
 		String[] sepTypes= new String[] {"-", "- ", " -", "   -     "};
-		for (String sep : sepTypes)
+		for (String sep : sepTypes) {
 			for (String pre : insertValues) {
-				if (pre.length() > 0)
+				if (pre.length() > 0) {
 					pre= pre + sep;
+				}
 				for (String mid : insertValues) {
-					if (mid.length() > 0)
+					if (mid.length() > 0) {
 						mid= sep + mid + sep;
-					else
+					} else {
 						mid= sep;
+					}
 					for (String post : insertValues) {
-						if (post.length() > 0)
+						if (post.length() > 0) {
 							post= sep + post;
+						}
 
 						DirData dd= new DirData("X:\\music\\1. Fresh\\Black Label Society-Shot To Hell-2006[www.heavytorrents.org]");
 						final String fn1= pre + "01" + mid + "concrete jungle" + post + ".mp3";
@@ -169,6 +172,7 @@ public class FilenameParserTest extends TestHelper {
 					}
 				}
 			}
+		}
 	}
 
 	@Test
@@ -291,14 +295,16 @@ public class FilenameParserTest extends TestHelper {
 		final String fn8= "Hawaii - 08 - Omichan No Uta - The Natives Are Restless.mp3";
 		final String fn9= "Hawaii - 09 - Dynamite - The Natives Are Restless.mp3";
 		final String[] fnAll= new String[] {fn1, fn2, fn3, fn4, fn5, fn6, fn7, fn8, fn9};
-		for (String f : fnAll)
+		for (String f : fnAll) {
 			dd.files.put(f, makeFileData(dd, true));
+		}
 		dd.files.put("Hawaii - 00 - The Natives Are Restless.nfo", makeFileData(dd, false));
 		dd.files.put("Hawaii - The Natives Are Restless.jpg", makeFileData(dd, false));
 		final Map<String, List<TrackPropertyMap>> r= fp.readMultipleTrackProperties(dd);
 		assertEquals(9, r.size());
-		for (String f : fnAll)
+		for (String f : fnAll) {
 			assertTrue(r.containsKey(f));
+		}
 		assertTrackPropertiesFound(fn1, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "01", "Call Of The Wild"), r.get(fn1));
 		assertTrackPropertiesFound(fn2, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "02", "Turn It Louder"), r.get(fn2));
 		assertTrackPropertiesFound(fn3, makeTrackProperties("Hawaii", 1985, "The Natives Are Restless", "03", "V.P.H.B."), r.get(fn3));

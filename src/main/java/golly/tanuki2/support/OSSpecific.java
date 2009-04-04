@@ -25,14 +25,15 @@ public final class OSSpecific {
 
 	static {
 		final String osStr= SWT.getPlatform();
-		if ("win32".equals(osStr)) //$NON-NLS-1$
+		if ("win32".equals(osStr)) { //$NON-NLS-1$
 			os= OS.WIN32;
-		else if ("gtk".equals(osStr)) //$NON-NLS-1$
+		} else if ("gtk".equals(osStr)) { //$NON-NLS-1$
 			os= OS.LINUX;
-		else if ("carbon".equals(osStr)) //$NON-NLS-1$
+		} else if ("carbon".equals(osStr)) { //$NON-NLS-1$
 			os= OS.MAC;
-		else
+		} else {
 			os= OS.OTHER;
+		}
 	}
 
 	// =============================================================================================== //
@@ -54,19 +55,22 @@ public final class OSSpecific {
 	}
 
 	private static boolean execInDir(String dir, String cmd, String... args) {
-		if (cmd == null)
+		if (cmd == null) {
 			return false;
+		}
 
 		// Make cmdarray
 		final String[] cmdarray;
 		if (args.length > 0) {
 			int i= args.length;
 			cmdarray= new String[i + 1];
-			while (i-- > 0)
+			while (i-- > 0) {
 				cmdarray[i + 1]= args[i];
+			}
 			cmdarray[0]= cmd;
-		} else
+		} else {
 			cmdarray= new String[] {cmd};
+		}
 
 		// Execute
 		try {
@@ -108,20 +112,26 @@ public final class OSSpecific {
 	public static void openBrowser(String url) {
 		switch (os) {
 		case MAC:
-			if (!exec("/usr/bin/open", url))
+			if (!exec("/usr/bin/open", url)) {
 				attemptsFailed();
+			}
 			break;
 		case WIN32:
-			if (!Program.launch(url))
+			if (!Program.launch(url)) {
 				attemptsFailed();
+			}
 			break;
 		default:
 			Program p= Program.findProgram("html");
-			if (p == null || !p.execute(url))
-				if (!exec("firefox", url))
-					if (!exec("mozilla", url))
-						if (!exec("netscape", url))
+			if (p == null || !p.execute(url)) {
+				if (!exec("firefox", url)) {
+					if (!exec("mozilla", url)) {
+						if (!exec("netscape", url)) {
 							attemptsFailed();
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -129,20 +139,27 @@ public final class OSSpecific {
 	public static void openFolder(String dir) {
 		switch (os) {
 		case LINUX:
-			if (!exec("nautilus", dir))
-				if (!exec("gnome-open", dir))
-					if (!exec("kfm", "file:" + dir))
-						if (!exec("konqueror", "file:" + dir))
-							if (!exec("xfe", dir))
+			if (!exec("nautilus", dir)) {
+				if (!exec("gnome-open", dir)) {
+					if (!exec("kfm", "file:" + dir)) {
+						if (!exec("konqueror", "file:" + dir)) {
+							if (!exec("xfe", dir)) {
 								attemptsFailed();
+							}
+						}
+					}
+				}
+			}
 			break;
 		case MAC:
-			if (!exec("/usr/bin/open", dir))
+			if (!exec("/usr/bin/open", dir)) {
 				attemptsFailed();
+			}
 			break;
 		case WIN32:
-			if (!execInDir(dir, "explorer.exe", "."))
+			if (!execInDir(dir, "explorer.exe", ".")) {
 				attemptsFailed();
+			}
 			break;
 		default:
 			unsupported();
@@ -153,20 +170,26 @@ public final class OSSpecific {
 	public static void openPrompt(String dir) {
 		switch (os) {
 		case LINUX:
-			if (!execInDir(dir, "kde-terminal"))
-				if (!execInDir(dir, "gnome-terminal"))
-					if (!execInDir(dir, "konsole"))
-						if (!execInDir(dir, "xterm"))
+			if (!execInDir(dir, "kde-terminal")) {
+				if (!execInDir(dir, "gnome-terminal")) {
+					if (!execInDir(dir, "konsole")) {
+						if (!execInDir(dir, "xterm")) {
 							attemptsFailed();
+						}
+					}
+				}
+			}
 			break;
 		case MAC:
 			// TODO openPrompt doesn't work on mac
-			if (!execInDir(dir, "/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal"))
+			if (!execInDir(dir, "/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal")) {
 				attemptsFailed();
+			}
 			break;
 		case WIN32:
-			if (!execInDir(dir, "cmd.exe", "/C start cmd.exe"))
+			if (!execInDir(dir, "cmd.exe", "/C start cmd.exe")) {
 				attemptsFailed();
+			}
 			break;
 		default:
 			unsupported();
@@ -180,14 +203,16 @@ public final class OSSpecific {
 		// Windows APPDATA dir
 		if (OSSpecific.getOS() == OS.WIN32) {
 			dir= System.getenv("APPDATA");
-			if (dir != null)
+			if (dir != null) {
 				return Helpers.addPathElements(dir, "Tanuki2");
+			}
 		}
 
 		// user.home
 		dir= System.getProperty("user.home");
-		if (dir != null)
+		if (dir != null) {
 			return Helpers.addPathElements(dir, ".tanuki2");
+		}
 
 		// Still not found? Default to same dir as app
 		return ".";

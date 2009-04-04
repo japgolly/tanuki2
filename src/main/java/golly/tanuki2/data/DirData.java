@@ -19,11 +19,12 @@ public final class DirData extends AbstractDataObject {
 	}
 
 	public void autoSetHasAudioContent() {
-		for (FileData fd : files.values())
+		for (FileData fd : files.values()) {
 			if (fd.isAudio()) {
 				setHasAudioContent(true);
 				return;
 			}
+		}
 		setHasAudioContent(false);
 	}
 
@@ -34,13 +35,17 @@ public final class DirData extends AbstractDataObject {
 
 	public boolean hasAudioContent(boolean andNotMarkedForDeletion) {
 		if (andNotMarkedForDeletion) {
-			if (hasAudioContent)
-				for (FileData fd : files.values())
-					if (fd.isAudio() && !fd.isMarkedForDeletion())
+			if (hasAudioContent) {
+				for (FileData fd : files.values()) {
+					if (fd.isAudio() && !fd.isMarkedForDeletion()) {
 						return true;
+					}
+				}
+			}
 			return false;
-		} else
+		} else {
 			return hasAudioContent;
+		}
 	}
 
 	public void setHasAudioContent(boolean hasAudioContent) {

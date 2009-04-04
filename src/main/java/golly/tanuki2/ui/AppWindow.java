@@ -4,10 +4,10 @@ import golly.tanuki2.core.Engine;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.AutoResizeColumnsListener;
-import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
 import golly.tanuki2.support.OSSpecific;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.TanukiImage;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
@@ -159,6 +159,7 @@ public class AppWindow {
 		// TODO makeDropTarget doesn't work properly on mac
 		makeDropTarget(tabFolder);
 		tabFolder.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onFileViewChanged((IFileView) e.item.getData());
 			}
@@ -184,8 +185,9 @@ public class AppWindow {
 					ei.setExpanded(expanded);
 					resizeWidgets();
 					ei.setExpanded(!expanded);
-				} else
+				} else {
 					resizeWidgets();
+				}
 				expandBar.setRedraw(true);
 			}
 		});
@@ -260,6 +262,7 @@ public class AppWindow {
 
 		// Shell again
 		shell.addControlListener(new ControlAdapter() {
+			@Override
 			public void controlResized(ControlEvent e) {
 				shell.setRedraw(false);
 				resizeWidgets();
@@ -303,30 +306,37 @@ public class AppWindow {
 		DropTarget target= new DropTarget(widget, DND.DROP_COPY | DND.DROP_DEFAULT);
 		target.setTransfer(new Transfer[] {fileTransfer});
 		target.addDropListener(new DropTargetAdapter() {
+			@Override
 			public void dragEnter(DropTargetEvent event) {
 				dragOperationChanged(event);
 			}
 
+			@Override
 			public void dragOperationChanged(DropTargetEvent event) {
-				if (event.detail != DND.DROP_DEFAULT)
+				if (event.detail != DND.DROP_DEFAULT) {
 					return;
-				if ((event.operations & DND.DROP_COPY) != 0)
+				}
+				if ((event.operations & DND.DROP_COPY) != 0) {
 					event.detail= DND.DROP_COPY;
-				else
+				} else {
 					event.detail= DND.DROP_NONE;
+				}
 			}
 
+			@Override
 			public void drop(DropTargetEvent event) {
-				if (fileTransfer.isSupportedType(event.currentDataType))
+				if (fileTransfer.isSupportedType(event.currentDataType)) {
 					add((String[]) event.data);
+				}
 			}
 		});
 	}
 
 	protected void onAddFiles() {
 		FileDialog dlg= new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		if (RuntimeConfig.getInstance().lastAddedDir != null)
+		if (RuntimeConfig.getInstance().lastAddedDir != null) {
 			dlg.setFilterPath(RuntimeConfig.getInstance().lastAddedDir);
+		}
 		String file= dlg.open();
 		if (file != null) {
 			File f= new File(file);
@@ -338,8 +348,9 @@ public class AppWindow {
 
 	protected void onAddFolder() {
 		DirectoryDialog dlg= new DirectoryDialog(shell);
-		if (RuntimeConfig.getInstance().lastAddedDir != null)
+		if (RuntimeConfig.getInstance().lastAddedDir != null) {
 			dlg.setFilterPath(RuntimeConfig.getInstance().lastAddedDir);
+		}
 		dlg.setMessage(I18n.l("main_txt_selectFolderToAddMsg")); //$NON-NLS-1$
 		String dir= dlg.open();
 		if (dir != null) {
@@ -430,14 +441,15 @@ public class AppWindow {
 	final class AppUIShared {
 
 		public TwoColours getFileItemColours(final FileData fd, boolean checkAlbumDataToo) {
-			if (fd.isMarkedForDeletion())
+			if (fd.isMarkedForDeletion()) {
 				return sharedUIResources.deletionColours;
-			else if (!fd.isAudio())
+			} else if (!fd.isAudio()) {
 				return sharedUIResources.nonAudioFileColours;
-			else if (!fd.isComplete(checkAlbumDataToo))
+			} else if (!fd.isComplete(checkAlbumDataToo)) {
 				return sharedUIResources.itemIncompleteColours;
-			else
+			} else {
 				return sharedUIResources.itemCompleteColours;
+			}
 		}
 
 		public void launch(String fullFilename) {
@@ -446,8 +458,9 @@ public class AppWindow {
 
 		public void onDataUpdated(boolean isCurrentViewUptodate) {
 			fileViewsUptodate.clear();
-			if (isCurrentViewUptodate)
+			if (isCurrentViewUptodate) {
 				fileViewsUptodate.add(currentFileView);
+			}
 		}
 
 		public void onDataUpdated_RefreshNow() {
@@ -461,8 +474,9 @@ public class AppWindow {
 			if (ae.didUpdate()) {
 				onDataUpdated_RefreshNow();
 				return true;
-			} else
+			} else {
 				return false;
+			}
 		}
 
 		public void refreshFiles(boolean force) {
@@ -490,17 +504,20 @@ public class AppWindow {
 		}
 
 		public boolean removeFiles(String[] files) {
-			if (files.length == 0)
+			if (files.length == 0) {
 				return false;
+			}
 
 			final MessageBox mb= new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.APPLICATION_MODAL);
 			mb.setText(I18n.l("general_app_title")); //$NON-NLS-1$
 			mb.setMessage(I18n.l("main_txt_removeSelectedConfirmationMsg")); //$NON-NLS-1$
-			if (mb.open() != SWT.YES)
+			if (mb.open() != SWT.YES) {
 				return false;
+			}
 
-			for (String f : files)
+			for (String f : files) {
 				engine.remove(f);
+			}
 			engine.removeEmptyDirs();
 			onDataUpdated_RefreshNow();
 			return true;

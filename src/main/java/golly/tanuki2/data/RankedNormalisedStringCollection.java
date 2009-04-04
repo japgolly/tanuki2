@@ -61,8 +61,9 @@ public class RankedNormalisedStringCollection {
 
 	public String getWinner() {
 		final String n= rankedCollection.getWinner();
-		if (n == null || !unnormalised.containsKey(n))
+		if (n == null || !unnormalised.containsKey(n)) {
 			return null;
+		}
 		return unnormalised.get(n).getWinner();
 	}
 

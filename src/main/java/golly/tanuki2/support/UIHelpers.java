@@ -55,9 +55,11 @@ public class UIHelpers {
 	}
 
 	public static void addUnlessExists(Combo combo, String name) {
-		for (String s : combo.getItems())
-			if (name.equals(s))
+		for (String s : combo.getItems()) {
+			if (name.equals(s)) {
 				return;
+			}
+		}
 		combo.add(name);
 	}
 
@@ -84,15 +86,19 @@ public class UIHelpers {
 		Point s= wnd.getSize();
 		Point l= new Point(parentBounds.x + (parentBounds.width - s.x) / 2, parentBounds.y + (parentBounds.height - s.y) / 2);
 		int d= (l.y + s.y) - (dca.y + dca.height);
-		if (d > 0)
+		if (d > 0) {
 			l.y-= d;
+		}
 		d= (l.x + s.x) - (dca.x + dca.width);
-		if (d > 0)
+		if (d > 0) {
 			l.x-= d;
-		if (l.x < dca.x)
+		}
+		if (l.x < dca.x) {
 			l.x= dca.x;
-		if (l.y < dca.y)
+		}
+		if (l.y < dca.y) {
 			l.y= dca.y;
+		}
 		wnd.setLocation(l);
 	}
 
@@ -104,8 +110,9 @@ public class UIHelpers {
 
 	public static Font createFont(Font baseFont, int style) {
 		FontData[] fds= baseFont.getFontData();
-		for (FontData fd : fds)
+		for (FontData fd : fds) {
 			fd.setStyle(style);
+		}
 		return new Font(Display.getCurrent(), fds);
 	}
 
@@ -150,9 +157,11 @@ public class UIHelpers {
 
 	public static void passControlToUiUntilShellClosed(Shell shell) {
 		final Display display= shell.getDisplay();
-		while (!shell.isDisposed())
-			if (!display.readAndDispatch())
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch()) {
 				display.sleep();
+			}
+		}
 	}
 
 	public static void runWithShell(Shell shell, RunnableWithShell runnable) {
@@ -163,18 +172,21 @@ public class UIHelpers {
 			if (display == null) {
 				display= new Display();
 				disposeDisplay= true;
-			} else
+			} else {
 				disposeDisplay= false;
+			}
 			try {
 				// Get a shell
 				shell= display.getActiveShell();
-				if (shell == null)
+				if (shell == null) {
 					shell= new Shell(display);
+				}
 				// Call self with shell
 				runWithShell(shell, runnable);
 			} finally {
-				if (disposeDisplay)
+				if (disposeDisplay) {
 					display.dispose();
+				}
 			}
 		} else {
 			runnable.shell= shell;
@@ -184,18 +196,20 @@ public class UIHelpers {
 
 	public static void selectItem(List list, String name) {
 		int i= list.getItemCount();
-		while (i-- > 0)
+		while (i-- > 0) {
 			if (list.getItem(i).equals(name)) {
 				list.select(i);
 				return;
 			}
+		}
 	}
 
 	public static void setButtonText(Button button, String i18nStringKey) {
-		if (OSSpecific.getOS() == OS.MAC)
+		if (OSSpecific.getOS() == OS.MAC) {
 			button.setText(I18n.l(i18nStringKey));
-		else
+		} else {
 			button.setText("   " + I18n.l(i18nStringKey) + "   "); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
 	public static void setHeight(Control control, int height) {
@@ -208,11 +222,12 @@ public class UIHelpers {
 
 	public static int showAbortIgnoreRetryBox(Shell shell, final String title, final String message) {
 		final RunnableWithShell r= new RunnableWithShell() {
+			@Override
 			public void run(Shell shell) {
 				MessageBox m= new MessageBox(shell, SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY | SWT.IGNORE);
 				m.setText(title);
 				m.setMessage(message);
-				ret= (Integer) m.open();
+				ret= m.open();
 			}
 		};
 		runWithShell(shell, r);
@@ -221,11 +236,12 @@ public class UIHelpers {
 
 	public static boolean showOkCancelBox(Shell shell, final int iconType, final String title, final String message) {
 		final RunnableWithShell r= new RunnableWithShell() {
+			@Override
 			public void run(Shell shell) {
 				MessageBox m= new MessageBox(shell, iconType | SWT.OK | SWT.CANCEL);
 				m.setText(title);
 				m.setMessage(message);
-				ret= (Boolean) (m.open() == SWT.OK);
+				ret= (m.open() == SWT.OK);
 			}
 		};
 		runWithShell(shell, r);
@@ -234,11 +250,12 @@ public class UIHelpers {
 
 	public static boolean showYesNoBox(Shell shell, final int iconType, final String title, final String message) {
 		final RunnableWithShell r= new RunnableWithShell() {
+			@Override
 			public void run(Shell shell) {
 				MessageBox m= new MessageBox(shell, iconType | SWT.YES | SWT.NO);
 				m.setText(title);
 				m.setMessage(message);
-				ret= (Boolean) (m.open() == SWT.YES);
+				ret= (m.open() == SWT.YES);
 			}
 		};
 		runWithShell(shell, r);
@@ -248,9 +265,11 @@ public class UIHelpers {
 	public static boolean disableShowMessageBox= false;
 
 	public static void showMessageBox(Shell shell, final int iconType, final String title, final String message) {
-		if (disableShowMessageBox)
+		if (disableShowMessageBox) {
 			return;
+		}
 		runWithShell(shell, new RunnableWithShell() {
+			@Override
 			public void run(Shell shell) {
 				MessageBox m= new MessageBox(shell, iconType);
 				m.setText(title);

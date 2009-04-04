@@ -37,17 +37,19 @@ public abstract class TestHelper extends Assert {
 
 	protected void assertTrackPropertiesFound(String filename, TrackPropertyMap expected, final Collection<TrackPropertyMap> test) {
 		boolean found= false;
-		for (TrackPropertyMap tp : test)
+		for (TrackPropertyMap tp : test) {
 			if (tp.equals(expected)) {
 				found= true;
 				break;
 			}
+		}
 		if (!found) {
 			System.err.println("Expected TrackProperties not found.");
 			System.err.println("  Filename: " + filename);
 			System.err.println("  Expected: " + expected);
-			for (TrackPropertyMap tp : test)
+			for (TrackPropertyMap tp : test) {
 				System.err.println("  Found:    " + tp);
+			}
 			System.err.println();
 			fail("Expected TrackProperties not found.");
 		}

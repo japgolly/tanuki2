@@ -9,9 +9,9 @@ import golly.tanuki2.data.RankedObject;
 import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.data.TrackPropertyMap;
 import golly.tanuki2.data.TrackPropertyType;
-import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.I18n;
+import golly.tanuki2.support.RuntimeConfig;
 import golly.tanuki2.support.TanukiImage;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIResourceManager;
@@ -134,13 +134,15 @@ public class AlbumEditor {
 				l.setBackground(composite.getBackground());
 				l.setText(f);
 				GridData ld= UIHelpers.makeGridData(2, true, SWT.FILL);
-				if (firstTrack)
+				if (firstTrack) {
 					firstTrack= false;
-				else
+				} else {
 					ld.verticalIndent= 6;
+				}
 				l.setLayoutData(ld);
-				if (trackLabelFont == null)
+				if (trackLabelFont == null) {
 					trackLabelFont= UIResourceManager.getFont("albumeditor_trackLabelFont", l.getFont(), SWT.ITALIC); //$NON-NLS-1$
+				}
 				l.setFont(trackLabelFont);
 
 				// tn widget
@@ -149,8 +151,9 @@ public class AlbumEditor {
 				ld= UIHelpers.makeGridData(1, false, SWT.LEFT);
 				ld.minimumWidth= ld.widthHint= 24;
 				t.setLayoutData(ld);
-				if (fd.getTn() != null)
+				if (fd.getTn() != null) {
 					t.setText(fd.getTn().toString());
+				}
 
 				// track widget
 				t= new Text(composite, SWT.BORDER);
@@ -159,8 +162,9 @@ public class AlbumEditor {
 				setText(t, fd.getTrack());
 
 				// Rank album data
-				if (fd.getAlbumData() != null)
+				if (fd.getAlbumData() != null) {
 					allAlbumData.increaseRank(fd.getAlbumData(), 1);
+				}
 			}
 		}
 		addListenersToTrackInfoWidgets();
@@ -169,6 +173,7 @@ public class AlbumEditor {
 		composite.pack();
 		trackInfoComposite.setMinSize(16, composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		trackInfoComposite.addControlListener(new ControlAdapter() {
+			@Override
 			public void controlResized(ControlEvent e) {
 				UIHelpers.setWidth(trackInfoComposite.getContent(), trackInfoComposite.getClientArea().width);
 			}
@@ -185,6 +190,7 @@ public class AlbumEditor {
 		btnOk.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
 		shell.setDefaultButton(btnOk);
 		btnOk.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onOk();
 			}
@@ -194,6 +200,7 @@ public class AlbumEditor {
 		UIHelpers.setButtonText(btnCancel, "general_btn_cancel"); //$NON-NLS-1$
 		btnCancel.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
 		btnCancel.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onCancel();
 			}
@@ -209,12 +216,13 @@ public class AlbumEditor {
 
 		// Populate (using potential data)
 		final Map<String, List<TrackPropertyMap>> trackPropertyMap= engine.readTrackProprties(dd);
-		for (List<TrackPropertyMap> tpList : trackPropertyMap.values())
+		for (List<TrackPropertyMap> tpList : trackPropertyMap.values()) {
 			for (TrackPropertyMap tp : tpList) {
 				addToCombo(iwArtist, tp.get(TrackPropertyType.ARTIST), false);
 				addToCombo(iwYear, tp.get(TrackPropertyType.YEAR), false);
 				addToCombo(iwAlbum, tp.get(TrackPropertyType.ALBUM), false);
 			}
+		}
 
 		// Resize and position window
 		final String iwYearTxt= iwYear.getText();
@@ -223,8 +231,9 @@ public class AlbumEditor {
 		iwYear.setText(iwYearTxt);
 		Rectangle dca= Display.getCurrent().getClientArea();
 		Rectangle shellBounds= shell.getBounds();
-		if (shellBounds.height > dca.height)
+		if (shellBounds.height > dca.height) {
 			UIHelpers.setHeight(shell, dca.height);
+		}
 		UIHelpers.centerInFrontOfParent(Display.getCurrent(), shell, parent.getBounds());
 	}
 
@@ -254,30 +263,37 @@ public class AlbumEditor {
 	protected void onGoogle() {
 		final List<String> searchTermList= new ArrayList<String>();
 		String x;
-		if ((x= processWidgetText(iwArtist.getText())) != null)
+		if ((x= processWidgetText(iwArtist.getText())) != null) {
 			searchTermList.add(x);
-		if ((x= processWidgetText(iwAlbum.getText())) != null)
+		}
+		if ((x= processWidgetText(iwAlbum.getText())) != null) {
 			searchTermList.add(x);
+		}
 
-		if (searchTermList.isEmpty())
+		if (searchTermList.isEmpty()) {
 			WebBrowser.open("http://www.google.com"); //$NON-NLS-1$
-		else {
+		} else {
 			int i= searchTermList.size();
 			final String[] searchTermArray= searchTermList.toArray(new String[i]);
-			while (i-- > 0)
-				if (searchTermArray[i].indexOf(' ') != -1)
+			while (i-- > 0) {
+				if (searchTermArray[i].indexOf(' ') != -1) {
 					searchTermArray[i]= "\"" + searchTermArray[i] + "\""; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
 			WebBrowser.open(WebBrowser.getGoogleSearchUrl(searchTermArray));
 		}
 	}
 
 	protected void onOk() {
 		// Check all numeric fields are valid numbers
-		if (!checkNumber(iwYear, iwYear.getText()))
+		if (!checkNumber(iwYear, iwYear.getText())) {
 			return;
-		for (Text t : iwTnMap.values())
-			if (!checkNumber(t, t.getText()))
+		}
+		for (Text t : iwTnMap.values()) {
+			if (!checkNumber(t, t.getText())) {
 				return;
+			}
+		}
 
 		// Create new AlbumData
 		AlbumData ad= new AlbumData();
@@ -303,13 +319,13 @@ public class AlbumEditor {
 		// TODO onReadClipboard(): Add a seperate dialog for this 
 		final ClipboardParser cp= new ClipboardParser();
 		final String clipboardText= cp.getClipboardText(sharedUIResources.clipboard);
-		if (clipboardText == null)
+		if (clipboardText == null) {
 			UIHelpers.showTanukiWarning(shell, "albumEditor_err_noClipboardText"); //$NON-NLS-1$
-		else {
+		} else {
 			final Map<String, TrackPropertyMap> results= cp.parseAndMatch(dd, clipboardText);
-			if (results.isEmpty())
+			if (results.isEmpty()) {
 				UIHelpers.showMessageBox(shell, SWT.ICON_WARNING, shell.getText(), I18n.l("albumEditor_err_noClipboardMatches")); //$NON-NLS-1$
-			else {
+			} else {
 				for (String filename : results.keySet()) {
 					TrackPropertyMap tp= results.get(filename);
 					setText(iwTnMap.get(filename), tp.get(TrackPropertyType.TN));
@@ -323,8 +339,9 @@ public class AlbumEditor {
 	protected void onTitleCase() {
 		makeTitleCase(iwArtist);
 		makeTitleCase(iwAlbum);
-		for (Text t : iwTrackMap.values())
+		for (Text t : iwTrackMap.values()) {
 			makeTitleCase(t);
+		}
 	}
 
 	// =============================================================================================== //
@@ -347,44 +364,54 @@ public class AlbumEditor {
 				Rectangle bounds= child.getBounds();
 				Rectangle area= trackInfoComposite.getClientArea();
 				Point origin= trackInfoComposite.getOrigin();
-				if (origin.x > bounds.x)
+				if (origin.x > bounds.x) {
 					origin.x= Math.max(0, bounds.x);
-				if (origin.y > bounds.y)
+				}
+				if (origin.y > bounds.y) {
 					origin.y= Math.max(0, bounds.y);
-				if (origin.x + area.width < bounds.x + bounds.width)
+				}
+				if (origin.x + area.width < bounds.x + bounds.width) {
 					origin.x= Math.max(0, bounds.x + bounds.width - area.width);
-				if (origin.y + area.height < bounds.y + bounds.height)
+				}
+				if (origin.y + area.height < bounds.y + bounds.height) {
 					origin.y= Math.max(0, bounds.y + bounds.height - area.height);
+				}
 				trackInfoComposite.setOrigin(origin);
 			}
 		};
-		for (Text t : iwTnMap.values())
+		for (Text t : iwTnMap.values()) {
 			t.addListener(SWT.Activate, makeSureWidgetIsVisible);
-		for (Text t : iwTrackMap.values())
+		}
+		for (Text t : iwTrackMap.values()) {
 			t.addListener(SWT.Activate, makeSureWidgetIsVisible);
+		}
 	}
 
 	private void addToCombo(Combo combo, Integer i, boolean select) {
-		if (i == null)
+		if (i == null) {
 			return;
+		}
 		addToCombo(combo, i.toString(), select);
 	}
 
 	private void addToCombo(Combo combo, String str, boolean select) {
-		if (str == null)
+		if (str == null) {
 			return;
+		}
 		UIHelpers.addUnlessExists(combo, str);
-		if (select)
+		if (select) {
 			combo.setText(str);
+		}
 	}
 
 	private boolean checkNumber(Control widget, String origText) {
 		String text= processWidgetText(origText);
-		if (text == null)
+		if (text == null) {
 			return true;
-		if (patNumeric.matcher(text).matches())
+		}
+		if (patNumeric.matcher(text).matches()) {
 			return true;
-		else {
+		} else {
 			UIHelpers.showTanukiError(shell, "albumEditor_err_invalidNumber", origText); //$NON-NLS-1$
 			widget.setFocus();
 			return false;
@@ -400,14 +427,16 @@ public class AlbumEditor {
 	}
 
 	private static String processWidgetText(String text) {
-		if (text == null)
+		if (text == null) {
 			return null;
+		}
 		text= Helpers.unicodeTrim(text);
 		return (text.length() == 0) ? null : text;
 	}
 
 	private static void setText(Text w, String txt) {
-		if (txt != null)
+		if (txt != null) {
 			w.setText(txt);
+		}
 	}
 }

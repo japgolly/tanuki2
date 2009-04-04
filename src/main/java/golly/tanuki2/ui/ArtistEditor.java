@@ -26,8 +26,9 @@ public class ArtistEditor {
 		if (dirdataSet.isEmpty()) {
 			UIHelpers.showTanukiWarning(parent, "main_err_noAudioSelectedForArtistEditor"); //$NON-NLS-1$
 			return false;
-		} else
+		} else {
 			return new ArtistEditor(parent, dirdataSet).open();
+		}
 	}
 
 	private final Shell shell;
@@ -51,6 +52,7 @@ public class ArtistEditor {
 		btnOk.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
 		UIHelpers.setButtonText(btnOk, "general_btn_ok"); //$NON-NLS-1$
 		btnOk.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onOk();
 			}
@@ -62,6 +64,7 @@ public class ArtistEditor {
 		btnCancel.setLayoutData(UIHelpers.makeGridData(1, true, SWT.CENTER));
 		UIHelpers.setButtonText(btnCancel, "general_btn_cancel"); //$NON-NLS-1$
 		btnCancel.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				shell.close();
 			}
@@ -73,17 +76,22 @@ public class ArtistEditor {
 
 		// Populate artist combo
 		RankedObjectCollection<String> artists= new RankedObjectCollection<String>();
-		for (DirData dd : dirdataSet)
-			for (FileData fd : dd.files.values())
-				if (fd.getAlbumData() != null && !fd.isMarkedForDeletion())
+		for (DirData dd : dirdataSet) {
+			for (FileData fd : dd.files.values()) {
+				if (fd.getAlbumData() != null && !fd.isMarkedForDeletion()) {
 					artists.increaseRank(fd.getAlbumData().getArtist(), 1);
+				}
+			}
+		}
 		artists.remove(null);
-		for (RankedObject<String> a : artists)
+		for (RankedObject<String> a : artists) {
 			iwArtist.add(a.data);
-		if (artists.getWinner() != null)
+		}
+		if (artists.getWinner() != null) {
 			iwArtist.setText(artists.getWinner());
-		else
+		} else {
 			iwArtist.setText(""); //$NON-NLS-1$
+		}
 	}
 
 	public boolean open() {
@@ -94,15 +102,18 @@ public class ArtistEditor {
 
 	protected void onOk() {
 		final String artist= iwArtist.getText();
-		for (DirData dd : dirdataSet)
-			for (FileData fd : dd.files.values())
+		for (DirData dd : dirdataSet) {
+			for (FileData fd : dd.files.values()) {
 				if (!fd.isMarkedForDeletion()) {
 					AlbumData ad= fd.getAlbumData();
-					if (ad == null)
+					if (ad == null) {
 						ad= new AlbumData();
+					}
 					ad.setArtist(artist);
 					fd.setAlbumData(ad);
 				}
+			}
+		}
 		updated= true;
 		shell.close();
 	}

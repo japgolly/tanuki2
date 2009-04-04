@@ -21,10 +21,11 @@ public class RichRandomAccessFile extends RandomAccessFile {
 	}
 
 	public RichRandomAccessFile seekTo(long bytes) throws IOException {
-		if (bytes >= 0)
+		if (bytes >= 0) {
 			super.seek(bytes);
-		else
+		} else {
 			super.seek(length() - bytes);
+		}
 		return this;
 	}
 

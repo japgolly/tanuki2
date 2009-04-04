@@ -63,8 +63,9 @@ public class ClipboardParser {
 		for (String line : lines) {
 			line= pCrapBeforeTnAndText.matcher(line).replaceFirst("");
 			Matcher m= pTnAndText.matcher(line);
-			if (m.matches())
+			if (m.matches()) {
 				values.put(Integer.parseInt(m.group(1)), m.group(2));
+			}
 		}
 
 		// If that didn't work, assume there are no track numbers and that each line is a track name
@@ -85,19 +86,23 @@ public class ClipboardParser {
 		// Unquote
 		if (values.size() > 1) {
 			boolean allMatch= true;
-			for (String v : values.values())
+			for (String v : values.values()) {
 				if (!pQuotedText.matcher(v).matches()) {
 					allMatch= false;
 					break;
 				}
-			if (allMatch)
-				for (Integer k : values.keySet())
+			}
+			if (allMatch) {
+				for (Integer k : values.keySet()) {
 					values.put(k, pQuotedText.matcher(values.get(k)).replaceFirst("$1"));
+				}
+			}
 		}
 
 		// Clean up
-		for (Integer k : values.keySet())
+		for (Integer k : values.keySet()) {
 			values.put(k, Helpers.unicodeTrim(values.get(k)));
+		}
 
 		// Done
 		return values;
@@ -129,15 +134,17 @@ public class ClipboardParser {
 			final RankedObjectCollection<Integer> highestRanks= new RankedObjectCollection<Integer>();
 			for (Integer tn : rankedMatchesPerResult.keySet()) {
 				final RankedObjectCollection<String> ranks= rankedMatchesPerResult.get(tn);
-				if (ranks.isEmpty())
+				if (ranks.isEmpty()) {
 					keysWithoutMatches.add(tn);
-				else
+				} else {
 					highestRanks.add(tn, ranks.getWinningRank() - (ranks.getWinnerCount() > 1 ? 0.2 : 0));
+				}
 			}
 
 			// Remove empty matches
-			for (Integer i : keysWithoutMatches)
+			for (Integer i : keysWithoutMatches) {
 				rankedMatchesPerResult.remove(i);
+			}
 
 			// Assign
 			if (!highestRanks.isEmpty()) {
@@ -150,8 +157,9 @@ public class ClipboardParser {
 
 				// Remove
 				rankedMatchesPerResult.remove(tn);
-				for (RankedObjectCollection<String> r : rankedMatchesPerResult.values())
+				for (RankedObjectCollection<String> r : rankedMatchesPerResult.values()) {
 					r.remove(filename);
+				}
 			}
 		}
 	}
@@ -161,7 +169,7 @@ public class ClipboardParser {
 		for (Integer tn : clipboardResults.keySet()) {
 			final String nClipboardText= normaliseForComparison(clipboardResults.get(tn));
 			final RankedObjectCollection<String> rankedMatches= new RankedObjectCollection<String>();
-			for (String filename : ddFiles.keySet())
+			for (String filename : ddFiles.keySet()) {
 				if (ddFiles.get(filename).isAudio()) {
 
 					// Compare to filename
@@ -170,13 +178,15 @@ public class ClipboardParser {
 
 					// Compare to FileData.track
 					final FileData fd= ddFiles.get(filename);
-					if (fd.getTrack() != null)
+					if (fd.getTrack() != null) {
 						rank= Math.max(rank, calculateFuzzyRank(normaliseForComparison(fd.getTrack()), nClipboardText));
+					}
 
 					// Store
 					rankedMatches.add(filename, rank);
 //					System.out.printf("%6f\t%s\t%s\n", rank, nFilename, nClipboardText);
 				}
+			}
 			rankedMatchesPerResult.put(tn, rankedMatches);
 		}
 		assignBestResultMatches(clipboardResults, completeMatches, rankedMatchesPerResult);
@@ -214,24 +224,28 @@ public class ClipboardParser {
 
 	private void matchClipboardResultsUsingTN(Map<String, FileData> ddFiles, final Map<Integer, String> clipboardResults, final Map<String, TrackPropertyMap> completeMatches) {
 		final Map<Integer, RankedObjectCollection<String>> rankedMatchesPerResult= new HashMap<Integer, RankedObjectCollection<String>>();
-		for (String filename : ddFiles.keySet())
+		for (String filename : ddFiles.keySet()) {
 			if (ddFiles.get(filename).isAudio()) {
 				final String filenameNoExt= Helpers.removeFilenameExtension(filename);
 				// Find numbers in filename
 				final Matcher m= pFindNumber.matcher(filenameNoExt);
 				final List<Integer> numbersFound= new ArrayList<Integer>();
-				while (m.find())
+				while (m.find()) {
 					numbersFound.add(Integer.parseInt(m.group(1)));
+				}
 				// Register this filename as potential match for each number found
 				final double numberCount= numbersFound.size();
-				for (Integer i : numbersFound)
+				for (Integer i : numbersFound) {
 					if (clipboardResults.containsKey(i)) {
 						RankedObjectCollection<String> x= rankedMatchesPerResult.get(i);
-						if (x == null)
+						if (x == null) {
 							rankedMatchesPerResult.put(i, x= new RankedObjectCollection<String>());
+						}
 						x.add(filename, 1.0 / numberCount);
 					}
+				}
 			}
+		}
 		assignBestResultMatches(clipboardResults, completeMatches, rankedMatchesPerResult);
 	}
 
@@ -245,14 +259,14 @@ public class ClipboardParser {
 			while (loop) {
 				final Pattern pFind= Pattern.compile(beginning ? (regex + "([^" + whitespace + "]+)[" + whitespace + "].+") : (".+[" + whitespace + "]([^" + whitespace + "]+)" + regex));
 				String thisPassRegex= null;
-				for (String v : map.values())
+				for (String v : map.values()) {
 					if ((m= pFind.matcher(v)).matches()) {
 						String found= Pattern.quote(m.group(1));
 						found= found.replaceAll("\\d+(?:[:,.]\\d+)*", "\\\\E\\\\d+(?:[:,.]\\\\d+)*\\\\Q");
 						found= found.replace("\\Q\\E", "");
-						if (thisPassRegex == null)
+						if (thisPassRegex == null) {
 							thisPassRegex= found;
-						else if (!found.equals(thisPassRegex)) {
+						} else if (!found.equals(thisPassRegex)) {
 							loop= false;
 							break;
 						}
@@ -260,15 +274,18 @@ public class ClipboardParser {
 						loop= false;
 						break;
 					}
+				}
 
-				if (loop)
+				if (loop) {
 					regex= beginning ? (regex + thisPassRegex + "[" + whitespace + "]+") : ("[" + whitespace + "]+" + thisPassRegex + regex);
+				}
 			}
 
 			// Remove crap
 			final Pattern pCrap= Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-			for (K k : map.keySet())
+			for (K k : map.keySet()) {
 				map.put(k, pCrap.matcher(map.get(k)).replaceFirst(""));
+			}
 		}
 	}
 }

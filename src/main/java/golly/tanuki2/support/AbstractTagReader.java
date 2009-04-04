@@ -24,9 +24,11 @@ public abstract class AbstractTagReader implements ITrackPropertyReader {
 
 	public Map<String, List<TrackPropertyMap>> readMultipleTrackProperties(DirData dd) {
 		final Map<String, List<TrackPropertyMap>> r= new HashMap<String, List<TrackPropertyMap>>();
-		for (Map.Entry<String, FileData> e : dd.files.entrySet())
-			if (e.getValue().isAudio())
+		for (Map.Entry<String, FileData> e : dd.files.entrySet()) {
+			if (e.getValue().isAudio()) {
 				r.put(e.getKey(), readTrackProperties(Helpers.addPathElements(dd.dir, e.getKey())));
+			}
+		}
 		return r;
 	}
 
@@ -41,7 +43,7 @@ public abstract class AbstractTagReader implements ITrackPropertyReader {
 		}
 
 		// Read tag
-		if (fin != null)
+		if (fin != null) {
 			try {
 				buf= fin.buffer;
 				readTags(results);
@@ -51,6 +53,7 @@ public abstract class AbstractTagReader implements ITrackPropertyReader {
 				fin= null;
 				buf= null;
 			}
+		}
 
 		return results;
 	}
@@ -59,17 +62,21 @@ public abstract class AbstractTagReader implements ITrackPropertyReader {
 
 	protected boolean compare(byte[] buffer, int offset, byte... expected) {
 		int i= expected.length;
-		while (i-- > 0)
-			if (buffer[offset + i] != expected[i])
+		while (i-- > 0) {
+			if (buffer[offset + i] != expected[i]) {
 				return false;
+			}
+		}
 		return true;
 	}
 
 	protected boolean compare(byte[] buffer, int offset, char... expected) {
 		int i= expected.length;
-		while (i-- > 0)
-			if (buffer[offset + i] != ((byte) expected[i]))
+		while (i-- > 0) {
+			if (buffer[offset + i] != ((byte) expected[i])) {
 				return false;
+			}
+		}
 		return true;
 	}
 

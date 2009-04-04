@@ -24,8 +24,9 @@ public final class UIResourceManager {
 
 	public static Color getColor(String id, int r, int g, int b) {
 		Color c= (Color) resources.get(id);
-		if (c == null)
+		if (c == null) {
 			add(id, c= new Color(Display.getCurrent(), r, g, b));
+		}
 		return c;
 	}
 
@@ -43,8 +44,9 @@ public final class UIResourceManager {
 	}
 
 	public static synchronized void disposeAll() {
-		for (Resource r : resources.values())
+		for (Resource r : resources.values()) {
 			r.dispose();
+		}
 		resources.clear();
 	}
 }

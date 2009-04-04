@@ -38,8 +38,9 @@ public class CheckForUpdatesTask implements Runnable {
 			byte[] buf= new byte[1024];
 			new URL(StaticConfig.URL_LATEST_VERSION).openStream().read(buf);
 			Version v= new Version(new String(buf, "ASCII")); //$NON-NLS-1$
-			if (v.compareTo(StaticConfig.VERSION_VALUE) == 1)
+			if (v.compareTo(StaticConfig.VERSION_VALUE) == 1) {
 				onNewVersionFound(v);
+			}
 
 		} catch (Throwable e) {
 			// Ignore

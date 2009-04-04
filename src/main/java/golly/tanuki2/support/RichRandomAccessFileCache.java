@@ -42,12 +42,13 @@ public class RichRandomAccessFileCache {
 	}
 
 	public void clear() {
-		for (final RichRandomAccessFile f : cache.values())
+		for (final RichRandomAccessFile f : cache.values()) {
 			try {
 				f.close();
 			} catch (IOException e) {
 				// Ignore
 			}
+		}
 		cache.clear();
 	}
 }

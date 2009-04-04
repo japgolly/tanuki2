@@ -289,8 +289,9 @@ public class ClipboardParserTest extends TestHelper {
 	private void subtestMatching(String f1, String f2, String f3, String f4, String f5, String f6, String f7, String f8, String f9, String f10) {
 		final String[] fAll= new String[] {f1, f2, f3, f4, f5, f6, f7, f8, f9, f10};
 		DirData dd= new DirData("/var/music");
-		for (String f : fAll)
+		for (String f : fAll) {
 			makeFileData(dd, f, true);
+		}
 		final String txt= "01. Splintered Visions\n02. Embraced By Desolation\n03. 3 Dimensional Aperture\n04. Beginning Of The End\n05. Point Of Uncertainty\n06. Spiraling Into Depression\n07. Isolation\n08. Buried In Oblivion\n09. Black Sea Of Agony\n10. Morose Seclusion";
 		Map<String, TrackPropertyMap> r= cp.parseAndMatch(dd, txt);
 		assertMatchResults(r, f1, 1, "Splintered Visions");

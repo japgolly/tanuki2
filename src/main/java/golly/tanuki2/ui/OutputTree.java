@@ -65,6 +65,7 @@ public class OutputTree extends AbstractTreeBasedFileView {
 			this.sourceFilename= srcFilename;
 		}
 
+		@Override
 		public String toString() {
 			return Helpers.inspect(this, false);
 		}
@@ -86,11 +87,12 @@ public class OutputTree extends AbstractTreeBasedFileView {
 					final Map<String, FileData> srcDirFiles= engine.dirs.get(info.pc.sourceDirectory).files;
 					for (final String targetFilename : Helpers.sort(moves.values())) {
 						String sourceFilename= null;
-						for (String s : moves.keySet())
+						for (String s : moves.keySet()) {
 							if (moves.get(s).equals(targetFilename)) {
 								sourceFilename= s;
 								break;
 							}
+						}
 						final FileData fd= srcDirFiles.get(sourceFilename);
 						createFileTreeItem(parent, targetFilename, new TreeItemInfo(Type.MOVED, fd, sourceFilename));
 						addedFiles.add(Helpers.addPathElements(info.pc.sourceDirectory, sourceFilename));
@@ -114,8 +116,9 @@ public class OutputTree extends AbstractTreeBasedFileView {
 			// Incomplete
 			else if (info.type == Type.INCOMPLETE) {
 				final Map<String, FileData> files= engine.dirs.get(info.pc.sourceDirectory).files;
-				for (final String filename : Helpers.sort(files.keySet()))
+				for (final String filename : Helpers.sort(files.keySet())) {
 					createFileTreeItem(parent, filename, new TreeItemInfo(Type.INCOMPLETE, files.get(filename), filename));
+				}
 			}
 
 		}
@@ -125,12 +128,13 @@ public class OutputTree extends AbstractTreeBasedFileView {
 	protected void getAllSelectedDirData(Set<DirData> r, TreeItem ti) {
 		final TreeItemInfo info= (TreeItemInfo) ti.getData();
 		if (info != null && info.type != Type.DELETION) {
-			if (info.fd != null)
+			if (info.fd != null) {
 				r.add(info.fd.getDirData());
-			else {
+			} else {
 				r.add(engine.dirs.get(info.pc.sourceDirectory));
-				for (TreeItem c : ti.getItems())
+				for (TreeItem c : ti.getItems()) {
 					getAllSelectedDirData(r, c);
+				}
 			}
 		}
 	}
@@ -144,14 +148,14 @@ public class OutputTree extends AbstractTreeBasedFileView {
 	protected String getSelectedDir() {
 		final TreeItemInfo info= getSelectedInfo();
 		// Root element
-		if (info == null)
+		if (info == null) {
 			return null;
-		// Directory
-		else if (info.fd == null)
+		} else if (info.fd == null) {
 			return info.pc.sourceDirectory;
-		// File
-		else
+			// File
+		} else {
 			return info.fd.getDirData().dir;
+		}
 	}
 
 	@Override
@@ -169,8 +173,9 @@ public class OutputTree extends AbstractTreeBasedFileView {
 	@Override
 	protected void onDelete() {
 		final Set<String> files= new HashSet<String>();
-		for (TreeItem ti : tree.getSelection())
+		for (TreeItem ti : tree.getSelection()) {
 			collectFullFilenames(ti, files);
+		}
 		sharedUIResources.appUIShared.removeFiles(files.toArray(new String[files.size()]));
 	}
 
@@ -180,15 +185,17 @@ public class OutputTree extends AbstractTreeBasedFileView {
 		if (info != null) {
 			// If selected item is a file
 			FileData fd= info.fd;
-			if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion())
+			if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
 				return fd.getDirData();
-			else
+			} else {
 				// Or if directory, get the first audio child-item, and use its DirData
 				for (TreeItem i : getSelected().getItems()) {
 					fd= ((TreeItemInfo) i.getData()).fd;
-					if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion())
+					if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
 						return fd.getDirData();
+					}
 				}
+			}
 		}
 		return null;
 	}
@@ -220,10 +227,12 @@ public class OutputTree extends AbstractTreeBasedFileView {
 		final Map<String, Map> optimisedDirTreeMoved= Helpers.optimiseDirTree(unoptimisedDirTreeMoved);
 		final Map<String, Map> optimisedDirTreeDeleted= Helpers.optimiseDirTree(unoptimisedDirTreeDeleted);
 		Map<String, Map> optimisedDirTree= new HashMap<String, Map>();
-		if (!optimisedDirTreeMoved.isEmpty())
+		if (!optimisedDirTreeMoved.isEmpty()) {
 			optimisedDirTree.put(rootTxtTargetDir, optimisedDirTreeMoved);
-		if (!optimisedDirTreeDeleted.isEmpty())
+		}
+		if (!optimisedDirTreeDeleted.isEmpty()) {
 			optimisedDirTree.put(rootTxtDeletion, optimisedDirTreeDeleted);
+		}
 		tree.removeAll();
 		populateTree(optimisedDirTree);
 
@@ -231,7 +240,7 @@ public class OutputTree extends AbstractTreeBasedFileView {
 		final Map<String, OptimisibleDirTreeNode> unoptimisedDirTreeIncomplete= new HashMap<String, OptimisibleDirTreeNode>();
 		final String rootTxtIncomplete= I18n.l("outputTree_txt_rootIncomplete"); //$NON-NLS-1$
 		final String rootTxtIncomplete2= Helpers.addPathElements(rootTxtIncomplete, ""); //$NON-NLS-1$
-		for (String filename : engine.files.keySet())
+		for (String filename : engine.files.keySet()) {
 			if (!addedFiles.contains(filename)) {
 				final String dir= engine.files.get(filename).getDirData().dir;
 				if (!incompleteDirs.contains(dir)) {
@@ -241,6 +250,7 @@ public class OutputTree extends AbstractTreeBasedFileView {
 					content.put(rootTxtIncomplete2 + dir, new TreeItemInfo(Type.INCOMPLETE, pc));
 				}
 			}
+		}
 		final Map<String, Map> optimisedDirTreeIncomplete= Helpers.optimiseDirTree(unoptimisedDirTreeIncomplete);
 		if (!optimisedDirTreeIncomplete.isEmpty()) {
 			optimisedDirTree= new HashMap<String, Map>();
@@ -251,13 +261,15 @@ public class OutputTree extends AbstractTreeBasedFileView {
 		// Update style of root notes
 		Font rootItemFont= null;
 		for (TreeItem ti : tree.getItems()) {
-			if (rootItemFont == null)
+			if (rootItemFont == null) {
 				rootItemFont= UIResourceManager.getFont("outputTree_font_italic", ti.getFont(), SWT.ITALIC); //$NON-NLS-1$
+			}
 			ti.setFont(rootItemFont);
-			if (rootTxtDeletion.equals(ti.getText()))
+			if (rootTxtDeletion.equals(ti.getText())) {
 				setTreeItemColor(ti, sharedUIResources.deletionColours);
-			else if (rootTxtIncomplete.equals(ti.getText()))
+			} else if (rootTxtIncomplete.equals(ti.getText())) {
 				setTreeItemColor(ti, sharedUIResources.itemIncompleteColours);
+			}
 		}
 
 		// TODO Should I bother recording and restoring collapsed items?
@@ -271,12 +283,14 @@ public class OutputTree extends AbstractTreeBasedFileView {
 	private void collectFullFilenames(TreeItem ti, Set<String> files) {
 		final TreeItemInfo info= (TreeItemInfo) ti.getData();
 		// Root elements + directories
-		if (info == null || info.fd == null)
-			for (TreeItem i : ti.getItems())
+		if (info == null || info.fd == null) {
+			for (TreeItem i : ti.getItems()) {
 				collectFullFilenames(i, files);
-		// File
-		else
+				// File
+			}
+		} else {
 			files.add(Helpers.addPathElements(info.fd.getDirData().dir, info.sourceFilename));
+		}
 	}
 
 	private void createFileTreeItem(TreeItem parent, final String targetFilename, final TreeItemInfo treeItemInfo) {

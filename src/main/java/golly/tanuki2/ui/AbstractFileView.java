@@ -41,11 +41,13 @@ abstract class AbstractFileView implements IFileView {
 
 	protected void addCommonFileViewListeners(Control w) {
 		w.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseDoubleClick(MouseEvent e) {
 				onDoubleClick();
 			}
 		});
 		w.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.stateMask == SWT.NONE) {
 					// DEL
@@ -88,6 +90,7 @@ abstract class AbstractFileView implements IFileView {
 		miEditAlbum.setImage(TanukiImage.EDITOR.get());
 		miEditAlbum.setText(I18n.l("main_contextMenu_editAlbum")); //$NON-NLS-1$
 		miEditAlbum.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onEdit();
 			}
@@ -97,6 +100,7 @@ abstract class AbstractFileView implements IFileView {
 		miEditArtist.setImage(TanukiImage.EDITOR.get());
 		miEditArtist.setText(I18n.l("main_contextMenu_editArtist")); //$NON-NLS-1$
 		miEditArtist.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onEditArtist();
 			}
@@ -106,6 +110,7 @@ abstract class AbstractFileView implements IFileView {
 		miLaunchFile.setText(I18n.l("main_contextMenu_launchFile") + "\tCtrl+L"); //$NON-NLS-1$ //$NON-NLS-2$
 		singleFileSelectionMenuItems.add(miLaunchFile);
 		miLaunchFile.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onLaunchFile();
 			}
@@ -116,6 +121,7 @@ abstract class AbstractFileView implements IFileView {
 		miOpenFolder.setText(I18n.l("main_contextMenu_openFolder")); //$NON-NLS-1$
 		singleSelectionWithDirMenuItems.add(miOpenFolder);
 		miOpenFolder.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onOpenFolder();
 			}
@@ -126,6 +132,7 @@ abstract class AbstractFileView implements IFileView {
 		miOpenPrompt.setText(I18n.l("main_contextMenu_openPrompt")); //$NON-NLS-1$
 		singleSelectionWithDirMenuItems.add(miOpenPrompt);
 		miOpenPrompt.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onOpenPrompt();
 			}
@@ -136,6 +143,7 @@ abstract class AbstractFileView implements IFileView {
 		miRemoveItems.setText(I18n.l("main_contextMenu_removeItems") + "\tDel"); //$NON-NLS-1$ //$NON-NLS-2$
 		selectionRequiredMenuItems.add(miRemoveItems);
 		miRemoveItems.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onDelete();
 			}
@@ -143,6 +151,7 @@ abstract class AbstractFileView implements IFileView {
 
 		// add listener
 		contextMenu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuShown(MenuEvent e) {
 				final boolean selection= getSelectionCount() > 0;
 				final boolean single= isSingleSelection();
@@ -151,16 +160,21 @@ abstract class AbstractFileView implements IFileView {
 				final boolean singleAudio= (fd != null) && fd.isAudio() && !fd.isMarkedForDeletion();
 				final boolean singleWithDir= single && getSelectedDir() != null;
 				// Generic cases
-				for (MenuItem mi : selectionRequiredMenuItems)
+				for (MenuItem mi : selectionRequiredMenuItems) {
 					mi.setEnabled(selection);
-				for (MenuItem mi : singleSelectionMenuItems)
+				}
+				for (MenuItem mi : singleSelectionMenuItems) {
 					mi.setEnabled(single);
-				for (MenuItem mi : singleFileSelectionMenuItems)
+				}
+				for (MenuItem mi : singleFileSelectionMenuItems) {
 					mi.setEnabled(singleFile);
-				for (MenuItem mi : singleAudioSelectionMenuItems)
+				}
+				for (MenuItem mi : singleAudioSelectionMenuItems) {
 					mi.setEnabled(singleAudio);
-				for (MenuItem mi : singleSelectionWithDirMenuItems)
+				}
+				for (MenuItem mi : singleSelectionWithDirMenuItems) {
 					mi.setEnabled(singleWithDir);
+				}
 				// Special cases
 				miEditAlbum.setEnabled(onEdit_getDirData() != null);
 				miEditArtist.setEnabled(!getAllSelectedDirDataWithAudio(true).isEmpty());
@@ -177,9 +191,11 @@ abstract class AbstractFileView implements IFileView {
 	protected Set<DirData> getAllSelectedDirDataWithAudio(boolean andNotMarkedForDeletion) {
 		final Set<DirData> all= getAllSelectedDirData();
 		final Set<DirData> hasAudio= new HashSet<DirData>();
-		for (DirData dd : all)
-			if (dd.hasAudioContent(andNotMarkedForDeletion))
+		for (DirData dd : all) {
+			if (dd.hasAudioContent(andNotMarkedForDeletion)) {
 				hasAudio.add(dd);
+			}
+		}
 		return hasAudio;
 	}
 
@@ -206,46 +222,52 @@ abstract class AbstractFileView implements IFileView {
 	protected void onDoubleClick() {
 		if (isSingleSelection()) {
 			final FileData fd= getSelectedFileData();
-			if (fd != null && !fd.isAudio())
+			if (fd != null && !fd.isAudio()) {
 				onLaunchFile();
-			else
+			} else {
 				onEdit();
+			}
 		}
 	}
 
 	protected final void onEdit() {
 		if (isSingleSelection()) {
 			final DirData dd= onEdit_getDirData();
-			if (dd != null)
+			if (dd != null) {
 				sharedUIResources.appUIShared.openAlbumEditor(dd, getWidget().getShell());
+			}
 		}
 	}
 
 	protected abstract DirData onEdit_getDirData();
 
 	protected void onEditArtist() {
-		if (ArtistEditor.open(getWidget().getShell(), getAllSelectedDirDataWithAudio(true)))
+		if (ArtistEditor.open(getWidget().getShell(), getAllSelectedDirDataWithAudio(true))) {
 			sharedUIResources.appUIShared.onDataUpdated_RefreshNow();
+		}
 	}
 
 	protected void onLaunchFile() {
-		if (isSingleSelection() && isFileSelected())
+		if (isSingleSelection() && isFileSelected()) {
 			sharedUIResources.appUIShared.launch(getSelectedFullFilename());
+		}
 	}
 
 	protected void onOpenFolder() {
 		if (isSingleSelection()) {
 			final String dir= getSelectedDir();
-			if (dir != null)
+			if (dir != null) {
 				OSSpecific.openFolder(dir);
+			}
 		}
 	}
 
 	protected void onOpenPrompt() {
 		if (isSingleSelection()) {
 			final String dir= getSelectedDir();
-			if (dir != null)
+			if (dir != null) {
 				OSSpecific.openPrompt(dir);
+			}
 		}
 	}
 

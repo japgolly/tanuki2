@@ -1,9 +1,5 @@
 package golly.tanuki2.ui;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
 import golly.tanuki2.support.AutoResizeColumnsListener;
@@ -11,6 +7,10 @@ import golly.tanuki2.support.Helpers;
 import golly.tanuki2.support.TanukiImage;
 import golly.tanuki2.support.UIHelpers;
 import golly.tanuki2.support.UIHelpers.TwoColours;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -34,6 +34,7 @@ public abstract class AbstractTreeBasedFileView extends AbstractFileView {
 		createMenu(tree);
 
 		tree.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.stateMask == SWT.CTRL) {
 					// CTRL +, CTRL -
@@ -57,7 +58,7 @@ public abstract class AbstractTreeBasedFileView extends AbstractFileView {
 
 	@SuppressWarnings("unchecked")
 	protected void addDirToTree(TreeItem parent, Map<String, Map> children, String path) {
-		if (children != null)
+		if (children != null) {
 			for (String dir : Helpers.sort(children.keySet())) {
 				final String fullDir= Helpers.addPathElements(path, dir);
 				TreeItem ti= new TreeItem(parent, SWT.NONE);
@@ -67,15 +68,18 @@ public abstract class AbstractTreeBasedFileView extends AbstractFileView {
 				ti.setText(0, dir);
 				addDirToTree(ti, children.get(dir), fullDir);
 			}
+		}
 		addFilesToTree(parent, path);
 	}
 
 	protected abstract void addFilesToTree(TreeItem parent, String path);
 
+	@Override
 	protected Set<DirData> getAllSelectedDirData() {
 		final Set<DirData> r= new HashSet<DirData>();
-		for (TreeItem ti : tree.getSelection())
+		for (TreeItem ti : tree.getSelection()) {
 			getAllSelectedDirData(r, ti);
+		}
 		r.remove(null);
 		return r;
 	}
@@ -92,6 +96,7 @@ public abstract class AbstractTreeBasedFileView extends AbstractFileView {
 		return tree.getSelection()[0];
 	}
 
+	@Override
 	protected int getSelectionCount() {
 		return tree.getSelectionCount();
 	}
@@ -100,6 +105,7 @@ public abstract class AbstractTreeBasedFileView extends AbstractFileView {
 		return tree;
 	}
 
+	@Override
 	protected boolean isFileSelected() {
 		return getSelectedFileData() != null;
 	}
@@ -115,19 +121,22 @@ public abstract class AbstractTreeBasedFileView extends AbstractFileView {
 		}
 	}
 
+	@Override
 	protected void selectAll() {
 		tree.selectAll();
 	}
 
 	protected void setExpanded(TreeItem ti, boolean expanded) {
 		ti.setExpanded(expanded);
-		for (TreeItem i : ti.getItems())
+		for (TreeItem i : ti.getItems()) {
 			setExpanded(i, expanded);
+		}
 	}
 
 	protected void setExpandedAll(boolean expanded) {
-		for (TreeItem i : tree.getItems())
+		for (TreeItem i : tree.getItems()) {
 			setExpanded(i, expanded);
+		}
 		tree.showSelection();
 	}
 
