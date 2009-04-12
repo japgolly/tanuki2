@@ -289,7 +289,12 @@ public class AppWindow {
 	// = Internal
 	// =============================================================================================== //
 
-	private void add(final String... sources) {
+	/**
+	 * Adds files and/or directories to the underlying {@link Engine} and refreshes the screen.
+	 * 
+	 * @param sources File names and/or directory names.
+	 */
+	protected void add(final String... sources) {
 		BusyIndicator.showWhile(display, new Runnable() {
 			public void run() {
 				engine.add(sources);

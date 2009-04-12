@@ -133,7 +133,10 @@ public class InputTree extends AbstractTreeBasedFileView {
 
 	@Override
 	protected FileData getSelectedFileData() {
-		final TreeItem ti= getSelected();
+		return getFileData(getSelected());
+	}
+
+	private FileData getFileData(final TreeItem ti) {
 		return ti.getData() instanceof FileData ? (FileData) ti.getData() : null;
 	}
 
@@ -152,21 +155,34 @@ public class InputTree extends AbstractTreeBasedFileView {
 		sharedUIResources.appUIShared.removeFiles(files);
 	}
 
+	/**
+	 * Returns the {@link DirData} associated with the selected item(s). If there is more than 1, <code>null</code> is
+	 * returned.
+	 */
 	@Override
 	protected DirData onEdit_getDirData() {
+		Set<DirData> dd= new HashSet<DirData>();
+		for (TreeItem ti : tree.getSelection()) {
+			dd.add(getDirData(getFileData(ti)));
+		}
+		dd.remove(null);
+		return (dd.size() == 1) ? dd.iterator().next() : null;
+	}
+
+	private DirData getDirData(FileData fd) {
 		// If selected item is a file
-		FileData fd= getSelectedFileData();
 		if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
 			return fd.getDirData();
-		} else {
-			// Or if directory, get the first audio child-item, and use its DirData
-			for (TreeItem i : getSelected().getItems()) {
-				fd= i.getData() instanceof FileData ? (FileData) i.getData() : null;
-				if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
-					return fd.getDirData();
-				}
+		}
+
+		// Or if directory, get the first audio child-item, and use its DirData
+		for (TreeItem i : getSelected().getItems()) {
+			fd= getFileData(i);
+			if (fd != null && fd.isAudio() && !fd.isMarkedForDeletion()) {
+				return fd.getDirData();
 			}
 		}
+
 		return null;
 	}
 
