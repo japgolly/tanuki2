@@ -106,14 +106,6 @@
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/AllTests.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
 			<!--
 				Create an empty dir for the tests.
 				This is due to a bug in the maven-resources plugin that wont copy
