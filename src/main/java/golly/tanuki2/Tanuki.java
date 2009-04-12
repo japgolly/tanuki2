@@ -23,10 +23,10 @@ import org.eclipse.swt.widgets.Display;
 public class Tanuki {
 
 	public static void main(String[] args) {
-		new Tanuki().run();
+		new Tanuki().run(args);
 	}
 
-	public void run() {
+	public void run(String[] args) {
 		Display display= null;
 		Engine engine= null;
 		CheckForUpdatesTask checkForUpdatesTask= null;
@@ -45,6 +45,11 @@ public class Tanuki {
 			// Check for new version
 			if (RuntimeConfig.getInstance().checkVersionOnStartup) {
 				(checkForUpdatesTask= new CheckForUpdatesTask()).start();
+			}
+
+			// Add args
+			if (args.length != 0) {
+				engine.add(args);
 			}
 
 			// Start app
