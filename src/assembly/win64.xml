@@ -12,10 +12,6 @@
 			<lineEnding>dos</lineEnding>
 		</fileSet>
 		<fileSet>
-			<directory>${swt.output.dir}</directory>
-			<outputDirectory></outputDirectory>
-		</fileSet>
-		<fileSet>
 			<directory>src/bin/win64</directory>
 			<outputDirectory></outputDirectory>
 			<filtered>true</filtered>
@@ -25,9 +21,6 @@
 		<dependencySet>
 			<unpack>false</unpack>
 			<scope>runtime</scope>
-			<excludes>
-				<exclude>${swt.group}:${swt.artifact}</exclude>
-			</excludes>
 		</dependencySet>
 	</dependencySets>
 </assembly>
