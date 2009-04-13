@@ -37,7 +37,8 @@ public class ConfigDialog {
 
 	private final Shell shell;
 	private final StyledText iwTargetDirFormat, iwTargetAudioFileFormat;
-	private final Color tagInFormatStringColour;
+	private final Color tagInFormatStringForegroundColour;
+	private final Color tagInFormatStringBackgroundColour;
 	private boolean firstWidget= true, updated= false;
 	private final LineStyleListener lineStyleListener;
 	private final Button btnAutoTitleCase, btnIntelligentTitleCase;
@@ -71,7 +72,8 @@ public class ConfigDialog {
 		g.setLayoutData(UIHelpers.makeGridData(1, true, SWT.FILL));
 		g.setLayout(UIHelpers.makeGridLayout(1, false, 4, 2));
 		// Add output format widgets
-		tagInFormatStringColour= shell.getDisplay().getSystemColor(SWT.COLOR_BLUE);
+		tagInFormatStringForegroundColour= shell.getDisplay().getSystemColor(SWT.COLOR_BLUE);
+		tagInFormatStringBackgroundColour= shell.getDisplay().getSystemColor(SWT.COLOR_GRAY);
 		lineStyleListener= new LineStyleListener() {
 			public void lineGetStyle(LineStyleEvent event) {
 				final List<StyleRange> styles= new ArrayList<StyleRange>();
@@ -80,7 +82,8 @@ public class ConfigDialog {
 					final StyleRange sr= new StyleRange();
 					sr.start= m.start();
 					sr.length= m.end() - m.start();
-					sr.foreground= tagInFormatStringColour;
+					sr.foreground= tagInFormatStringForegroundColour;
+					sr.background= tagInFormatStringBackgroundColour;
 					styles.add(sr);
 				}
 				event.styles= styles.toArray(new StyleRange[styles.size()]);
