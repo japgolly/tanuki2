@@ -201,13 +201,13 @@ public class EngineTest extends TestHelper {
 
 	@Test
 	public void wholeDirHasMultipleResults_checksAlbumDataOfOtherTracks() {
-		// || ARTIST | RANK || YEAR | RANK || ALBUM | RANK ||
+		// || ARTIST       | RANK || YEAR | RANK || ALBUM     | RANK ||
 		// ||--------------|------||------|------||-----------|------||
-		// || Bullshit | 1 || 2006 | 5 || A | 4 ||
-		// || Metallica | 2 || 1980 | 1 || FakeAlbum | 1 ||
-		// || Crap | 1 ||
-		// || WhatCanYouDo | 1 ||
-		// || WayOff | 1 ||
+		// || Bullshit     |    1 || 2006 |    5 || A         |    4 ||
+		// || Metallica    |    2 || 1980 |    1 || FakeAlbum |    1 ||
+		// || Crap         |    1 ||
+		// || WhatCanYouDo |    1 ||
+		// || WayOff       |    1 ||
 		//
 		// A/a1
 		// 11 (2+5+4) - "Metallica", 2006, "A"
