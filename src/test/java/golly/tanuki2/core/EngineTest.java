@@ -37,9 +37,11 @@ public class EngineTest extends TestHelper {
 	private MockTrackProprtyReader mtpr;
 	private MockTrackProprtyReader mtpr1, mtpr2;
 	private TrackPropertyMap noprop= makeTrackProperties(null, null, null, null, null);
+	private String prevArtistBlacklist;
 
 	@Before
 	public void setup() {
+		prevArtistBlacklist= RuntimeConfig.getInstance().artistBlacklist;
 		RuntimeConfig.getInstance().autoTitleCase= false;
 		mtpr= mtpr1= new MockTrackProprtyReader();
 		mtpr2= null;
@@ -48,6 +50,7 @@ public class EngineTest extends TestHelper {
 
 	@After
 	public void teardown() throws IOException {
+		RuntimeConfig.getInstance().artistBlacklist= prevArtistBlacklist;
 		System.gc(); // Or else certain File objects can still be in memory causing deletes to fail because handles are still held :S 
 		removeDirectoryIfExists(getTestSourceDir());
 		removeDirectoryIfExists(getTestTargetDir());
@@ -104,6 +107,17 @@ public class EngineTest extends TestHelper {
 		ad8.setYear(2005);
 		fd8.setAlbumData(ad8);
 		assertEquals(fd8.toString(), engine.files.get(addPathElements(octo, "08. Octavarium.mp3")).toString());
+	}
+
+	@Test
+	public void blacklistedArtistsShouldBeExcluded() {
+		RuntimeConfig.getInstance().artistBlacklist= "test[0-9]+";
+		addFakeDirsToEngine();
+		TrackPropertyMap a1;
+		mtpr.addMockResult("A/a1", makeTrackProperties("test123", 2006, "A", "1", "A One")); // this would normally win cos it has more
+		mtpr.addMockResult("A/a1", a1= makeTrackProperties("test not!", 1995, null, null, "rubbish")); // but this wins cos above is blacklisted
+		engine2.readTrackProprties2();
+		assertEngineTrackProperties("A/a1", a1);
 	}
 
 	// =============================================================================================== //

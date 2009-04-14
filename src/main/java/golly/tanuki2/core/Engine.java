@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -583,6 +584,11 @@ public class Engine implements ITextProcessor {
 	protected void readAndAssignTrackProprties() {
 		// Read properties
 		final Map<DirData, Map<String, List<TrackPropertyMap>>> allData= readTrackProprties(dirsNeedingTrackProprties);
+
+		// Remove blacklisted artists
+		removeBlacklistedArtists(allData);
+
+		// Create a separate copy of unassigned data
 		final Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData= copy(allData);
 
 		// Remove for files that already have values
@@ -612,6 +618,26 @@ public class Engine implements ITextProcessor {
 
 		// Finished. Clean up.
 		dirsNeedingTrackProprties.clear();
+	}
+
+	/**
+	 * Removes any {@link TrackPropertyMap}s that contain an artist that matches the artist blacklist pattern.
+	 */
+	private void removeBlacklistedArtists(final Map<DirData, Map<String, List<TrackPropertyMap>>> data) {
+		if (RuntimeConfig.getInstance().artistBlacklist != null) {
+			final Pattern artistBlacklist= Pattern.compile(RuntimeConfig.getInstance().artistBlacklist, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+			for (Map<String, List<TrackPropertyMap>> map : data.values()) {
+				for (List<TrackPropertyMap> list : map.values()) {
+					Iterator<TrackPropertyMap> it= list.iterator();
+					while (it.hasNext()) {
+						TrackPropertyMap tpm= it.next();
+						if (tpm.containsKey(TrackPropertyType.ARTIST) && artistBlacklist.matcher(tpm.get(TrackPropertyType.ARTIST)).matches()) {
+							it.remove();
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private static RankedObjectCollection<String> rankUnconfirmedArtists(Map<DirData, Map<String, List<TrackPropertyMap>>> unassignedData) {
