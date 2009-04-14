@@ -28,6 +28,15 @@ public class RuntimeConfig {
 	public boolean intelligentTitleCase= false;
 	public String targetDirFormat= Helpers.ensureCorrectDirSeperators("[:artist:]/[:year:] - [:album:]");
 	public String targetAudioFileFormat= "[:tn:]. [:track:]";
+
+	/**
+	 * This is an optional regex pattern that is used to filter out metadata with illegal artist names. In other words,
+	 * when attempting to detect metadata for new files, any artists that match will pattern will be excluded.
+	 * 
+	 * @since 13/04/2009
+	 */
+	public String artistBlacklist= null;
+
 	public boolean checkVersionOnStartup= true;
 
 	// =============================================================================================== //

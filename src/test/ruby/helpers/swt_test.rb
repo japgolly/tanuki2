@@ -11,6 +11,7 @@ module Tanuki2
       @display= $SWT_DISPLAY
       I18n.setLocale java.util.Locale::ENGLISH
       golly.tanuki2.support.TanukiImage.setDisplay @display
+      golly.tanuki2.support.UIHelpers.DISABLE_SHOW_MESSAGE_BOX= true
     end
     
     def setup

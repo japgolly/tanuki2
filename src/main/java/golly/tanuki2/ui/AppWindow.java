@@ -107,7 +107,7 @@ public class AppWindow {
 		miFileConfig.setText(I18n.l("main_menu_fileConfig")); //$NON-NLS-1$
 		miFileConfig.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
-				if (new ConfigDialog(shell).show()) {
+				if (new ConfigDialog(shell, RuntimeConfig.getInstance()).show()) {
 					fileViewsUptodate.remove(outputTree);
 					appUIShared.refreshFiles(false);
 				}

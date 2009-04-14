@@ -262,10 +262,10 @@ public class UIHelpers {
 		return (Boolean) r.ret;
 	}
 
-	public static boolean disableShowMessageBox= false;
+	public static boolean DISABLE_SHOW_MESSAGE_BOX= false;
 
 	public static void showMessageBox(Shell shell, final int iconType, final String title, final String message) {
-		if (disableShowMessageBox) {
+		if (DISABLE_SHOW_MESSAGE_BOX) {
 			return;
 		}
 		runWithShell(shell, new RunnableWithShell() {
