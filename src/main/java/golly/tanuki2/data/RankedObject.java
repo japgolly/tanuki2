@@ -38,13 +38,9 @@ public class RankedObject<T> extends AbstractDataObject implements Comparable<Ra
 	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 		if (obj instanceof RankedObject) {
-			if (data == null) {
-				return ((RankedObject) obj).data == null;
-			} else {
-				return data.equals(((RankedObject) obj).data);
-			}
+			obj= ((RankedObject) obj).data;
 		}
-		return data.equals(obj);
+		return (data == null) ? (obj == null) : data.equals(obj);
 	}
 
 	@Override
@@ -59,7 +55,7 @@ public class RankedObject<T> extends AbstractDataObject implements Comparable<Ra
 
 	@Override
 	public int hashCode() {
-		return data.hashCode();
+		return (data == null) ? 0 : data.hashCode();
 	}
 
 	private int hashCodeThis() {

@@ -241,7 +241,7 @@ public class ClipboardParser {
 						if (x == null) {
 							rankedMatchesPerResult.put(i, x= new RankedObjectCollection<String>());
 						}
-						x.add(filename, 1.0 / numberCount);
+						x.increaseRank(filename, 1.0 / numberCount);
 					}
 				}
 			}

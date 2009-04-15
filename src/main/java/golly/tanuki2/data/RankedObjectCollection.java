@@ -21,8 +21,11 @@ public class RankedObjectCollection<T> implements Iterable<RankedObject<T>> {
 	private final List<RankedObject<T>> collection= new ArrayList<RankedObject<T>>();
 
 	/**
-	 * Adds a new object to the collection. It is your responsibility to check whether or not the object already exists
-	 * in the collection.
+	 * Adds a new object to the collection.
+	 * <p>
+	 * <u><strong>WARNING:</strong></u> This is not a set, this will always <em>add</em> objects. It is your
+	 * responsibility to check whether or not the object already exists in the collection if you do not want duplicates.
+	 * Alternatively call {@link #increaseRank(Object, double)}.
 	 */
 	public RankedObject<T> add(T data, double rank) {
 		RankedObject<T> r= new RankedObject<T>(data, rank);
