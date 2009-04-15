@@ -13,14 +13,14 @@ import org.junit.Test;
  * @since 15/04/2009
  */
 @SuppressWarnings("nls")
-public class RankedNormalisedStringCollectionTest {
+public class RankedNormalisedStringSetTest {
 	private static final double DBL_DELTA= 0.000001;
 
-	private RankedNormalisedStringCollection x;
+	private RankedNormalisedStringSet x;
 
 	@Before
 	public void setup() {
-		x= new RankedNormalisedStringCollection();
+		x= new RankedNormalisedStringSet();
 		x.add("two words", 1.5);
 		x.add("ffs", 4);
 		x.add("TWO  WORDS", 3);

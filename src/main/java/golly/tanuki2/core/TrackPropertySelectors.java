@@ -3,7 +3,7 @@ package golly.tanuki2.core;
 import golly.tanuki2.data.AlbumData;
 import golly.tanuki2.data.DirData;
 import golly.tanuki2.data.FileData;
-import golly.tanuki2.data.RankedNormalisedStringCollection;
+import golly.tanuki2.data.RankedNormalisedStringSet;
 import golly.tanuki2.data.RankedObject;
 import golly.tanuki2.data.RankedObjectCollection;
 import golly.tanuki2.data.TrackPropertyMap;
@@ -303,7 +303,7 @@ class TrackPropertySelectors {
 
 		private void populateEmptyProperty(final FileData fd, TrackPropertyType prop, final List<TrackPropertyMap> rows) {
 			// Rank each row
-			final RankedNormalisedStringCollection rankedValues= new RankedNormalisedStringCollection();
+			final RankedNormalisedStringSet rankedValues= new RankedNormalisedStringSet();
 			for (TrackPropertyMap row : rows) {
 				if (row.containsKey(prop)) {
 					rankedValues.increaseRank(row.get(prop), rankedTrackPropertyMaps.getRank(row) + 1);

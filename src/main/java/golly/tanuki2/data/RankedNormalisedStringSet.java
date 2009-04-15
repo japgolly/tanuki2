@@ -12,7 +12,7 @@ import java.util.Map;
  * @author Golly
  * @since 26/07/2007
  */
-public class RankedNormalisedStringCollection {
+public class RankedNormalisedStringSet {
 	final Map<String, RankedObjectCollection<String>> normalisedToRankedOrig= new HashMap<String, RankedObjectCollection<String>>();
 	final RankedObjectCollection<String> rankedCollection= new RankedObjectCollection<String>();
 
