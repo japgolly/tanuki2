@@ -13,42 +13,37 @@ import java.util.Map;
  * @since 26/07/2007
  */
 public class RankedNormalisedStringCollection {
-	final Map<String, RankedObjectCollection<String>> unnormalised= new HashMap<String, RankedObjectCollection<String>>();
+	final Map<String, RankedObjectCollection<String>> normalisedToRankedOrig= new HashMap<String, RankedObjectCollection<String>>();
 	final RankedObjectCollection<String> rankedCollection= new RankedObjectCollection<String>();
 
 	private static String normalise(String data) {
 		return Helpers.normalizeText(data);
 	}
 
-	private String regStr(String data, double incRank) {
-		final String n= normalise(data);
-		RankedObjectCollection<String> u= unnormalised.get(n);
-		if (u == null) {
-			u= new RankedObjectCollection<String>();
-			unnormalised.put(n, u);
+	/**
+	 * Stores an unnormalised string in {@link #normalisedToRankedOrig} and returns a normalised version.
+	 */
+	private String registerUnnormalisedString(String orig, double rank) {
+		final String n= normalise(orig);
+		RankedObjectCollection<String> rankedOrig= normalisedToRankedOrig.get(n);
+		if (rankedOrig == null) {
+			rankedOrig= new RankedObjectCollection<String>();
+			normalisedToRankedOrig.put(n, rankedOrig);
 		}
-		u.increaseRank(data, incRank);
+		rankedOrig.increaseRank(orig, rank);
 		return n;
 	}
 
-	//	private void unregStr(String data) {
-	//		final String n= normalise(data);
-	//		RankedObjectCollection<String> u= unnormalised.get(n);
-	//		if (u != null) {
-	//			if (u.getRank(n) == 1)
-	//				u.remove(n);
-	//			else
-	//			u.increaseRank(n, -1);
-	//		}
-	//	}
-
+	/**
+	 * Same as calling {@link #increaseRank(String, double)} as this is a set, not a list.
+	 */
 	public void add(String data, double rank) {
-		rankedCollection.add(regStr(data, rank), rank);
+		increaseRank(data, rank);
 	}
 
 	public void clear() {
 		rankedCollection.clear();
-		unnormalised.clear();
+		normalisedToRankedOrig.clear();
 	}
 
 	public boolean contains(String o) {
@@ -61,10 +56,10 @@ public class RankedNormalisedStringCollection {
 
 	public String getWinner() {
 		final String n= rankedCollection.getWinner();
-		if (n == null || !unnormalised.containsKey(n)) {
+		if (n == null || !normalisedToRankedOrig.containsKey(n)) {
 			return null;
 		}
-		return unnormalised.get(n).getWinner();
+		return normalisedToRankedOrig.get(n).getWinner();
 	}
 
 	public int getWinnerCount() {
@@ -79,8 +74,8 @@ public class RankedNormalisedStringCollection {
 		return rankedCollection.hasSingleWinner();
 	}
 
-	public void increaseRank(String data, double incRank) {
-		rankedCollection.increaseRank(regStr(data, incRank), incRank);
+	public void increaseRank(String data, double rank) {
+		rankedCollection.increaseRank(registerUnnormalisedString(data, rank), rank);
 	}
 
 	public boolean isEmpty() {
@@ -93,9 +88,5 @@ public class RankedNormalisedStringCollection {
 
 	public int size() {
 		return rankedCollection.size();
-	}
-
-	public void sort() {
-		rankedCollection.sort();
 	}
 }
