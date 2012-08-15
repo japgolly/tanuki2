@@ -341,7 +341,7 @@ public class ClipboardParserTest extends TestHelper {
 
 	private static String mapToStringLC(Map<Integer, String> m) {
 		StringBuilder sb= new StringBuilder();
-		for (Integer i : Helpers.sort(m.keySet())) {
+		for (Integer i : Helpers.sortInts(m.keySet())) {
 			sb.append("\n");
 			sb.append(i);
 			sb.append(": ");

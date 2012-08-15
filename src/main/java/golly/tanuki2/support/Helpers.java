@@ -878,7 +878,7 @@ public final class Helpers {
 		}
 	}
 
-	public static Integer[] sort(final Collection<Integer> data) {
+	public static Integer[] sortInts(final Collection<Integer> data) {
 		Integer[] r= data.toArray(new Integer[data.size()]);
 		Arrays.sort(r);
 		return r;
