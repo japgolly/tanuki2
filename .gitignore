@@ -1,0 +1,7 @@
+target
+.*.sw[p-z]
+*.log
+*.out
+*.err
+*.tmp
+*.bak
