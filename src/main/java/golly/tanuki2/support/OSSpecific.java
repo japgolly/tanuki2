@@ -129,10 +129,14 @@ public final class OSSpecific {
 		default:
 			Program p= Program.findProgram("html");
 			if (p == null || !p.execute(url)) {
-				if (!exec("firefox", url)) {
-					if (!exec("mozilla", url)) {
-						if (!exec("netscape", url)) {
-							attemptsFailed();
+				if (!exec("xdg-open", url)) {
+					if (!exec("chromium", url)) {
+						if (!exec("firefox", url)) {
+							if (!exec("mozilla", url)) {
+								if (!exec("netscape", url)) {
+									attemptsFailed();
+								}
+							}
 						}
 					}
 				}
