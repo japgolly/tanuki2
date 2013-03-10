@@ -156,8 +156,6 @@ public class AppWindow {
 		ti.setData(outputTree);
 		ti.setText(I18n.l("main_tab_outputTree")); //$NON-NLS-1$
 		// Tab folder again
-		// TODO makeDropTarget doesn't work properly on mac
-		makeDropTarget(tabFolder);
 		tabFolder.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -166,6 +164,11 @@ public class AppWindow {
 		});
 		tabFolder.setSelection(0);
 		onFileViewChanged(inputTree);
+
+		// Add drag-n-drop support
+		makeDropTarget(inputTree.getWidget());
+		makeDropTarget(flatList.getWidget());
+		makeDropTarget(outputTree.getWidget());
 
 		// Create expandBar
 		expandBar= new ExpandBar(shell, SWT.NONE);
