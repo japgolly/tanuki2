@@ -97,6 +97,11 @@ public final class OSSpecific {
 	}
 
 	public static void launch(String fullFilename) {
+		if (os == OS.LINUX) {
+			if (exec("xdg-open", fullFilename)) { //$NON-NLS-1$
+				return;
+			}
+		}
 		Program.launch(fullFilename);
 	}
 
