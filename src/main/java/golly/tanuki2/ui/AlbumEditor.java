@@ -216,6 +216,7 @@ public class AlbumEditor {
 
 		// Populate (using potential data)
 		final Map<String, List<TrackPropertyMap>> trackPropertyMap= engine.readTrackProprties(dd);
+		if (trackPropertyMap != null)
 		for (List<TrackPropertyMap> tpList : trackPropertyMap.values()) {
 			for (TrackPropertyMap tp : tpList) {
 				addToCombo(iwArtist, tp.get(TrackPropertyType.ARTIST), false);

@@ -84,19 +84,8 @@ public class ClipboardParser {
 		removeCommonCrap(values, false);
 
 		// Unquote
-		if (values.size() > 1) {
-			boolean allMatch= true;
-			for (String v : values.values()) {
-				if (!pQuotedText.matcher(v).matches()) {
-					allMatch= false;
-					break;
-				}
-			}
-			if (allMatch) {
-				for (Integer k : values.keySet()) {
-					values.put(k, pQuotedText.matcher(values.get(k)).replaceFirst("$1"));
-				}
-			}
+		for (Integer k : values.keySet()) {
+			values.put(k, pQuotedText.matcher(values.get(k)).replaceFirst("$1"));
 		}
 
 		// Clean up
